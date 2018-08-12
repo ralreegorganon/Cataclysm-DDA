@@ -4,7 +4,7 @@
 #include "color.h"
 
 #ifdef TILES
-#include "SDL.h"
+#include <SDL2/SDL.h>
 #endif // TILES
 
 extern bool test_mode;

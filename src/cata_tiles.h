@@ -2,8 +2,8 @@
 #ifndef CATA_TILES_H
 #define CATA_TILES_H
 
-#include <SDL.h>
-#include <SDL_ttf.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "animation.h"
 #include "lightmap.h"

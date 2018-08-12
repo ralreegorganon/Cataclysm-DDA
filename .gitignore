@@ -1,4 +1,5 @@
 cataclysm
+cataclysm-vcpkg
 cataclysm-tiles
 chkjson*
 !src/chkjson
