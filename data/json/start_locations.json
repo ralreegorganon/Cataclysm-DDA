@@ -224,5 +224,12 @@
     "ident" : "basement_bionic",
     "name" : "Shady Basement",
     "target" : "basement_bionic"
+  },
+  {
+    "type" : "start_location",
+    "ident" : "road",
+    "name" : "Road",
+    "target" : "bridge",
+    "flags" : ["ALLOW_OUTSIDE"]
   }
 ]

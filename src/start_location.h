@@ -67,6 +67,8 @@ class start_location
 
         void handle_heli_crash( player &u ) const;
 
+        void handle_driving(const tripoint &omtstart, player &u) const;
+
         /**
          * Adds surround start monsters.
          * @param expected_count Expected value of "monster points" (map tiles times density from @ref map::place_spawns).

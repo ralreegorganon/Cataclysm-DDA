@@ -239,5 +239,17 @@
     "start_name": "Shady Basement",
     "allowed_locs": [ "basement_bionic" ],
     "professions": [  "cyberjunkie", "faulty_bionic", "cykotic", "razorgirl", "bionic_installer" ]
+  },
+  {
+    "type": "scenario",
+    "ident": "on_the_road_again",
+    "name": "On The Road Again",
+    "points" : 0,
+    "description": "You're on the road again...",
+    "start_name": "The Road",
+    "professions" : ["road_warrior"],
+    "allowed_locs" : ["road"],
+    "map_special": "mx_workingvehicle",
+    "flags": ["LONE_START", "DRIVING"]
   }
 ]

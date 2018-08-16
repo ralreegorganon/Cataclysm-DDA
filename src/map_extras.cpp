@@ -548,6 +548,15 @@ void mx_anomaly( map &m, const tripoint &abs_sub )
     m.spawn_natural_artifact( center, prop );
 }
 
+void mx_workingvehicle(map &m, const tripoint &abs_sub)
+{
+    for (auto v : m.get_vehicles()) {
+        m.destroy_vehicle(v.v);
+    }
+
+    m.add_vehicle(vproto_id("policecar"), SEEX/2, SEEY/2, 0, 100, 0);
+}
+
 typedef std::unordered_map<std::string, map_special_pointer> FunctionMap;
 FunctionMap builtin_functions = {
     { "mx_null", mx_null },
@@ -563,7 +572,8 @@ FunctionMap builtin_functions = {
     { "mx_crater", mx_crater },
     { "mx_fumarole", mx_fumarole },
     { "mx_portal_in", mx_portal_in },
-    { "mx_anomaly", mx_anomaly }
+    { "mx_anomaly", mx_anomaly },
+    { "mx_workingvehicle", mx_workingvehicle },
 };
 
 map_special_pointer get_function( const std::string &name )

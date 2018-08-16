@@ -937,6 +937,16 @@ bool game::start_game()
     if(scen->has_flag("HELI_CRASH")) {
         start_loc.handle_heli_crash( u );
     }
+    if (scen->has_flag("DRIVING")) {
+        //start_loc.handle_driving( omtstart, u );
+        for (auto v : m.get_vehicles()) {
+            for (auto pv : v.v->get_parts(VPFLAG_CONTROLS, false)) {
+                auto pos = v.v->global_part_pos3(*pv);
+                u.setpos(pos);
+                break;
+            }
+        }
+    }
 
     // Now that we're done handling coordinates, ensure the player's submap is in the center of the map
     update_map( u );

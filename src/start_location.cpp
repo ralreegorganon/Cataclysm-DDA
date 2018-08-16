@@ -15,6 +15,9 @@
 #include "overmap.h"
 #include "overmapbuffer.h"
 #include "player.h"
+#include "vehicle.h"
+#include "veh_type.h"
+#include "veh_interact.h"
 
 #include <algorithm>
 
@@ -423,6 +426,24 @@ void start_location::handle_heli_crash( player &u ) const
                 break;
         }
     }
+}
+
+void start_location::handle_driving(const tripoint &omtstart, player &u) const
+{
+    const tripoint player_location = omt_to_sm_copy(omtstart);
+    tinymap m;
+    m.load(player_location.x, player_location.y, player_location.z, true);
+    m.build_outside_cache(m.get_abs_sub().z);
+
+    for (auto v : m.get_vehicles()) {
+        for (auto pv : v.v->get_parts(VPFLAG_CONTROLS, true)) {
+            auto pos = v.v->global_part_pos3(*pv);
+            u.setpos(pos);
+            break;
+        }
+    }
+
+    m.save();
 }
 
 static void add_monsters( const tripoint &omtstart, const mongroup_id &type, float expected_points )
