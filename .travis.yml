@@ -9,6 +9,27 @@ matrix:
   include:
     # GCC 4.9
     - env: DOCKERIMAGE=gcc49
+    # GCC 5
+    - env: DOCKERIMAGE=gcc5
+    # GCC 6
+    - env: DOCKERIMAGE=gcc6
+    # GCC 7
+    - env: DOCKERIMAGE=gcc7
+    # GCC 8
+    - env: DOCKERIMAGE=gcc8
+    # GCC MinGW
+    - env: DOCKERIMAGE=gccmingw
+    # Clang 3.8
+    - env: DOCKERIMAGE=clang38
+    # Clang 3.9
+    - env: DOCKERIMAGE=clang39
+    # Clang 4.0
+    - env: DOCKERIMAGE=clang4
+    # Clang 5.0
+    - env: DOCKERIMAGE=clang5
+    # Clang 6.0
+    - env: DOCKERIMAGE=clang6
+
 
 before_script:
 - docker pull ralreegorganon/cddadocker:$DOCKERIMAGE
