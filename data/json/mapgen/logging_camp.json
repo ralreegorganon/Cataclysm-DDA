@@ -1,0 +1,124 @@
+[
+    {
+      "type": "mapgen",
+      "method": "json",
+      "om_terrain": "logging_camp",
+      "weight": 100,
+      "object": {
+        "fill_ter": "t_dirt",
+        "rows": [
+          "........................",
+          "..**x*************+**...",
+          "..*s  *        *   s*...",
+          "..*   +        +    *...",
+          "..*b l**********    *...",
+          "..*b l* c   c      t*...",
+          "..*b l*cfc cfc     t*...",
+          "..*b l* c   c     tt*...",
+          "..**+***x**x*********...",
+          "........................",
+          "........................",
+          "..................****..",
+          "..................+ #*..",
+          "..................****..",
+          "........................",
+          "..................****..",
+          "..................+ #*..",
+          "..................****..",
+          "........................",
+          "....G...d.........****..",
+          "..................+ #*..",
+          "..................****..",
+          "........................",
+          "........................"
+        ],
+        "furniture": { 
+            
+            "f": "f_tourist_table",
+            "c": "f_chair",
+            "b": "f_bench",
+            "#": "f_makeshift_bed",
+            "s": "f_woodstove",
+            "h": "f_trashcan",
+            "l": "f_locker",
+            "r": "f_rack_coat",
+            "d": "f_dumpster",
+            "t": "f_counter"
+        },
+        "terrain": {
+          "+": [ "t_door_c", "t_door_o", "t_door_makeshift_c", "t_door_makeshift_o" ],
+          "i": "t_floor_primitive",
+          " ": "t_floor_primitive",
+          "s": "t_floor_primitive",
+          "c": "t_floor_primitive",
+          "f": "t_floor_primitive",
+          "l": "t_floor_primitive",
+          "t": "t_floor_primitive",
+          "*": "t_wall_wood",
+          "x": ["t_window_frame", "t_window"],
+          ".": [ "t_grass", "t_dirt", "t_dirt", "t_dirt" ]
+        },
+        "vehicles": {
+          "G": { "vehicle": "portable_generator", "chance": 100, "fuel": 40, "status": 1 }
+        },
+        "place_items": [
+
+        ]
+      }
+    },
+    {
+      "type": "mapgen",
+      "method": "json",
+      "om_terrain": "logging_camp_clearcut",
+      "weight": 100,
+      "object": {
+        "fill_ter": "t_dirt",
+        "rows": [
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        ",
+          "                        "
+        ],
+        "terrain": {
+          " ": [
+            "t_dirt",
+            "t_dirt",
+            "t_dirt",
+            "t_dirt",
+            "t_dirt",
+            "t_dirt",
+            "t_dirt",
+            "t_dirt",
+            "t_dirtmound",
+            "t_grass",
+            "t_grass",
+            "t_grass",
+            "t_trunk",
+            "t_stump",
+            "t_stump"
+          ]
+        }
+      }
+    }
+  ]
+  

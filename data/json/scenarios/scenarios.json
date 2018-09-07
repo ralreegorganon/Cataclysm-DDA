@@ -424,5 +424,17 @@
     "start_name": "Camping",
     "allowed_locs": [ "campsite_a", "campsite", "campground_1a", "campground_2b" ],
     "professions": [ "camper" ]
+  },
+  {
+    "type": "scenario",
+    "ident": "logger",
+    "name": "I'm Stihl Standing",
+    "points": 0,
+    "description": "When you turned off the chainsaw and the last tree fell, you realized those screams weren't just the whine of the blade...",
+    "start_name": "Clearcut Forest",
+    "professions": [ "logger" ],
+    "allowed_locs": [ "logging_camp" ],
+    "flags": [ "LONE_START" ],
+    "map_special": "mx_clearcut"
   }
 ]

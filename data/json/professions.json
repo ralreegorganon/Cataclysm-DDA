@@ -937,6 +937,28 @@
   },
   {
     "type": "profession",
+    "ident": "logger",
+    "name": "Logger",
+    "description": "Lumberjacks are a relic of a bygone day--you're a modern professional logger who's traded in the axe and flannel for a chainsaw and a hard hat.",
+    "points": 0,
+    "traits": [ "ANIMALDISCORD", "OUTDOORSMAN"],
+    "skills": [ { "level": 1, "name": "survival" }, { "level": 2, "name": "cutting" } ],
+    "items": {
+      "both": {
+        "items": [ "jeans", "socks", "boots_steel", "hat_hard", "hoodie", "longshirt", "vest", "gloves_work", "knee_pads", "glasses_safety", "camelbak" ],
+        "entries": [
+          { "item": "ear_plugs", "custom-flags": [ "no_auto_equip" ] },
+          { "item": "sheath", "contents-item": "multitool" },
+          { "item": "chainsaw_off", "ammo-item": "gasoline", "charges": 200 }
+        ]
+      },
+      "male": [ "boxer_shorts" ],
+      "female": [ "bra", "boxer_shorts" ]
+    },
+    "flags": [ "SCEN_ONLY" ]
+  },
+  {
+    "type": "profession",
     "ident": "backpacker",
     "name": "Backpacker",
     "description": "You've traveled for a living, sightseeing here and there, and living off your parents' trust fund.  But now they're gone, and the only thing between you and death is the open road and your backpack.",

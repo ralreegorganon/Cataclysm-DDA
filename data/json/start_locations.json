@@ -301,5 +301,12 @@
     "ident": "golfcourse_31",
     "name": "Golf course clubhouse",
     "target": "golfcourse_31"
+  },
+  {
+    "type": "start_location",
+    "ident": "logging_camp",
+    "name": "Logging camp",
+    "target": "logging_camp",
+    "flags": [ "ALLOW_OUTSIDE" ]
   }
 ]

@@ -9685,5 +9685,21 @@
   "name": "mass grave",
   "sym": 88,
   "color": "yellow"
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "logging_camp",
+    "name": "logging camp",
+    "sym": 76,
+    "color": "light_green",
+    "see_cost": 4
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "logging_camp_clearcut",
+    "name": "logging camp",
+    "sym": 76,
+    "color": "light_green",
+    "see_cost": 1
   }
 ]
