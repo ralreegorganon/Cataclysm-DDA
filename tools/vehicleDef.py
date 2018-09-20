@@ -84,6 +84,7 @@ def buildVehicleDef(vehicle):
     ]
 
     frames = sortFrames(frames)
+    parts = compactParts(frames + everythingElse)
 
     itemsDef.sort(key=lambda i: (i["x"], i["y"]))
 
@@ -91,7 +92,7 @@ def buildVehicleDef(vehicle):
         "id": vehicle["name"],
         "type": "vehicle",
         "name": vehicle["name"],
-        "parts": frames + everythingElse,
+        "parts": parts,
         "items": itemsDef
     }
 
@@ -120,5 +121,22 @@ def sortFrames(frames):
 def adjacent(frame1, frame2):
     return hypot(frame1["x"] - frame2["x"], frame1["y"] - frame2["y"]) == 1
 
+def compactParts(parts):
+    stacks = {}
+    for p in parts:
+        if (p["x"], p["y"]) in stacks:
+            stacks[(p["x"], p["y"])].append(p["part"])
+        else:
+            stacks[(p["x"], p["y"])] = [p["part"]]
+
+    parts_stacks = []
+    for s, p in stacks.items():
+        parts_stacks.append({
+            "x": s[0],
+            "y": s[1],
+            "parts": p
+        })
+
+    return parts_stacks
 
 writeVehicleTemplates(getVehicleTemplates())
