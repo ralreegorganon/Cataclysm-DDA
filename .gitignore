@@ -156,3 +156,5 @@ stage
 
 # Apple Xcode IDE
 Xcode/
+*.xcuserdata
+xcuserdata
