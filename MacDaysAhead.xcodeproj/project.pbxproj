@@ -230,6 +230,7 @@
 		282102F32155968200697C30 /* libSDL2_mixer-2.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 282102EF2155968200697C30 /* libSDL2_mixer-2.0.0.dylib */; };
 		282102F42155968200697C30 /* libSDL2_ttf-2.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 282102F02155968200697C30 /* libSDL2_ttf-2.0.0.dylib */; };
 		282102F62155972100697C30 /* liblua.5.3.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 282102F52155972100697C30 /* liblua.5.3.5.dylib */; };
+		286EC6F22159EE78003C5251 /* regional_settings.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 286EC6F02159EE77003C5251 /* regional_settings.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -690,6 +691,8 @@
 		282102EF2155968200697C30 /* libSDL2_mixer-2.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL2_mixer-2.0.0.dylib"; path = "../../../../usr/local/Cellar/sdl2_mixer/2.0.2_3/lib/libSDL2_mixer-2.0.0.dylib"; sourceTree = "<group>"; };
 		282102F02155968200697C30 /* libSDL2_ttf-2.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libSDL2_ttf-2.0.0.dylib"; path = "../../../../usr/local/Cellar/sdl2_ttf/2.0.14/lib/libSDL2_ttf-2.0.0.dylib"; sourceTree = "<group>"; };
 		282102F52155972100697C30 /* liblua.5.3.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = liblua.5.3.5.dylib; path = ../../../../usr/local/Cellar/lua/5.3.5_1/lib/liblua.5.3.5.dylib; sourceTree = "<group>"; };
+		286EC6F02159EE77003C5251 /* regional_settings.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = regional_settings.cpp; sourceTree = "<group>"; };
+		286EC6F12159EE78003C5251 /* regional_settings.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = regional_settings.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -728,6 +731,8 @@
 		282100542155941400697C30 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				286EC6F02159EE77003C5251 /* regional_settings.cpp */,
+				286EC6F12159EE78003C5251 /* regional_settings.h */,
 				282101E22155941400697C30 /* action.cpp */,
 				282101452155941400697C30 /* action.h */,
 				282101EC2155941400697C30 /* active_item_cache.cpp */,
@@ -1247,6 +1252,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				286EC6F22159EE78003C5251 /* regional_settings.cpp in Sources */,
 				282102382155941400697C30 /* char_validity_check.cpp in Sources */,
 				282102CF2155941400697C30 /* activity_item_handling.cpp in Sources */,
 				2821022A2155941400697C30 /* activity_type.cpp in Sources */,
