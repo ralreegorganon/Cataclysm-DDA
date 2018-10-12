@@ -9,6 +9,7 @@
 
 #include <list>
 #include <vector>
+#include <map>
 
 class JsonObject;
 class JsonIn;
@@ -68,6 +69,7 @@ class overmap_connection
 
         std::list<subtype> subtypes;
         mutable std::vector<cache> cached_subtypes;
+        mutable std::map<int_id<oter_t>, bool> cached_has;
 };
 
 namespace overmap_connections
