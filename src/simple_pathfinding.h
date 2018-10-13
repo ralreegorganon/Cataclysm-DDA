@@ -47,13 +47,26 @@ struct path {
  * @param estimator BinaryPredicate( node &previous, node *current ) returns
  * integer estimation (smaller - better) for the current node or a negative value
  * if the node is unsuitable.
+ * @param closed Pre-allocated vector of closed locations for pathfinding, to
+ * mitigate allocation cost for repeated calls. Will be reset to default value
+ * prior to use. Will be resized if size doesn't match max_x * max_y.
+ * @param open Pre-allocated vector of open locations for pathfinding, to
+ * mitigate allocation cost for repeated calls. Will be reset to default value
+ * prior to use. Will be resized if size doesn't match max_x * max_y.
+ * @param dirs Pre-allocated vector of directions for pathfinding, to
+ * mitigate allocation cost for repeated calls. Will be reset to default value
+ * prior to use. Will be resized if size doesn't match max_x * max_y.
  */
 template<class BinaryPredicate>
 path find_path( const point &source,
                 const point &dest,
                 const int max_x,
                 const int max_y,
-                BinaryPredicate estimator )
+                BinaryPredicate estimator,
+                std::vector<bool> &closed,
+                std::vector<int> &open,
+                std::vector<short> &dirs
+              )
 {
     static const int dx[4] = {  0, 1, 0, -1 };
     static const int dy[4] = { -1, 0, 1,  0 };
@@ -89,9 +102,22 @@ path find_path( const point &source,
 
     const size_t map_size = max_x * max_y;
 
-    std::vector<bool> closed( map_size, false );
-    std::vector<int> open( map_size, 0 );
-    std::vector<short> dirs( map_size, 0 );
+    if( closed.size() != map_size ) {
+        closed.resize( map_size, false );
+    }
+
+    if( open.size() != map_size ) {
+        open.resize( map_size, 0 );
+    }
+
+    if( dirs.size() != map_size ) {
+        dirs.resize( map_size, 0 );
+    }
+
+    std::fill( closed.begin(), closed.end(), false );
+    std::fill( open.begin(), open.end(), 0 );
+    std::fill( dirs.begin(), dirs.end(), 0 );
+
     std::priority_queue<node, std::deque<node>> nodes[2];
 
     int i = 0;
@@ -170,6 +196,28 @@ path find_path( const point &source,
     }
 
     return res;
+}
+
+/**
+ * @param source Starting point of path
+ * @param dest End point of path
+ * @param max_x Max permissible x coordinate for a point on the path
+ * @param max_y Max permissible y coordinate for a point on the path
+ * @param estimator BinaryPredicate( node &previous, node *current ) returns
+ * integer estimation (smaller - better) for the current node or a negative value
+ * if the node is unsuitable.
+ */
+template<class BinaryPredicate>
+path find_path( const point &source,
+                const point &dest,
+                const int max_x,
+                const int max_y,
+                BinaryPredicate estimator )
+{
+    std::vector<bool> closed;
+    std::vector<int> open;
+    std::vector<short> dirs;
+    return find_path( source, dest, max_x, max_y, estimator, closed, open, dirs );
 }
 
 inline path straight_path( const point &source,

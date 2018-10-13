@@ -854,6 +854,8 @@ overmap::overmap( int const x, int const y ) : loc( x, y )
     settings = rsit->second;
 
     init_layers();
+
+    init_pathfinding();
 }
 
 overmap::~overmap() = default;
@@ -899,6 +901,13 @@ void overmap::init_layers()
             }
         }
     }
+}
+
+void overmap::init_pathfinding()
+{
+    overmap_pathfinding_closed.resize( OMAPX * OMAPY, false );
+    overmap_pathfinding_open.resize( OMAPX * OMAPY, 0 );
+    overmap_pathfinding_dirs.resize( OMAPX * OMAPY, 0 );
 }
 
 oter_id &overmap::ter( const int x, const int y, const int z )
@@ -2579,7 +2588,8 @@ pf::path overmap::lay_out_connection( const overmap_connection &connection, cons
         return existency_mult * dist + subtype->basic_cost;
     };
 
-    return pf::find_path( source, dest, OMAPX, OMAPY, estimate );
+    return pf::find_path( source, dest, OMAPX, OMAPY, estimate, overmap_pathfinding_closed,
+                          overmap_pathfinding_open, overmap_pathfinding_dirs );
 }
 
 pf::path overmap::lay_out_street( const overmap_connection &connection, const point &source,

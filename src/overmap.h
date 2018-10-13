@@ -295,6 +295,10 @@ class overmap
         void unserialize_legacy( std::istream &fin );
         void unserialize_view_legacy( std::istream &fin );
     private:
+        mutable std::vector<bool> overmap_pathfinding_closed;
+        mutable std::vector<int> overmap_pathfinding_open;
+        mutable std::vector<short> overmap_pathfinding_dirs;
+    
         void generate( const overmap *north, const overmap *east,
                        const overmap *south, const overmap *west,
                        overmap_special_batch &enabled_specials );
@@ -330,6 +334,7 @@ class overmap
         void place_rifts( int const z );
 
         // Connection laying
+        void init_pathfinding();
         pf::path lay_out_connection( const overmap_connection &connection, const point &source,
                                      const point &dest, int z ) const;
         pf::path lay_out_street( const overmap_connection &connection, const point &source,
