@@ -1270,7 +1270,7 @@ void overmap::generate( const overmap *north, const overmap *east,
     place_forest();
 
     // Ideally we should have at least two exit points for roads, on different sides
-    if( roads_out.size() < 2 ) {
+    if( roads_out.size() < 4 ) {
         std::vector<city> viable_roads;
         int tmp;
         // Populate viable_roads with one point for each neighborless side.
@@ -1304,26 +1304,101 @@ void overmap::generate( const overmap *north, const overmap *east,
                      is_river( ter( 0, tmp + 1, 0 ) ) );
             viable_roads.push_back( city( 0, tmp, 0 ) );
         }
-        while( roads_out.size() < 2 && !viable_roads.empty() ) {
+        while( roads_out.size() < 4 && !viable_roads.empty() ) {
             roads_out.push_back( random_entry_removed( viable_roads ) );
         }
     }
 
-    std::vector<point> road_points; // cities and roads_out together
-    // Compile our master list of roads; it's less messy if roads_out is first
-    road_points.reserve( roads_out.size() + cities.size() );
-    for( const auto &elem : roads_out ) {
-        road_points.emplace_back( elem.x, elem.y );
-    }
-    for( const auto &elem : cities ) {
-        road_points.emplace_back( elem.x, elem.y );
-    }
+    const auto build_road_network = [&]() {
+        using weighted_road_point_pair = std::tuple<city, city, double>;
+        auto compare_weighted_road_point_pair = [](const weighted_road_point_pair p1, const weighted_road_point_pair p2) {
+            return std::get<2>(p1) < std::get<2>(p2);
+        };
+
+        std::priority_queue<weighted_road_point_pair, std::vector<weighted_road_point_pair>, decltype(compare_weighted_road_point_pair)> weighted_road_points(compare_weighted_road_point_pair);
+
+        std::vector<city> road_points;
+        road_points.reserve(roads_out.size() + cities.size());
+
+        for (const auto &elem : roads_out) {
+            road_points.emplace_back(elem.x, elem.y, 16);
+        }
+        for (const auto &elem : cities) {
+            road_points.emplace_back(elem);
+        }
+
+        for (auto point_a = road_points.begin(); point_a != road_points.end(); ++point_a) {
+            for (auto point_b = point_a; ++point_b != road_points.end(); /**/) {
+                const auto d = static_cast<double>(square_dist(point_a->x, point_a->y, point_b->x, point_b->y));
+                auto weight = (point_a->s * point_b->s) / (d*d);
+                weighted_road_points.emplace(weighted_road_point_pair{*point_a, *point_b, weight });
+            }
+        }
+
+        const string_id<overmap_connection> local_road("local_road");
+        const string_id<overmap_connection> highway_road("highway_road");
+
+        std::priority_queue<weighted_road_point_pair, std::vector<weighted_road_point_pair>, decltype(compare_weighted_road_point_pair)> highway_points(compare_weighted_road_point_pair);
+
+        while (!weighted_road_points.empty()) {
+            auto foo = weighted_road_points.top();
+
+            auto from = std::get<0>(foo);
+            auto to = std::get<1>(foo);
+
+            if(from.s >= 8 && to.s >= 8)
+            {
+                highway_points.push(foo);
+            }
+
+            auto source = point(from.x, from.y);
+            auto dest = point(to.x, to.y);
+
+            auto path = lay_out_connection(*local_road, source, dest, 0);
+
+            build_connection(*local_road, path, 0);
+
+            dbg(D_ERROR) << from.name << " to " << to.name << " (" << std::get<2>(foo) << ") " << path.nodes.size();
+
+            weighted_road_points.pop();
+        }
+
+        while (!highway_points.empty()) {
+            auto foo = highway_points.top();
+
+            auto from = std::get<0>(foo);
+            auto to = std::get<1>(foo);
+
+            auto source = point(from.x, from.y);
+            auto dest = point(to.x, to.y);
+
+            auto path = lay_out_connection(*highway_road, source, dest, 0);
+
+            build_connection(*highway_road, path, 0);
+
+            dbg(D_ERROR) << from.name << " to " << to.name << " (" << std::get<2>(foo) << ") " << path.nodes.size();
+
+            highway_points.pop();
+        }
+    };
+
+    build_road_network();
+
+    //std::vector<point> road_points; // cities and roads_out together
+    //// Compile our master list of roads; it's less messy if roads_out is first
+    //road_points.reserve( roads_out.size() + cities.size() );
+    //for( const auto &elem : roads_out ) {
+    //    road_points.emplace_back( elem.x, elem.y );
+    //}
+    //for( const auto &elem : cities ) {
+    //    road_points.emplace_back( elem.x, elem.y );
+    //}
 
     // And finally connect them via roads.
-    const string_id<overmap_connection> local_road( "local_road" );
-    connect_closest_points( road_points, 0, *local_road );
+    //const string_id<overmap_connection> local_road( "local_road" );
+    //connect_closest_points( road_points, 0, *local_road );
 
-    place_specials( enabled_specials );
+    //place_specials( enabled_specials );
     polish_river();
 
     // @todo: there is no reason we can't generate the sublevels in one pass
