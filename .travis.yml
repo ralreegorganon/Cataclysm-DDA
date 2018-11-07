@@ -182,6 +182,7 @@ jobs:
       addons: { apt: { packages: ["astyle"] }}
       before_script: skip
       after_success: skip
+    - stage: test
 stages:
   - verify
   - test
