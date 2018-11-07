@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "src/assign.h"
+            timestampString = "562754263.766614"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "210"
+            endingLineNumber = "210"
+            landmarkName = "assign( JsonObject &amp;jo, const std::string &amp;name, units::volume &amp;val, bool strict = false, const units::volume lo = units::volume_min, const units::volume hi = units::volume_max )"
+            landmarkType = "9">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "assign(JsonObject&amp;, std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; const&amp;, units::quantity&lt;int, units::volume_in_milliliter_tag&gt;&amp;, bool, units::quantity&lt;int, units::volume_in_milliliter_tag&gt;, units::quantity&lt;int, units::volume_in_milliliter_tag&gt;)"
+                  moduleName = "MacDaysAhead"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/jj/code/Cataclysm-DDA/src/assign.h"
+                  timestampString = "562754235.266237"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "210"
+                  endingLineNumber = "210"
+                  offsetFromSymbolStart = "56">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "assign(JsonObject&amp;, std::__1::basic_string&lt;char, std::__1::char_traits&lt;char&gt;, std::__1::allocator&lt;char&gt; &gt; const&amp;, units::quantity&lt;int, units::volume_in_milliliter_tag&gt;&amp;, bool, units::quantity&lt;int, units::volume_in_milliliter_tag&gt;, units::quantity&lt;int, units::volume_in_milliliter_tag&gt;)::&apos;lambda&apos;(JsonObject&amp;, units::quantity&lt;int, units::volume_in_milliliter_tag&gt;&amp;)::operator()(JsonObject&amp;, units::quantity&lt;int, units::volume_in_milliliter_tag&gt;&amp;) const"
+                  moduleName = "MacDaysAhead"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/jj/code/Cataclysm-DDA/src/assign.h"
+                  timestampString = "562754235.268443"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "211"
+                  endingLineNumber = "211"
+                  offsetFromSymbolStart = "39">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
