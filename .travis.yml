@@ -180,6 +180,8 @@ jobs:
     - stage: verify
       script: echo blam!
       addons: { apt: { packages: ["astyle"] }}
+      before_script: skip
+      after_success: skip
 stages:
   - verify
   - test
