@@ -1,6 +1,5 @@
 # this file is HEAVILY influenced by https://github.com/boostorg/hana/blob/master/.travis.yml
 
-sudo: false
 dist: xenial
 language: c++
 
@@ -43,7 +42,6 @@ jobs:
       # GCC MinGW
       env: COMPILER='g++' LDFLAGS='-static-libgcc -static-libstdc++' MXE_TARGET='i686-w64-mingw32.static' WINE='wine'
       compiler: gcc
-      sudo: required
       addons: &gcc
         apt:
           packages: ["wine"]
@@ -51,7 +49,6 @@ jobs:
     # Windows Tiles
     - env: COMPILER='g++' LDFLAGS='-static-libgcc -static-libstdc++' MXE_TARGET='i686-w64-mingw32.static' WINE='wine' TILES=1 SOUND=1
       compiler: gcc
-      sudo: required
       addons: &gcc
         apt:
           packages: ["wine"]
