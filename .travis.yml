@@ -1,7 +1,7 @@
 # this file is HEAVILY influenced by https://github.com/boostorg/hana/blob/master/.travis.yml
 
 sudo: false
-dist: trusty
+dist: xenial
 language: c++
 
 cache: ccache
