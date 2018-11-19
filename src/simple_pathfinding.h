@@ -63,9 +63,9 @@ path find_path( const point &source,
                 const int max_x,
                 const int max_y,
                 BinaryPredicate estimator,
-                std::vector<bool> &closed,
+                std::vector<int> &closed,
                 std::vector<int> &open,
-                std::vector<short> &dirs
+                std::vector<int> &dirs
               )
 {
     static const int dx[4] = {  0, 1, 0, -1 };
@@ -103,7 +103,7 @@ path find_path( const point &source,
     const size_t map_size = max_x * max_y;
 
     if( closed.size() != map_size ) {
-        closed.resize( map_size, false );
+        closed.resize( map_size, 0 );
     }
 
     if( open.size() != map_size ) {
@@ -114,7 +114,7 @@ path find_path( const point &source,
         dirs.resize( map_size, 0 );
     }
 
-    std::fill( closed.begin(), closed.end(), false );
+    std::fill( closed.begin(), closed.end(), 0 );
     std::fill( open.begin(), open.end(), 0 );
     std::fill( dirs.begin(), dirs.end(), 0 );
 
@@ -130,7 +130,7 @@ path find_path( const point &source,
 
         nodes[i].pop();
         // mark it visited
-        closed[map_index( mn.x, mn.y )] = true;
+        closed[map_index( mn.x, mn.y )] = 1;
 
         // if we've reached the end, draw the path and return
         if( mn.x == x2 && mn.y == y2 ) {
@@ -159,7 +159,7 @@ path find_path( const point &source,
             // don't allow:
             // * out of bounds
             // * already traversed tiles
-            if( x < 1 || x + 1 >= max_x || y < 1 || y + 1 >= max_y || closed[n] ) {
+            if( x < 1 || x + 1 >= max_x || y < 1 || y + 1 >= max_y || closed[n] == 1 ) {
                 continue;
             }
 
@@ -214,11 +214,12 @@ path find_path( const point &source,
                 const int max_y,
                 BinaryPredicate estimator )
 {
-    std::vector<bool> closed;
-    std::vector<int> open;
-    std::vector<short> dirs;
+    const size_t map_size = max_x * max_y;
+    std::vector<int> closed( map_size );
+    std::vector<int> open( map_size );
+    std::vector<int> dirs( map_size );
     return find_path( source, dest, max_x, max_y, estimator, closed, open, dirs );
-}
+    }
 
 inline path straight_path( const point &source,
                            int dir,

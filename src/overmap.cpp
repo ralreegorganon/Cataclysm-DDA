@@ -905,7 +905,7 @@ void overmap::init_layers()
 
 void overmap::init_pathfinding()
 {
-    overmap_pathfinding_closed.resize( OMAPX * OMAPY, false );
+    overmap_pathfinding_closed.resize( OMAPX * OMAPY, 0 );
     overmap_pathfinding_open.resize( OMAPX * OMAPY, 0 );
     overmap_pathfinding_dirs.resize( OMAPX * OMAPY, 0 );
 }

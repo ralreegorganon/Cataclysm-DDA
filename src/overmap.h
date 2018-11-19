@@ -295,9 +295,9 @@ class overmap
         void unserialize_legacy( std::istream &fin );
         void unserialize_view_legacy( std::istream &fin );
     private:
-        mutable std::vector<bool> overmap_pathfinding_closed;
+        mutable std::vector<int> overmap_pathfinding_closed;
         mutable std::vector<int> overmap_pathfinding_open;
-        mutable std::vector<short> overmap_pathfinding_dirs;
+        mutable std::vector<int> overmap_pathfinding_dirs;
     
         void generate( const overmap *north, const overmap *east,
                        const overmap *south, const overmap *west,
