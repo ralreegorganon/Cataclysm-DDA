@@ -198,6 +198,16 @@ struct overmap_lake_settings {
     overmap_lake_settings() = default;
 };
 
+struct natural_cave_settings {
+    int surface_loctions = 2;
+    bool clear_natural_cave_terrain = false;
+    std::map<std::string, int> unfinalized_natural_cave_terrain;
+    weighted_int_list<ter_id> natural_cave_terrain;
+
+    void finalize();
+    natural_cave_settings() = default;
+};
+
 struct map_extras {
     unsigned int chance;
     weighted_int_list<std::string> values;
@@ -221,6 +231,7 @@ struct regional_settings {
     groundcover_extra field_coverage;
     forest_mapgen_settings forest_composition;
     forest_trail_settings forest_trail;
+    natural_cave_settings natural_cave;
     weather_generator weather;
     overmap_feature_flag_settings overmap_feature_flag;
     overmap_forest_settings overmap_forest;

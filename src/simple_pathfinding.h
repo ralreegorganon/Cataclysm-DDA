@@ -42,8 +42,8 @@ struct path {
 /**
  * @param source Starting point of path
  * @param dest End point of path
- * @param max_x Max permissible x coordinate for a point on the path
- * @param max_y Max permissible y coordinate for a point on the path
+ * @param width Width of the area the path may be in, 0 =< x < width
+ * @param height Height of the area the path may be in, 0 =< y < height
  * @param estimator BinaryPredicate( node &previous, node *current ) returns
  * integer estimation (smaller - better) for the current node or a negative value
  * if the node is unsuitable.
@@ -51,19 +51,19 @@ struct path {
 template<class BinaryPredicate>
 path find_path( const point &source,
                 const point &dest,
-                const int max_x,
-                const int max_y,
+                const int width,
+                const int height,
                 BinaryPredicate estimator )
 {
     static const int dx[4] = {  0, 1, 0, -1 };
     static const int dy[4] = { -1, 0, 1,  0 };
 
-    const auto inbounds = [ max_x, max_y ]( const int x, const int y ) {
-        return x >= 0 && x < max_x && y >= 0 && y <= max_y;
+    const auto inbounds = [ width, height ]( const int x, const int y ) {
+        return x >= 0 && x < width && y >= 0 && y < height;
     };
 
-    const auto map_index = [ max_x ]( const int x, const int y ) {
-        return y * max_x + x;
+    const auto map_index = [ width ]( const int x, const int y ) {
+        return y * width + x;
     };
 
     path res;
@@ -87,7 +87,7 @@ path find_path( const point &source,
         return res;
     }
 
-    const size_t map_size = max_x * max_y;
+    const size_t map_size = width * height;
 
     std::vector<bool> closed( map_size, false );
     std::vector<int> open( map_size, 0 );
@@ -133,7 +133,7 @@ path find_path( const point &source,
             // don't allow:
             // * out of bounds
             // * already traversed tiles
-            if( x < 1 || x + 1 >= max_x || y < 1 || y + 1 >= max_y || closed[n] ) {
+            if( !inbounds( x, y ) || closed[n] ) {
                 continue;
             }
 

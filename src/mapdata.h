@@ -499,7 +499,9 @@ extern ter_id t_null,
        t_railroad_track, t_railroad_track_h, t_railroad_track_v, t_railroad_track_d, t_railroad_track_d1,
        t_railroad_track_d2,
        t_railroad_track_on_tie, t_railroad_track_h_on_tie, t_railroad_track_v_on_tie,
-       t_railroad_track_d_on_tie;
+       t_railroad_track_d_on_tie,
+       // Caves
+       t_dirt_cave, t_sand_cave, t_clay_cave, t_moss_cave, t_water_sh_cave, t_water_dp_cave;
 
 /*
 runtime index: furn_id

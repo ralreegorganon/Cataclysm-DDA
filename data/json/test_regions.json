@@ -96,6 +96,13 @@
       "clear_trail_terrain": false,
       "trail_terrain": { "t_dirt": 1 }
     },
+    "natural_cave_settings": {
+      "surface_locations": 4,
+      "clear_natural_cave_terrain": false,
+      "natural_cave_terrain": { 
+        "t_rock_floor": 1 
+      }
+    },
     "city": {
       "type": "town",
       "shop_radius": 30,

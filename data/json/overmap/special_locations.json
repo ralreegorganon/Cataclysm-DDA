@@ -94,5 +94,15 @@
     "type": "overmap_location",
     "id": "lake_shore",
     "terrains": [ "lake_shore" ]
+  },
+  {
+    "type": "overmap_location",
+    "id": "potential_cave_network_surface_entrances",
+    "terrains": [ "forest", "forest_thick", "forest_trail" ]
+  },
+  {
+    "type": "overmap_location",
+    "id": "cave_network_targets",
+    "terrains": [ "lab" ]
   }
 ]

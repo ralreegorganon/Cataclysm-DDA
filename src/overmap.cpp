@@ -1471,6 +1471,10 @@ void overmap::generate( const overmap *north, const overmap *east,
         requires_sub = generate_sub( z );
     } while( requires_sub && ( --z >= -OVERMAP_DEPTH ) );
 
+    // Build the cave network after we've built our z-levels,
+    // so we can hopefully connect up some interesting things.
+    build_natural_cave_network();
+
     // Place the monsters, now that the terrain is laid out
     place_mongroups();
     place_radios();
@@ -1596,6 +1600,7 @@ bool overmap::generate_sub( const int z )
     for( auto &i : goo_points ) {
         requires_sub |= build_slimepit( i.pos.x, i.pos.y, z, i.size );
     }
+
     const string_id<overmap_connection> sewer_tunnel( "sewer_tunnel" );
     connect_closest_points( sewer_points, z, *sewer_tunnel );
 
@@ -1740,6 +1745,7 @@ bool overmap::generate_sub( const int z )
         ter( i.x, i.y, z ) = oter_id( "mine_shaft" );
         requires_sub = true;
     }
+
     return requires_sub;
 }
 

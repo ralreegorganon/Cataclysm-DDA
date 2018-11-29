@@ -281,6 +281,45 @@ static void load_overmap_feature_flag_settings( JsonObject &jo,
             JsonArray whitelist_ja = overmap_feature_flag_settings_jo.get_array( "whitelist" );
             while( whitelist_ja.has_more() ) {
                 overmap_feature_flag_settings.whitelist.emplace( whitelist_ja.next_string() );
+
+            }
+        }
+    }
+}
+
+void load_natural_cave_settings( JsonObject &jo, natural_cave_settings &natural_cave_settings,
+                                 const bool strict, const bool overlay )
+{
+    if( !jo.has_object( "natural_cave_settings" ) ) {
+        if( strict ) {
+            jo.throw_error( "\"natural_cave_settings\": { ... } required for default" );
+        }
+    } else {
+        JsonObject natural_cave_settings_jo = jo.get_object( "natural_cave_settings" );
+        read_and_set_or_throw<int>( natural_cave_settings_jo, "surface_locations",
+                                    natural_cave_settings.surface_loctions,
+                                    !overlay );
+        read_and_set_or_throw<bool>( natural_cave_settings_jo, "clear_natural_cave_terrain",
+                                     natural_cave_settings.clear_natural_cave_terrain, !overlay );
+
+        if( natural_cave_settings.clear_natural_cave_terrain ) {
+            natural_cave_settings.unfinalized_natural_cave_terrain.clear();
+        }
+
+        if( !natural_cave_settings_jo.has_object( "natural_cave_terrain" ) ) {
+            if( !overlay ) {
+                natural_cave_settings_jo.throw_error( "natural_cave_terrain required" );
+            }
+        } else {
+            JsonObject natural_cave_terrain_jo = natural_cave_settings_jo.get_object( "natural_cave_terrain" );
+            std::set<std::string> keys = natural_cave_terrain_jo.get_member_names();
+            for( const auto &key : keys ) {
+                int weight = 0;
+                if( key != "//" ) {
+                    if( natural_cave_terrain_jo.read( key, weight ) ) {
+                        natural_cave_settings.unfinalized_natural_cave_terrain[key] = weight;
+                    }
+                }
             }
         }
     }
@@ -424,6 +463,8 @@ void load_region_settings( JsonObject &jo )
     load_forest_mapgen_settings( jo, new_region.forest_composition, strict, false );
 
     load_forest_trail_settings( jo, new_region.forest_trail, strict, false );
+
+    load_natural_cave_settings( jo, new_region.natural_cave, strict, false );
 
     if( ! jo.has_object( "map_extras" ) ) {
         if( strict ) {
@@ -633,6 +674,8 @@ void apply_region_overlay( JsonObject &jo, regional_settings &region )
     load_forest_mapgen_settings( jo, region.forest_composition, false, true );
 
     load_forest_trail_settings( jo, region.forest_trail, false, true );
+
+    load_natural_cave_settings( jo, region.natural_cave, false, true );
 
     JsonObject mapextrajo = jo.get_object( "map_extras" );
     std::set<std::string> extrazones = mapextrajo.get_member_names();
@@ -871,6 +914,19 @@ void overmap_lake_settings::finalize()
     }
 }
 
+void natural_cave_settings::finalize()
+{
+    for( const std::pair<const std::string, int> &pr : unfinalized_natural_cave_terrain ) {
+        const ter_str_id tid( pr.first );
+        if( !tid.is_valid() ) {
+            debugmsg( "Tried to add invalid terrain %s to natural_cave_settings natural_cave_terrain.",
+                      tid.c_str() );
+            continue;
+        }
+        natural_cave_terrain.add( tid.id(), pr.second );
+    }
+}
+
 void regional_settings::finalize()
 {
     if( default_groundcover_str != nullptr ) {
@@ -884,6 +940,7 @@ void regional_settings::finalize()
         forest_composition.finalize();
         forest_trail.finalize();
         overmap_lake.finalize();
+        natural_cave.finalize();
         get_options().add_value( "DEFAULT_REGION", id, no_translation( id ) );
     }
 }
