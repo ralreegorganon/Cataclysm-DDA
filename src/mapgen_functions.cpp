@@ -4334,8 +4334,62 @@ void mapgen_natural_cave_entrance(map *m, oter_id, mapgendata dat, const time_po
 void mapgen_natural_cave(map *m, oter_id, mapgendata dat, const time_point &turn, float density)
 {
     fill_background(m, t_rock);
-    rough_circle(m, t_rock_floor, SEEX, SEEY, 8);
-    square(m, t_slope_up, SEEX - 1, SEEY - 1, SEEX, SEEY);
+
+    const tripoint abs_sub_here = m->get_abs_sub();
+
+    auto build_cavern = [&]() {
+        std::vector<tripoint> candidates;
+
+        for (int i = 0; i < SEEX * 2; i++) {
+            for (int j = 0; j < SEEY * 2; j++) {
+                tripoint here(i, j, abs_sub_here.z);
+                if (m->ter(here) == t_rock_floor) {
+                    candidates.emplace_back(here);
+                }
+            }
+        }
+
+        std::random_shuffle(candidates.begin(), candidates.end());
+
+        size_t iteration_number = candidates.size();
+        for (size_t i = 0; i < iteration_number; i++) {
+
+            unsigned random_offset = 0;
+            if (one_in(3)) {
+                random_offset = rng(candidates.size() - 5, candidates.size() - 1);
+            } else {
+                random_offset = rng(0, candidates.size() / 2);
+            }
+
+            if (random_offset >= candidates.size()) {
+                random_offset = candidates.size() - 1;
+            }
+
+            int radius = one_in(20) ? 2 : 1;
+
+            std::vector<tripoint> targets = closest_tripoints_first(radius, candidates[random_offset]);
+
+            for (auto &t : targets) {
+                if (m->ter(t) == t_rock) {
+                    m->ter_set(t, t_rock_floor);
+                    candidates.emplace_back(t);
+                }
+            }
+
+            candidates.erase(candidates.begin() + random_offset);
+        }
+        candidates.clear();
+        return true;
+    };
+
+    std::vector<point> path = line_to(0, SEEY, SEEX*2, SEEY, 0);
+    for (auto &i : path) {
+        m->ter_set(i.x, i.y, t_rock_floor);
+    }
+
+    build_cavern();
+    //rough_circle(m, t_rock_floor, SEEX, SEEY, 8);
+    //square(m, t_slope_up, SEEX - 1, SEEY - 1, SEEX, SEEY);
 }
 
 void mremove_trap( map *m, int x, int y )
