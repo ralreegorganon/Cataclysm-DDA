@@ -171,6 +171,8 @@ building_gen_pointer get_mapgen_cfunction( const std::string &ident )
             { "ants_larvae", &mapgen_ants_larvae },
             { "ants_queen", &mapgen_ants_queen },
             { "tutorial", &mapgen_tutorial },
+            { "natural_cave_entrance", &mapgen_natural_cave_entrance },
+            { "natural_cave", &mapgen_natural_cave },
         }
     };
     const auto iter = pointers.find( ident );
@@ -4307,6 +4309,33 @@ void mapgen_forest_trail_four_way( map *m, oter_id, mapgendata dat, const time_p
 
     m->place_items( "forest_trail", 75, center_x - 2, center_y - 2, center_x + 2, center_y + 2, true,
                     turn );
+}
+
+void mapgen_natural_cave_entrance(map *m, oter_id, mapgendata dat, const time_point &turn, float density)
+{
+    mapgen_forest(m, oter_str_id("forest_thick").id(), dat, turn, density);
+
+    rough_circle(m, t_rock, SEEX, SEEY, 8);
+
+    const int x = SEEX + 4;
+    const int y = SEEX + 4;
+    const int rad = 8;
+    for (int i = x - rad; i <= x + rad; i++) {
+        for (int j = y - rad; j <= y + rad; j++) {
+            if (trig_dist(x, y, i, j) + rng(0, 3) <= rad && m->ter(i, j) == t_rock) {
+                m->ter_set(i, j, t_dirt);
+            }
+        }
+    }
+
+    square(m, t_slope_down, SEEX - 1, SEEY - 1, SEEX, SEEY);
+}
+
+void mapgen_natural_cave(map *m, oter_id, mapgendata dat, const time_point &turn, float density)
+{
+    fill_background(m, t_rock);
+    rough_circle(m, t_rock_floor, SEEX, SEEY, 8);
+    square(m, t_slope_up, SEEX - 1, SEEY - 1, SEEX, SEEY);
 }
 
 void mremove_trap( map *m, int x, int y )

@@ -9900,5 +9900,21 @@
     "name": "trailhead",
     "sym": 84,
     "color": "brown"
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "natural_cave_entrance",
+    "name": "natural cave entrance",
+    "sym": 48,
+    "color": "green",
+    "flags": [ "KNOWN_DOWN", "NO_ROTATE" ]
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "natural_cave",
+    "name": "natural cave",
+    "sym": 48,
+    "color": "green",
+    "flags": [ "NO_ROTATE" ]
   }
 ]

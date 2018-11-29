@@ -233,6 +233,10 @@ void mapgen_ants_queen( map *m, oter_id terrain_type, mapgendata dat, const time
                         float density );
 void mapgen_tutorial( map *m, oter_id terrain_type, mapgendata dat, const time_point &turn,
                       float density );
+void mapgen_natural_cave_entrance(map *m, oter_id terrain_type, mapgendata dat, const time_point &turn,
+    float density);
+void mapgen_natural_cave(map *m, oter_id terrain_type, mapgendata dat, const time_point &turn,
+    float density);
 
 // Temporary wrappers
 void mremove_trap( map *m, int x, int y );

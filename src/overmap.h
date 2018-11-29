@@ -331,6 +331,7 @@ class overmap
         bool build_slimepit( int x, int y, int z, int s );
         void build_mine( int x, int y, int z, int s );
         void place_rifts( int const z );
+        bool build_natural_cave(int x, int y, int z, int s);
 
         // Connection laying
         pf::path lay_out_connection( const overmap_connection &connection, const point &source,

@@ -1367,6 +1367,7 @@ bool overmap::generate_sub( int const z )
     std::vector<point> central_lab_train_points;
     std::vector<point> shaft_points;
     std::vector<city> mine_points;
+    std::vector<city> natural_cave_points;
     // These are so common that it's worth checking first as int.
     const oter_id skip_above[5] = {
         oter_id( "empty_rock" ), oter_id( "forest" ), oter_id( "field" ),
@@ -1464,6 +1465,8 @@ bool overmap::generate_sub( int const z )
                     ter( i, j, z ) = oter_id( "silo" );
                     requires_sub = true;
                 }
+            } else if (oter_above == "natural_cave_entrance") {
+                natural_cave_points.push_back(city(i, j, z));
             }
         }
     }
@@ -1575,6 +1578,12 @@ bool overmap::generate_sub( int const z )
         ter( i.x, i.y, z ) = oter_id( "mine_shaft" );
         requires_sub = true;
     }
+
+    for (auto &ncp : natural_cave_points) {
+        bool cave = build_natural_cave(ncp.x, ncp.y, z, ncp.s);
+        requires_sub |= cave;
+    }
+
     return requires_sub;
 }
 
@@ -2772,6 +2781,191 @@ void overmap::place_rifts( int const z )
             }
         }
     }
+}
+
+bool overmap::build_natural_cave(int x, int y, int z, int s)
+{
+    const oter_id natural_cave("natural_cave");
+    ter(x, y, z) = natural_cave;
+    return false;
+
+    //std::vector<point> generated_lab;
+    //const oter_id labt(prefix + "lab");
+    //const oter_id labt_stairs(labt.id().str() + "_stairs");
+    //const oter_id labt_core(labt.id().str() + "_core");
+    //const oter_id labt_finale(labt.id().str() + "_finale");
+    //const oter_id labt_ants("ants_lab");
+    //const oter_id labt_ants_stairs("ants_lab_stairs");
+
+    //ter(x, y, z) = labt;
+    //generated_lab.push_back(point(x, y));
+
+    //// maintain a list of potential new lab maps
+    //// grows outwards from previously placed lab maps
+    //std::set<point> candidates;
+    //candidates.insert({ point(x - 1, y), point(x + 1, y), point(x, y - 1), point(x, y + 1) });
+    //while (!candidates.empty()) {
+    //    auto cand = candidates.begin();
+    //    const int &cx = cand->x;
+    //    const int &cy = cand->y;
+    //    int dist = abs(x - cx) + abs(y - cy);
+    //    if (dist <= s * 2) { // increase radius to compensate for sparser new algorithm
+    //        int dist_increment = s > 3 ? 3 : 2; // Determines at what distance the odds of placement decreases
+    //        if (one_in(dist / dist_increment + 1)) { // odds diminish farther away from the stairs
+    //            // make an ants lab if it's a basic lab and ants were there before.
+    //            if (prefix.empty() && check_ot_type("ants", cx, cy, z)) {
+    //                if (ter(cx, cy, z) != "ants_queen") { // skip over a queen's chamber.
+    //                    ter(cx, cy, z) = labt_ants;
+    //                }
+    //            }
+    //            else {
+    //                ter(cx, cy, z) = labt;
+    //            }
+    //            generated_lab.push_back(*cand);
+    //            // add new candidates, don't backtrack
+    //            if (ter(cx - 1, cy, z) != labt && abs(x - cx + 1) + abs(y - cy) > dist) {
+    //                candidates.insert(point(cx - 1, cy));
+    //            }
+    //            if (ter(cx + 1, cy, z) != labt && abs(x - cx - 1) + abs(y - cy) > dist) {
+    //                candidates.insert(point(cx + 1, cy));
+    //            }
+    //            if (ter(cx, cy - 1, z) != labt && abs(x - cx) + abs(y - cy + 1) > dist) {
+    //                candidates.insert(point(cx, cy - 1));
+    //            }
+    //            if (ter(cx, cy + 1, z) != labt && abs(x - cx) + abs(y - cy - 1) > dist) {
+    //                candidates.insert(point(cx, cy + 1));
+    //            }
+    //        }
+    //    }
+    //    candidates.erase(cand);
+    //}
+
+    //bool generate_stairs = true;
+    //for (auto &elem : generated_lab) {
+    //    // Use a check for "_stairs" to catch the hidden_lab_stairs tiles.
+    //    if (is_ot_subtype("_stairs", ter(elem.x, elem.y, z + 1))) {
+    //        generate_stairs = false;
+    //    }
+    //}
+    //if (generate_stairs && !generated_lab.empty()) {
+    //    std::random_shuffle(generated_lab.begin(), generated_lab.end());
+
+    //    // we want a spot where labs are above, but we'll settle for the last element if necessary.
+    //    point p;
+    //    for (auto elem : generated_lab) {
+    //        p = elem;
+    //        if (ter(p.x, p.y, z + 1) == labt) {
+    //            break;
+    //        }
+    //    }
+    //    ter(p.x, p.y, z + 1) = labt_stairs;
+    //}
+
+    //ter(x, y, z) = labt_core;
+    //int numstairs = 0;
+    //if (s > 0) { // Build stairs going down
+    //    while (!one_in(6)) {
+    //        int stairx = 0;
+    //        int stairy = 0;
+    //        int tries = 0;
+    //        do {
+    //            stairx = rng(x - s, x + s);
+    //            stairy = rng(y - s, y + s);
+    //            tries++;
+    //        } while ((ter(stairx, stairy, z) != labt && ter(stairx, stairy, z) != labt_ants) &&
+    //            tries < 15);
+    //        if (tries < 15) {
+    //            if (ter(stairx, stairy, z) == labt_ants) {
+    //                ter(stairx, stairy, z) = labt_ants_stairs;
+    //            }
+    //            else {
+    //                ter(stairx, stairy, z) = labt_stairs;
+    //            }
+    //            numstairs++;
+    //        }
+    //    }
+    //}
+
+    //// We need a finale on the bottom of labs.  Central labs have a chance of additional finales.
+    //if (numstairs == 0 || (prefix == "central_" && one_in(-z - 1))) {
+    //    int finalex = 0;
+    //    int finaley = 0;
+    //    int tries = 0;
+    //    do {
+    //        finalex = rng(x - s, x + s);
+    //        finaley = rng(y - s, y + s);
+    //        tries++;
+    //    } while (tries < 15 && ter(finalex, finaley, z) != labt
+    //        && ter(finalex, finaley, z) != labt_core);
+    //    ter(finalex, finaley, z) = labt_finale;
+    //}
+
+    //if (train_odds > 0 && one_in(train_odds)) {
+    //    int trainx = 0;
+    //    int trainy = 0;
+    //    int tries = 0;
+    //    int adjacent_labs = 0;
+
+    //    do {
+    //        trainx = rng(x - s * 1.5 - 1, x + s * 1.5 + 1);
+    //        trainy = rng(y - s * 1.5 - 1, y + s * 1.5 + 1);
+    //        tries++;
+
+    //        adjacent_labs = (is_ot_subtype("lab", ter(trainx, trainy - 1, z)) ? 1 : 0) +
+    //            (is_ot_subtype("lab", ter(trainx - 1, trainy, z)) ? 1 : 0) +
+    //            (is_ot_subtype("lab", ter(trainx, trainy + 1, z)) ? 1 : 0) +
+    //            (is_ot_subtype("lab", ter(trainx + 1, trainy, z)) ? 1 : 0);
+    //    } while (tries < 50 && (
+    //        ter(trainx, trainy, z) == labt ||
+    //        ter(trainx, trainy, z) == labt_stairs ||
+    //        ter(trainx, trainy, z) == labt_finale ||
+    //        adjacent_labs != 1));
+    //    if (tries < 50) {
+    //        lab_train_points->push_back(point(trainx, trainy));
+    //        if (is_ot_subtype("lab", ter(trainx, trainy - 1, z))) {
+    //            lab_train_points->push_back(point(trainx, trainy + 1));
+    //        }
+    //        else if (is_ot_subtype("lab", ter(trainx, trainy + 1, z))) {
+    //            lab_train_points->push_back(point(trainx, trainy - 1));
+    //        }
+    //        else if (is_ot_subtype("lab", ter(trainx + 1, trainy, z))) {
+    //            lab_train_points->push_back(point(trainx - 1, trainy));
+    //        }
+    //        else if (is_ot_subtype("lab", ter(trainx - 1, trainy, z))) {
+    //            lab_train_points->push_back(point(trainx + 1, trainy));
+    //        }
+    //    }
+    //}
+
+    //// 4th story of labs is a candidate for lab escape, as long as there's no train or finale.
+    //if (prefix.empty() && z == -4 && train_odds == 0 && numstairs > 0) {
+    //    int cellx = 0;
+    //    int celly = 0;
+    //    int tries = 0;
+    //    int adjacent_labs = 0;
+
+    //    // Find a space bordering just one lab to the south.
+    //    do {
+    //        cellx = rng(x - s * 1.5 - 1, x + s * 1.5 + 1);
+    //        celly = rng(y - s * 1.5 - 1, y + s * 1.5 + 1);
+    //        tries++;
+
+    //        adjacent_labs = (is_ot_subtype("lab", ter(cellx, celly - 1, z)) ? 1 : 0) +
+    //            (is_ot_subtype("lab", ter(cellx - 1, celly, z)) ? 1 : 0) +
+    //            (is_ot_subtype("lab", ter(cellx, celly + 1, z)) ? 1 : 0) +
+    //            (is_ot_subtype("lab", ter(cellx + 1, celly, z)) ? 1 : 0);
+    //    } while (tries < 50 && (
+    //        ter(cellx, celly, z) == labt_stairs ||
+    //        ter(cellx, celly, z) == labt_finale ||
+    //        ter(cellx, celly + 1, z) != labt ||
+    //        adjacent_labs != 1));
+    //    if (tries < 50) {
+    //        ter(cellx, celly, z) = oter_id("lab_escape_cells");
+    //        ter(cellx, celly + 1, z) = oter_id("lab_escape_entrance");
+    //    }
+    //}
+
+    //return numstairs > 0;
 }
 
 pf::path overmap::lay_out_connection( const overmap_connection &connection, const point &source,
