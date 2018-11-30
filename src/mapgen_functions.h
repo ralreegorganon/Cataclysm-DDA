@@ -245,4 +245,8 @@ void madd_field( map *m, int x, int y, field_id t, int density );
 
 void place_stairs( map *m, oter_id terrain_type, mapgendata dat );
 
+std::vector<std::vector<int>> rise_automaton(int width, int height, int initial_filled, int birth_thresh, int death_thresh, int iterations);
+std::vector<std::vector<int>> go_home_youre_drunk(int width, int height, int limit);
+void blooming_booming(int width, int height, std::vector<std::vector<int>> &current);
+
 #endif

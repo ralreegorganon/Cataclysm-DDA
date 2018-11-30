@@ -1466,7 +1466,9 @@ bool overmap::generate_sub( int const z )
                     requires_sub = true;
                 }
             } else if (oter_above == "natural_cave_entrance") {
-                natural_cave_points.push_back(city(i, j, z));
+                natural_cave_points.push_back(city(i, j, rng(1, 5 + z)));
+            } else if (oter_above == "natural_cave_vertical") {
+                natural_cave_points.push_back(city(i, j, rng(1, 5 + z)));
             }
         }
     }
@@ -2785,9 +2787,82 @@ void overmap::place_rifts( int const z )
 
 bool overmap::build_natural_cave(int x, int y, int z, int s)
 {
+    std::vector<point> generated_natural_cave;
     const oter_id natural_cave("natural_cave");
+    const oter_id natural_cave_vertical("natural_cave_vertical");
+    const oter_id natural_cave_entrance("natural_cave_entrance");
+
     ter(x, y, z) = natural_cave;
-    return false;
+    generated_natural_cave.push_back(point(x, y));
+
+    std::set<point> candidates;
+    candidates.insert({ point(x - 1, y), point(x + 1, y), point(x, y - 1), point(x, y + 1) });
+    while (!candidates.empty()) {
+        auto cand = candidates.begin();
+        const int &cx = cand->x;
+        const int &cy = cand->y;
+        int dist = abs(x - cx) + abs(y - cy);
+        if (dist <= s * 2) {
+            int dist_increment = s > 3 ? 3 : 2;
+            if (one_in(dist / dist_increment + 1)) {
+                ter(cx, cy, z) = natural_cave;
+                generated_natural_cave.push_back(*cand);
+                if (ter(cx - 1, cy, z) != natural_cave && abs(x - cx + 1) + abs(y - cy) > dist) {
+                    candidates.insert(point(cx - 1, cy));
+                }
+                if (ter(cx + 1, cy, z) != natural_cave && abs(x - cx - 1) + abs(y - cy) > dist) {
+                    candidates.insert(point(cx + 1, cy));
+                }
+                if (ter(cx, cy - 1, z) != natural_cave && abs(x - cx) + abs(y - cy + 1) > dist) {
+                    candidates.insert(point(cx, cy - 1));
+                }
+                if (ter(cx, cy + 1, z) != natural_cave && abs(x - cx) + abs(y - cy - 1) > dist) {
+                    candidates.insert(point(cx, cy + 1));
+                }
+            }
+        }
+        candidates.erase(cand);
+    }
+
+    if (generated_natural_cave.empty()) {
+        return false;
+    }
+
+    std::random_shuffle(generated_natural_cave.begin(), generated_natural_cave.end());
+
+    const int z_above = z + 1;
+
+    point p;
+    for (auto elem : generated_natural_cave) {
+        p = elem;
+        if (ter(p.x, p.y, z_above) == natural_cave) {
+            break;
+        }
+    }
+    if (z_above == 0) {
+        ter(p.x, p.y, z_above) = natural_cave_entrance;
+    }
+    else {
+        ter(p.x, p.y, z_above) = natural_cave_vertical;
+    }
+
+    std::random_shuffle(generated_natural_cave.begin(), generated_natural_cave.end());
+
+    int verticals_down = 0;
+    int potential_verticals_down = std::min(static_cast<std::vector<point>::size_type>(rng(0, s)), generated_natural_cave.size());
+    for (auto elem : generated_natural_cave) {
+        if (ter(elem.x, elem.y, z) == natural_cave) {
+            ter(elem.x, elem.y, z) = natural_cave_vertical;
+            verticals_down++;
+        }
+        if (verticals_down >= potential_verticals_down) {
+            break;
+        }
+    }
+
+    return verticals_down > 0;
+
+    
 
     //std::vector<point> generated_lab;
     //const oter_id labt(prefix + "lab");

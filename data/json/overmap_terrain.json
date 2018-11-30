@@ -9906,7 +9906,7 @@
     "id": "natural_cave_entrance",
     "name": "natural cave entrance",
     "sym": 48,
-    "color": "green",
+    "color": "red",
     "flags": [ "KNOWN_DOWN", "NO_ROTATE" ]
   },
   {
@@ -9914,7 +9914,15 @@
     "id": "natural_cave",
     "name": "natural cave",
     "sym": 48,
-    "color": "green",
+    "color": "red",
+    "flags": [ "NO_ROTATE" ]
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "natural_cave_vertical",
+    "name": "natural cave vertical",
+    "sym": 48,
+    "color": "red",
     "flags": [ "NO_ROTATE" ]
   }
 ]

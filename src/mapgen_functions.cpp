@@ -23,6 +23,7 @@
 #include <chrono>
 #include <iterator>
 #include <random>
+#include <unordered_set>
 
 #define dbg(x) DebugLog((DebugLevel)(x),D_MAP_GEN) << __FILE__ << ":" << __LINE__ << ": "
 
@@ -173,6 +174,7 @@ building_gen_pointer get_mapgen_cfunction( const std::string &ident )
             { "tutorial", &mapgen_tutorial },
             { "natural_cave_entrance", &mapgen_natural_cave_entrance },
             { "natural_cave", &mapgen_natural_cave },
+            { "natural_cave_vertical", &mapgen_natural_cave },
         }
     };
     const auto iter = pointers.find( ident );
@@ -4328,69 +4330,260 @@ void mapgen_natural_cave_entrance(map *m, oter_id, mapgendata dat, const time_po
         }
     }
 
-    square(m, t_slope_down, SEEX - 1, SEEY - 1, SEEX, SEEY);
+    square(m, t_slope_down, SEEX - 1, SEEY - 1, SEEX -1, SEEY -1);
 }
 
-void mapgen_natural_cave(map *m, oter_id, mapgendata dat, const time_point &turn, float density)
+void mapgen_natural_cave(map *m, oter_id o, mapgendata dat, const time_point &turn, float density)
 {
-    fill_background(m, t_rock);
-
-    const tripoint abs_sub_here = m->get_abs_sub();
-
-    auto build_cavern = [&]() {
-        std::vector<tripoint> candidates;
-
-        for (int i = 0; i < SEEX * 2; i++) {
-            for (int j = 0; j < SEEY * 2; j++) {
-                tripoint here(i, j, abs_sub_here.z);
-                if (m->ter(here) == t_rock_floor) {
-                    candidates.emplace_back(here);
-                }
-            }
-        }
-
-        std::random_shuffle(candidates.begin(), candidates.end());
-
-        size_t iteration_number = candidates.size();
-        for (size_t i = 0; i < iteration_number; i++) {
-
-            unsigned random_offset = 0;
-            if (one_in(3)) {
-                random_offset = rng(candidates.size() - 5, candidates.size() - 1);
-            } else {
-                random_offset = rng(0, candidates.size() / 2);
-            }
-
-            if (random_offset >= candidates.size()) {
-                random_offset = candidates.size() - 1;
-            }
-
-            int radius = one_in(20) ? 2 : 1;
-
-            std::vector<tripoint> targets = closest_tripoints_first(radius, candidates[random_offset]);
-
-            for (auto &t : targets) {
-                if (m->ter(t) == t_rock) {
-                    m->ter_set(t, t_rock_floor);
-                    candidates.emplace_back(t);
-                }
-            }
-
-            candidates.erase(candidates.begin() + random_offset);
-        }
-        candidates.clear();
-        return true;
-    };
-
-    std::vector<point> path = line_to(0, SEEY, SEEX*2, SEEY, 0);
-    for (auto &i : path) {
-        m->ter_set(i.x, i.y, t_rock_floor);
-    }
-
-    build_cavern();
+    constexpr int width = SEEX * 2;
+    constexpr int height = SEEY * 2;
+   
     //rough_circle(m, t_rock_floor, SEEX, SEEY, 8);
     //square(m, t_slope_up, SEEX - 1, SEEY - 1, SEEX, SEEY);
+
+
+    // std::vector<std::vector<int>> current = go_home_youre_drunk(width, height, 100);
+    // std::vector<std::vector<int>> current = rise_automaton(width, height, 30, 4, 3, 4);
+    
+    /*std::vector<std::vector<int>> current(width, std::vector<int>(height, 0));
+
+    std::vector<point> path = line_to(0, SEEY, (SEEX * 2) - 1, SEEY, 0);
+    for (auto &i : path) {
+        current[i.x][i.y] = 1;
+    }*/
+
+    if (one_in(2)) {
+        // good
+    //std::vector<std::vector<int>> current = rise_automaton(width, height, 35, 4, 3, 3);
+        std::vector<std::vector<int>> current = rise_automaton(width, height, 45, 5, 3, 12);
+        const tripoint abs_sub = m->get_abs_sub();
+        fill_background(m, t_rock);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (current[i][j] == 1) {
+                    const tripoint location(i, j, abs_sub.z);
+                    m->ter_set(location, t_rock_floor);
+                }
+            }
+        }
+    }
+    else {
+        std::vector<std::vector<int>> current = go_home_youre_drunk(width, height, 100);
+        const tripoint abs_sub = m->get_abs_sub();
+        fill_background(m, t_rock);
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (current[i][j] == 1) {
+                    const tripoint location(i, j, abs_sub.z);
+                    m->ter_set(location, t_dirt);
+                }
+            }
+        }
+    }
+
+    if (o == "natural_cave_vertical") {
+        square(m, t_slope_down, SEEX - 1, SEEY - 1, SEEX - 1, SEEY - 1);
+    }
+
+    if(is_ot_subtype("natural_cave_entrance", dat.above()) || is_ot_subtype("natural_cave_vertical", dat.above())) {
+        square(m, t_slope_up, SEEX, SEEY, SEEX, SEEY);
+    }
+
+    if (is_ot_subtype("natural_cave", dat.north())) {
+        m->ter_set(SEEX, 0, t_floor_wax);
+    }
+
+    if (is_ot_subtype("natural_cave", dat.south())) {
+        m->ter_set(SEEX, (SEEY*2) -1, t_floor_wax);
+    }
+
+    if (is_ot_subtype("natural_cave", dat.west())) {
+        m->ter_set(0, SEEY, t_floor_wax);
+    }
+
+    if (is_ot_subtype("natural_cave", dat.east())) {
+        m->ter_set((SEEX * 2) - 1, SEEY, t_floor_wax);
+    }
 }
+
+void blooming_booming(int width, int height, std::vector<std::vector<int>> &current) {
+    std::vector<point> candidates;
+
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            if (current[i][j] == 1) {
+                candidates.emplace_back(point(i, j));
+            }
+        }
+    }
+
+    std::random_shuffle(candidates.begin(), candidates.end());
+
+    size_t iteration_number = candidates.size();
+    for (size_t i = 0; i < iteration_number; i++) {
+
+        unsigned random_offset = 0;
+        if (one_in(3)) {
+            random_offset = rng(candidates.size() - 5, candidates.size() - 1);
+        }
+        else {
+            random_offset = rng(0, candidates.size() / 2);
+        }
+
+        if (random_offset >= candidates.size()) {
+            random_offset = candidates.size() - 1;
+        }
+
+        int radius = 1;
+
+        std::vector<point> targets = closest_points_first(radius, candidates[random_offset]);
+
+        for (auto &t : targets) {
+            int cx = clamp(t.x, 0, width - 1);
+            int cy = clamp(t.y, 0, height - 1);
+            if (current[cx][cy] == 0) {
+                current[cx][cy] = 1;
+                candidates.emplace_back(t);
+            }
+        }
+
+        candidates.erase(candidates.begin() + random_offset);
+    }
+    candidates.clear();
+};
+
+
+std::vector<std::vector<int>> go_home_youre_drunk(int width, int height, int limit) 
+{
+    std::unordered_set<point> walked;
+
+    int steps = 0;
+    int x = 0;
+    int y = 0;
+    int min_x = x;
+    int max_x = x;
+    int min_y = y;
+    int max_y = y;
+
+    do {
+        point loc(x, y);
+        if (walked.find(loc) == walked.end()) {
+            walked.insert(loc);
+            steps++;
+
+            if (x < min_x) {
+                min_x = x;
+            }
+            else if (x > max_x) {
+                max_x = x;
+            }
+
+            if (y < min_y) {
+                min_y = y;
+            }
+            else if (y > max_y) {
+                max_y = y;
+            }
+        }
+        int dir = rng(0, 3);
+        switch (dir) {
+        case 0:
+            x += 1;
+            break;
+        case 1:
+            x -= 1;
+            break;
+        case 2:
+            y += 1;
+            break;
+        case 3:
+            y -= 1;
+            break;
+        }
+    } while (steps < limit);
+
+    int shift_x = 0 - min_x;
+    int shift_y = 0 - min_y;
+
+    std::vector<std::vector<int>> current(width, std::vector<int>(height, 0));
+
+    for (int x = min_x; x < min_x + width; x++) {
+        for (int y = min_y; y < min_y + height; y++) {
+            if (walked.find({ x,y }) != walked.end()) {
+                current[x + shift_x][y + shift_y] = 1;
+            }
+        }
+    }
+
+    return current;
+}
+
+std::vector<std::vector<int>> rise_automaton(int width, int height, int initial_filled, int birth_thresh, int death_thresh, int iterations) {
+
+    std::vector<std::vector<int>> current(width, std::vector<int>(height, 0));
+    std::vector<std::vector<int>> next(width, std::vector<int>(height, 0));
+
+    const auto neighbor_count = [&](const std::vector<std::vector<int>> &cells, const int x,
+        const int y, const int radius) {
+        int neighbors = 0;
+        for (int ni = -radius; ni <= radius; ni++) {
+            for (int nj = -radius; nj <= radius; nj++) {
+                const int nx = x + ni;
+                const int ny = y + nj;
+
+                if (nx >= width || nx < 0 || ny >= height || ny < 0) {
+                    // edges are alive
+                    neighbors += 1;
+                    continue;
+                }
+
+                neighbors += cells[nx][ny];
+            }
+        }
+        neighbors -= cells[x][y];
+
+        return neighbors;
+    };
+
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            current[i][j] = x_in_y(initial_filled, 100);
+        }
+    }
+
+    for (int iteration = 0; iteration < iterations; iteration++) {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                const int neighbors = neighbor_count(current, i, j, 1);
+
+                if (current[i][j] == 0 && neighbors >= birth_thresh) {
+                    next[i][j] = 1;
+                }
+                else if (current[i][j] == 1 && neighbors >= death_thresh) {
+                    next[i][j] = 1;
+                }
+                else {
+                    next[i][j] = 0;
+                }
+            }
+        }
+        std::swap(current, next);
+    }
+
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            if (current[i][j] == 0) {
+                current[i][j] = 1;
+            }
+            else {
+                current[i][j] = 0;
+            }
+        }
+    }
+
+    return current;
+}
+
 
 void mremove_trap( map *m, int x, int y )
 {

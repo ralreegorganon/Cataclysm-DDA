@@ -2559,7 +2559,7 @@
     "locations" : [ "forest" ],
     "city_distance" : [10, -1],
     "city_sizes" : [0, 20],
-    "occurrences" : [0, 3],
+    "occurrences" : [3, 3],
     "rotate" : false
   }
 ]
