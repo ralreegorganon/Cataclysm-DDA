@@ -233,10 +233,6 @@ void mapgen_ants_queen( map *m, oter_id terrain_type, mapgendata dat, const time
                         float density );
 void mapgen_tutorial( map *m, oter_id terrain_type, mapgendata dat, const time_point &turn,
                       float density );
-void mapgen_natural_cave_entrance(map *m, oter_id terrain_type, mapgendata dat, const time_point &turn,
-    float density);
-void mapgen_natural_cave(map *m, oter_id terrain_type, mapgendata dat, const time_point &turn,
-    float density);
 
 // Temporary wrappers
 void mremove_trap( map *m, int x, int y );
@@ -245,8 +241,5 @@ void madd_field( map *m, int x, int y, field_id t, int density );
 
 void place_stairs( map *m, oter_id terrain_type, mapgendata dat );
 
-std::vector<std::vector<int>> rise_automaton(int width, int height, int initial_filled, int birth_thresh, int death_thresh, int iterations);
-std::vector<std::vector<int>> go_home_youre_drunk(int width, int height, int limit);
-void blooming_booming(int width, int height, std::vector<std::vector<int>> &current);
 
 #endif
