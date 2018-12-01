@@ -16,6 +16,7 @@
 #include <queue>
 #include <vector>
 #include <unordered_set>
+#include <random>
 
 #include "simple_pathfinding.h"
 
@@ -166,8 +167,8 @@ void blooming_booming( int width, int height, std::vector<std::vector<int>> &cur
             }
         }
     }
-
-    std::random_shuffle( candidates.begin(), candidates.end() );
+    static std::default_random_engine eng(std::chrono::system_clock::now().time_since_epoch().count() );
+    std::shuffle( candidates.begin(), candidates.end(), eng );
 
     size_t iteration_number = candidates.size();
     for( size_t i = 0; i < iteration_number; i++ ) {
@@ -325,7 +326,97 @@ std::vector<std::vector<int>> rise_automaton( int width, int height, int initial
             }
         }
     }
+    
+    
+    std::unordered_set<point> visited;
+    
+    const auto get_cave = [&]( point starting_point, std::vector<point> &cave_points ) {
+        std::queue<point> to_check;
+        to_check.push( starting_point );
+        while( !to_check.empty() ) {
+            const point current_point = to_check.front();
+            to_check.pop();
+            
+            // We've been here before, so bail.
+            if( visited.find( current_point ) != visited.end() ) {
+                continue;
+            }
+            
+            // This point is out of bounds, so bail.
+            bool in_bounds = current_point.x >= 0 && current_point.x < width && current_point.y >= 0 && current_point.y < height;
+            if( !in_bounds ) {
+                continue;
+            }
+            
+            // Mark this point as visited.
+            visited.emplace( current_point );
+            
 
+            if(current[current_point.x][current_point.y] == 1) {
+                cave_points.emplace_back( current_point );
+                to_check.push( point( current_point.x, current_point.y + 1 ) );
+                to_check.push( point( current_point.x, current_point.y - 1 ) );
+                to_check.push( point( current_point.x + 1, current_point.y ) );
+                to_check.push( point( current_point.x - 1, current_point.y ) );
+            }
+        }
+        return;
+    };
+    
+    std::vector<std::vector<point>> caves;
+    
+    for( int i = 0; i < width; i++ ) {
+        for( int j = 0; j < height; j++ ) {
+            if(current[i][j] == 0) {
+                continue;
+            }
+
+            point seed_point( i, j );
+            
+            if( visited.find( seed_point ) != visited.end() ) {
+                continue;
+            }
+            
+            std::vector<point> cave_points;
+            get_cave(seed_point, cave_points);
+            caves.emplace_back(cave_points);
+        }
+    }
+    
+    if(caves.size() > 1) {
+        const auto route_to = [&current]( const point & src, const point & dest, const int &width, const int &height ) {
+            const auto estimate = [&]( const pf::node & cur, const pf::node * prev ) {
+                const int dx = std::abs( cur.x - dest.x );
+                const int dy = std::abs( cur.y - dest.y );
+                const int d = 1;
+                const int d2 = 1;
+                const int dist = d * ( dx + dy ) + ( d2 - 2 * d ) * std::min( dx,
+                                                                             dy ) + ( current[cur.x][cur.y] == 1 ? 1 : 5 );
+                return dist;
+            };
+            return pf::find_path( src, dest, width, height, estimate );
+        };
+        
+        static std::default_random_engine eng(std::chrono::system_clock::now().time_since_epoch().count() );
+        std::shuffle( caves.begin(), caves.end(), eng );
+        
+        std::vector<point> to_connect;
+        
+        for(auto &c : caves) {
+            const int pick = rng(0, c.size());
+            auto it = c.begin();
+            std::advance(it, pick);
+            to_connect.emplace_back(*it);
+        }
+        
+        for (auto src = to_connect.begin(), dest = ++to_connect.begin(); dest != to_connect.end(); src++, dest++)
+        {
+            pf::path path = route_to( *src, *dest, width, height );
+            for( const auto &node : path.nodes ) {
+                current[node.x][node.y] = 1;
+            }
+        }
+    }
+    
     return current;
 }
-
