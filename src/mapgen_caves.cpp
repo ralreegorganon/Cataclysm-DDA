@@ -92,8 +92,8 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
             const int dy = std::abs( cur.y - dest.y );
             const int d = 1;
             const int d2 = 1;
-            const int dist = d * ( dx + dy ) + ( d2 - 2 * d ) * std::min( dx,
-                             dy ) + ( current[cur.x][cur.y] == 1 ? 1 : 5 );
+            const int terrain_factor = current[cur.x][cur.y] == 1 ? 1 : rng(5, 10);
+            const int dist = d * ( dx + dy ) + ( d2 - 2 * d ) * std::min( dx, dy ) + terrain_factor;
             return dist;
         };
         return pf::find_path( src, dest, width, height, estimate );
@@ -135,24 +135,71 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         }
     }
 
+    if (o == "natural_cave_vertical") {
+        const point stair_point(SEEX - 1, SEEY - 1);
+        if (current[stair_point.x][stair_point.y] == 0) {
+            std::vector<point> targets = closest_points_first(width, stair_point.x, stair_point.y);
+            for (auto &t : targets) {
+                if (t.x < 0 || t.x > width || t.y < 0 || t.y > height) {
+                    continue;
+                }
+
+                if (current[t.x][t.y] == 1) {
+                    point src = point(t.x, t.y);
+                    point dest = stair_point;
+                    pf::path path = route_to(src, dest, width, height);
+                    for (const auto &node : path.nodes) {
+                        current[node.x][node.y] = 1;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    if (is_ot_subtype("natural_cave_entrance", dat.above()) ||
+        is_ot_subtype("natural_cave_vertical", dat.above())) {
+        const point stair_point(SEEX, SEEY);
+        if (current[stair_point.x][stair_point.y] == 0) {
+            std::vector<point> targets = closest_points_first(width, stair_point.x, stair_point.y);
+            for (auto &t : targets) {
+                if (t.x < 0 || t.x > width || t.y < 0 || t.y > height) {
+                    continue;
+                }
+
+                if (current[t.x][t.y] == 1) {
+                    point src = point(t.x, t.y);
+                    point dest = stair_point;
+                    pf::path path = route_to(src, dest, width, height);
+                    for (const auto &node : path.nodes) {
+                        current[node.x][node.y] = 1;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
     const tripoint abs_sub = m->get_abs_sub();
-    fill_background( m, t_rock );
-    for( int i = 0; i < width; i++ ) {
-        for( int j = 0; j < height; j++ ) {
-            if( current[i][j] == 1 ) {
-                const tripoint location( i, j, abs_sub.z );
-                m->ter_set( location, t_rock_floor );
+    fill_background(m, t_rock);
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            if (current[i][j] == 1) {
+                const tripoint location(i, j, abs_sub.z);
+                m->ter_set(location, t_rock_floor);
             }
         }
     }
 
     if( o == "natural_cave_vertical" ) {
-        square( m, t_slope_down, SEEX - 1, SEEY - 1, SEEX - 1, SEEY - 1 );
+        const tripoint location(SEEX - 1, SEEY - 1, abs_sub.z);
+        m->ter_set(location, t_slope_down);
     }
 
     if( is_ot_subtype( "natural_cave_entrance", dat.above() ) ||
         is_ot_subtype( "natural_cave_vertical", dat.above() ) ) {
-        square( m, t_slope_up, SEEX, SEEY, SEEX, SEEY );
+        const tripoint location(SEEX, SEEY, abs_sub.z);
+        m->ter_set(location, t_slope_up);
     }
 }
 
@@ -390,8 +437,8 @@ std::vector<std::vector<int>> rise_automaton( int width, int height, int initial
                 const int dy = std::abs( cur.y - dest.y );
                 const int d = 1;
                 const int d2 = 1;
-                const int dist = d * ( dx + dy ) + ( d2 - 2 * d ) * std::min( dx,
-                                                                             dy ) + ( current[cur.x][cur.y] == 1 ? 1 : 5 );
+                const int terrain_factor = current[cur.x][cur.y] == 1 ? 1 : rng(5, 10);
+                const int dist = d * (dx + dy) + (d2 - 2 * d) * std::min(dx, dy) + terrain_factor;
                 return dist;
             };
             return pf::find_path( src, dest, width, height, estimate );
