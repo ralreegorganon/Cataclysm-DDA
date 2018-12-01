@@ -13,6 +13,7 @@
 #include "omdata.h"
 #include "options.h"
 #include "overmap.h"
+#include "simple_pathfinding.h"
 #include "translations.h"
 #include "trap.h"
 #include "vehicle_group.h"
@@ -4337,46 +4338,102 @@ void mapgen_natural_cave(map *m, oter_id o, mapgendata dat, const time_point &tu
 {
     constexpr int width = SEEX * 2;
     constexpr int height = SEEY * 2;
-   
-    //rough_circle(m, t_rock_floor, SEEX, SEEY, 8);
-    //square(m, t_slope_up, SEEX - 1, SEEY - 1, SEEX, SEEY);
+  
+    bool should_connect_n = is_ot_subtype("natural_cave", dat.north());
+    bool should_connect_s = is_ot_subtype("natural_cave", dat.south());
+    bool should_connect_w = is_ot_subtype("natural_cave", dat.west());
+    bool should_connect_e = is_ot_subtype("natural_cave", dat.east());
 
-
-    // std::vector<std::vector<int>> current = go_home_youre_drunk(width, height, 100);
-    // std::vector<std::vector<int>> current = rise_automaton(width, height, 30, 4, 3, 4);
-    
-    /*std::vector<std::vector<int>> current(width, std::vector<int>(height, 0));
-
-    std::vector<point> path = line_to(0, SEEY, (SEEX * 2) - 1, SEEY, 0);
-    for (auto &i : path) {
-        current[i.x][i.y] = 1;
-    }*/
+    std::vector<std::vector<int>> current;
 
     if (one_in(2)) {
-        // good
-    //std::vector<std::vector<int>> current = rise_automaton(width, height, 35, 4, 3, 3);
-        std::vector<std::vector<int>> current = rise_automaton(width, height, 45, 5, 3, 12);
-        const tripoint abs_sub = m->get_abs_sub();
-        fill_background(m, t_rock);
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                if (current[i][j] == 1) {
-                    const tripoint location(i, j, abs_sub.z);
-                    m->ter_set(location, t_rock_floor);
-                }
+        current = rise_automaton(width, height, 45, 5, 3, 12);
+    }
+    else {
+        current = go_home_youre_drunk(width, height, 100);
+    }
+
+    std::vector<point> dapoints;
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            if (current[i][j] == 1) {
+                dapoints.emplace_back(point( i, j ));
             }
         }
     }
-    else {
-        std::vector<std::vector<int>> current = go_home_youre_drunk(width, height, 100);
-        const tripoint abs_sub = m->get_abs_sub();
-        fill_background(m, t_rock);
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                if (current[i][j] == 1) {
-                    const tripoint location(i, j, abs_sub.z);
-                    m->ter_set(location, t_dirt);
-                }
+
+    // Get the north and south most points.
+    auto north_south_most = std::minmax_element(dapoints.begin(),
+        dapoints.end(), [](const point & lhs, const point & rhs) {
+        return lhs.y < rhs.y;
+    });
+
+    // Get the west and east most points.
+    auto west_east_most = std::minmax_element(dapoints.begin(),
+        dapoints.end(), [](const point & lhs, const point & rhs) {
+        return lhs.x < rhs.x;
+    });
+
+    point northmost = *north_south_most.first;
+    point southmost = *north_south_most.second;
+    point westmost = *west_east_most.first;
+    point eastmost = *west_east_most.second;
+
+    const auto route_to = [](const point& src, const point& dest, const int &width, const int &height) {
+        const auto estimate = [&](const pf::node & cur, const pf::node * prev) {
+            const int dx = std::abs(cur.x - dest.x);
+            const int dy = std::abs(cur.y - dest.y);
+            const int d = 1;
+            const int d2 = 1;
+            const int dist = d * (dx + dy) + (d2 - 2 * d) * std::min(dx, dy);
+            return dist;
+        };
+        return pf::find_path(src, dest, width, height, estimate);
+    };
+
+    if (should_connect_n && current[SEEX][0] == 0) {
+        point src = northmost;  
+        point dest = point(SEEX, 1);
+        pf::path path = route_to(src, dest, width, height);
+        for (const auto &node : path.nodes) {
+            current[node.x][node.y] = 1;
+        }
+    }
+
+    if (should_connect_s && current[SEEX][(SEEY * 2) - 1] == 0) {
+        point src = southmost;
+        point dest = point(SEEX, (SEEY * 2) - 2);
+        pf::path path = route_to(src, dest, width, height);
+        for (const auto &node : path.nodes) {
+            current[node.x][node.y] = 1;
+        }
+    }
+
+    if (should_connect_w && current[0][SEEY] == 0) {
+        point src = westmost;
+        point dest = point(1, SEEY);
+        pf::path path = route_to(src, dest, width, height);
+        for (const auto &node : path.nodes) {
+            current[node.x][node.y] = 1;
+        }
+    }
+    if (should_connect_e && current[(SEEX * 2) - 1][SEEY] == 0) {
+
+        point src = eastmost;
+        point dest = point((SEEX * 2) - -2, SEEY);
+        pf::path path = route_to(src, dest, width, height);
+        for (const auto &node : path.nodes) {
+            current[node.x][node.y] = 1;
+        }
+    }
+
+    const tripoint abs_sub = m->get_abs_sub();
+    fill_background(m, t_rock);
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            if (current[i][j] == 1) {
+                const tripoint location(i, j, abs_sub.z);
+                m->ter_set(location, t_rock_floor);
             }
         }
     }
@@ -4387,22 +4444,6 @@ void mapgen_natural_cave(map *m, oter_id o, mapgendata dat, const time_point &tu
 
     if(is_ot_subtype("natural_cave_entrance", dat.above()) || is_ot_subtype("natural_cave_vertical", dat.above())) {
         square(m, t_slope_up, SEEX, SEEY, SEEX, SEEY);
-    }
-
-    if (is_ot_subtype("natural_cave", dat.north())) {
-        m->ter_set(SEEX, 0, t_floor_wax);
-    }
-
-    if (is_ot_subtype("natural_cave", dat.south())) {
-        m->ter_set(SEEX, (SEEY*2) -1, t_floor_wax);
-    }
-
-    if (is_ot_subtype("natural_cave", dat.west())) {
-        m->ter_set(0, SEEY, t_floor_wax);
-    }
-
-    if (is_ot_subtype("natural_cave", dat.east())) {
-        m->ter_set((SEEX * 2) - 1, SEEY, t_floor_wax);
     }
 }
 
