@@ -8,8 +8,151 @@
 #include "line.h"
 #include "rng.h"
 #include "map.h"
-#include "simple_pathfinding.h"
 #include "cata_utility.h"
+
+#include "enums.h"
+
+#include <limits>
+#include <queue>
+#include <vector>
+
+
+struct node {
+    int x;
+    int y;
+    int dir;
+    int priority;
+
+    node(int x, int y, int dir, int priority = 0) :
+        x(x),
+        y(y),
+        dir(dir),
+        priority(priority) {}
+
+    bool operator< (const node &n) const {
+        return priority > n.priority;
+    }
+
+    point pos() const {
+        return point(x, y);
+    }
+};
+
+struct path {
+    std::vector<node> nodes;
+};
+
+template<class BinaryPredicate>
+path find_path(const point &source, const point &dest, const int width, const int height, BinaryPredicate estimator)
+{
+    static const int dx[4] = { 0, 1, 0, -1 };
+    static const int dy[4] = { -1, 0, 1,  0 };
+
+    const auto inbounds = [width, height](const int x, const int y) {
+        return x >= 0 && x < width && y >= 0 && y < height;
+    };
+
+    const auto map_index = [width](const int x, const int y) {
+        return y * width + x;
+    };
+
+    path res;
+
+    if (source == dest) {
+        return res;
+    }
+
+    const int x1 = source.x;
+    const int y1 = source.y;
+    const int x2 = dest.x;
+    const int y2 = dest.y;
+
+    if (!inbounds(x1, y1) || !inbounds(x2, y2)) {
+        return res;
+    }
+
+    const node first_node(x1, y1, 5, 1000);
+    const size_t map_size = width * height;
+
+    std::vector<bool> closed(map_size, false);
+    std::vector<int> open(map_size, 0);
+    std::vector<short> dirs(map_size, 0);
+    std::priority_queue<node, std::deque<node>> nodes[2];
+
+    int i = 0;
+    nodes[i].push(first_node);
+    open[map_index(x1, y1)] = std::numeric_limits<int>::max();
+
+    // use A* to find the shortest path from (x1,y1) to (x2,y2)
+    while (!nodes[i].empty()) {
+        const node mn(nodes[i].top()); // get the best-looking node
+
+        nodes[i].pop();
+        // mark it visited
+        closed[map_index(mn.x, mn.y)] = true;
+
+        // if we've reached the end, draw the path and return
+        if (mn.x == x2 && mn.y == y2) {
+            int x = mn.x;
+            int y = mn.y;
+
+            res.nodes.reserve(nodes[i].size());
+
+            while (x != x1 || y != y1) {
+                const int n = map_index(x, y);
+                const int d = dirs[n];
+                res.nodes.emplace_back(x, y, d);
+                x += dx[d];
+                y += dy[d];
+            }
+
+            res.nodes.emplace_back(x, y, -1);
+
+            return res;
+        }
+
+        for (int d = 0; d < 4; d++) {
+            const int x = mn.x + dx[d];
+            const int y = mn.y + dy[d];
+            const int n = map_index(x, y);
+            // don't allow:
+            // * out of bounds
+            // * already traversed tiles
+            if (!inbounds(x, y) || closed[n]) {
+                continue;
+            }
+
+            node cn(x, y, d);
+            cn.priority = estimator(cn, &mn);
+
+            // record direction to shortest path
+            if (open[n] == 0 || open[n] > cn.priority) {
+                dirs[n] = (d + 2) % 4;
+
+                if (open[n] != 0) {
+                    while (nodes[i].top().x != x || nodes[i].top().y != y) {
+                        nodes[1 - i].push(nodes[i].top());
+                        nodes[i].pop();
+                    }
+                    nodes[i].pop();
+
+                    if (nodes[i].size() > nodes[1 - i].size()) {
+                        i = 1 - i;
+                    }
+                    while (!nodes[i].empty()) {
+                        nodes[1 - i].push(nodes[i].top());
+                        nodes[i].pop();
+                    }
+                    i = 1 - i;
+                }
+                open[n] = cn.priority;
+                nodes[i].push(cn);
+            }
+        }
+    }
+
+    return res;
+}
 
 void mapgen_natural_cave_entrance(map *m, oter_id, mapgendata dat, const time_point &turn, float density)
 {
@@ -76,22 +219,22 @@ void mapgen_natural_cave(map *m, oter_id o, mapgendata dat, const time_point &tu
     point westmost = *west_east_most.first;
     point eastmost = *west_east_most.second;
 
-    const auto route_to = [](const point& src, const point& dest, const int &width, const int &height) {
-        const auto estimate = [&](const pf::node & cur, const pf::node * prev) {
+    const auto route_to = [&current](const point& src, const point& dest, const int &width, const int &height) {
+        const auto estimate = [&](const node & cur, const node * prev) {
             const int dx = std::abs(cur.x - dest.x);
             const int dy = std::abs(cur.y - dest.y);
             const int d = 1;
             const int d2 = 1;
-            const int dist = d * (dx + dy) + (d2 - 2 * d) * std::min(dx, dy);
+            const int dist = d * (dx + dy) + (d2 - 2 * d) * std::min(dx, dy) + (current[cur.x][cur.y] == 1 ? 1 : 5);
             return dist;
         };
-        return pf::find_path(src, dest, width, height, estimate);
+        return find_path(src, dest, width, height, estimate);
     };
 
     if (should_connect_n && current[SEEX][0] == 0) {
         point src = northmost;
-        point dest = point(SEEX, 1);
-        pf::path path = route_to(src, dest, width, height);
+        point dest = point(SEEX, 0);
+        path path = route_to(src, dest, width, height);
         for (const auto &node : path.nodes) {
             current[node.x][node.y] = 1;
         }
@@ -99,8 +242,8 @@ void mapgen_natural_cave(map *m, oter_id o, mapgendata dat, const time_point &tu
 
     if (should_connect_s && current[SEEX][(SEEY * 2) - 1] == 0) {
         point src = southmost;
-        point dest = point(SEEX, (SEEY * 2) - 2);
-        pf::path path = route_to(src, dest, width, height);
+        point dest = point(SEEX, (SEEY * 2) - 1);
+        path path = route_to(src, dest, width, height);
         for (const auto &node : path.nodes) {
             current[node.x][node.y] = 1;
         }
@@ -108,8 +251,8 @@ void mapgen_natural_cave(map *m, oter_id o, mapgendata dat, const time_point &tu
 
     if (should_connect_w && current[0][SEEY] == 0) {
         point src = westmost;
-        point dest = point(1, SEEY);
-        pf::path path = route_to(src, dest, width, height);
+        point dest = point(0, SEEY);
+        path path = route_to(src, dest, width, height);
         for (const auto &node : path.nodes) {
             current[node.x][node.y] = 1;
         }
@@ -117,8 +260,8 @@ void mapgen_natural_cave(map *m, oter_id o, mapgendata dat, const time_point &tu
     if (should_connect_e && current[(SEEX * 2) - 1][SEEY] == 0) {
 
         point src = eastmost;
-        point dest = point((SEEX * 2) - -2, SEEY);
-        pf::path path = route_to(src, dest, width, height);
+        point dest = point((SEEX * 2) -1, SEEY);
+        path path = route_to(src, dest, width, height);
         for (const auto &node : path.nodes) {
             current[node.x][node.y] = 1;
         }
@@ -189,7 +332,6 @@ void blooming_booming(int width, int height, std::vector<std::vector<int>> &curr
     }
     candidates.clear();
 };
-
 
 std::vector<std::vector<int>> go_home_youre_drunk(int width, int height, int limit)
 {
@@ -321,3 +463,4 @@ std::vector<std::vector<int>> rise_automaton(int width, int height, int initial_
 
     return current;
 }
+

@@ -4,6 +4,7 @@
 
 #include "mapgen_functions.h"
 
+
 void mapgen_natural_cave_entrance( map *m, oter_id terrain_type, mapgendata dat, const time_point &turn, float density );
 void mapgen_natural_cave( map *m, oter_id terrain_type, mapgendata dat, const time_point &turn,float density );
 
