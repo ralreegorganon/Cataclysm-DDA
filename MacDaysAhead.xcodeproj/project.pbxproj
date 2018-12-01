@@ -234,6 +234,7 @@
 		2859F0C9218A66F80041A254 /* map_memory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2859F0C7218A66F80041A254 /* map_memory.cpp */; };
 		2859F0CA218A66F80041A254 /* faction_camp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2859F0C8218A66F80041A254 /* faction_camp.cpp */; };
 		28702289219F812500B822CD /* sdl_wrappers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28702288219F812400B822CD /* sdl_wrappers.cpp */; };
+		2879F1B721B223B200FD60B7 /* mapgen_caves.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2879F1B621B223B200FD60B7 /* mapgen_caves.cpp */; };
 		287FA9B62175BE2E00E5A203 /* popup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 287FA9B42175BE2E00E5A203 /* popup.cpp */; };
 		28DB756E2171466E003709F4 /* npctalk_funcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28DB75672171466E003709F4 /* npctalk_funcs.cpp */; };
 		28DB756F2171466E003709F4 /* dialogue_win.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28DB75692171466E003709F4 /* dialogue_win.cpp */; };
@@ -705,6 +706,8 @@
 		2859F0C8218A66F80041A254 /* faction_camp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = faction_camp.cpp; sourceTree = "<group>"; };
 		28702287219F812400B822CD /* sdl_wrappers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sdl_wrappers.h; sourceTree = "<group>"; };
 		28702288219F812400B822CD /* sdl_wrappers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sdl_wrappers.cpp; sourceTree = "<group>"; };
+		2879F1B521B223B200FD60B7 /* mapgen_caves.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = mapgen_caves.h; sourceTree = "<group>"; };
+		2879F1B621B223B200FD60B7 /* mapgen_caves.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mapgen_caves.cpp; sourceTree = "<group>"; };
 		287FA9B42175BE2E00E5A203 /* popup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = popup.cpp; sourceTree = "<group>"; };
 		287FA9B52175BE2E00E5A203 /* popup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = popup.h; sourceTree = "<group>"; };
 		28DB75642171466E003709F4 /* faction_camp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = faction_camp.h; sourceTree = "<group>"; };
@@ -755,23 +758,6 @@
 		282100542155941400697C30 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				28702288219F812400B822CD /* sdl_wrappers.cpp */,
-				28702287219F812400B822CD /* sdl_wrappers.h */,
-				2859F0C8218A66F80041A254 /* faction_camp.cpp */,
-				2859F0C7218A66F80041A254 /* map_memory.cpp */,
-				2859F0C6218A66F80041A254 /* map_memory.h */,
-				287FA9B42175BE2E00E5A203 /* popup.cpp */,
-				287FA9B52175BE2E00E5A203 /* popup.h */,
-				28DB75692171466E003709F4 /* dialogue_win.cpp */,
-				28DB75682171466E003709F4 /* dialogue_win.h */,
-				28DB75642171466E003709F4 /* faction_camp.h */,
-				28DB75652171466E003709F4 /* mission_companion.h */,
-				28DB75672171466E003709F4 /* npctalk_funcs.cpp */,
-				28DB756A2171466E003709F4 /* npctalk.h */,
-				28DB756B2171466E003709F4 /* npctrade.cpp */,
-				28DB75662171466E003709F4 /* npctrade.h */,
-				28DB756C2171466E003709F4 /* version.h */,
-				28DB756D2171466E003709F4 /* vpart_range.h */,
 				282101E22155941400697C30 /* action.cpp */,
 				282101452155941400697C30 /* action.h */,
 				282101EC2155941400697C30 /* active_item_cache.cpp */,
@@ -864,6 +850,8 @@
 				2821010E2155941400697C30 /* dependency_tree.cpp */,
 				282100BA2155941400697C30 /* dependency_tree.h */,
 				282100E82155941400697C30 /* descriptions.cpp */,
+				28DB75692171466E003709F4 /* dialogue_win.cpp */,
+				28DB75682171466E003709F4 /* dialogue_win.h */,
 				282101222155941400697C30 /* dialogue.h */,
 				282100EE2155941400697C30 /* dispersion.cpp */,
 				2821008D2155941400697C30 /* dispersion.h */,
@@ -881,6 +869,8 @@
 				282100D12155941400697C30 /* event.h */,
 				282100CF2155941400697C30 /* explosion.cpp */,
 				282101C82155941400697C30 /* explosion.h */,
+				2859F0C8218A66F80041A254 /* faction_camp.cpp */,
+				28DB75642171466E003709F4 /* faction_camp.h */,
 				2821012A2155941400697C30 /* faction.cpp */,
 				282100602155941400697C30 /* faction.h */,
 				282101402155941400697C30 /* fault.cpp */,
@@ -985,6 +975,8 @@
 				2821009D2155941400697C30 /* map_item_stack.cpp */,
 				2821020A2155941400697C30 /* map_item_stack.h */,
 				282100AD2155941400697C30 /* map_iterator.h */,
+				2859F0C7218A66F80041A254 /* map_memory.cpp */,
+				2859F0C6218A66F80041A254 /* map_memory.h */,
 				282101A22155941400697C30 /* map_selector.cpp */,
 				282101C22155941400697C30 /* map_selector.h */,
 				2821015E2155941400697C30 /* map.cpp */,
@@ -993,6 +985,8 @@
 				282101482155941400697C30 /* mapbuffer.h */,
 				282101302155941400697C30 /* mapdata.cpp */,
 				282101E42155941400697C30 /* mapdata.h */,
+				2879F1B621B223B200FD60B7 /* mapgen_caves.cpp */,
+				2879F1B521B223B200FD60B7 /* mapgen_caves.h */,
 				282101752155941400697C30 /* mapgen_functions.cpp */,
 				282101A02155941400697C30 /* mapgen_functions.h */,
 				282100D62155941400697C30 /* mapgen.cpp */,
@@ -1014,6 +1008,7 @@
 				2821009B2155941400697C30 /* messages.h */,
 				2821015A2155941400697C30 /* mingw.thread.h */,
 				282101842155941400697C30 /* mission_companion.cpp */,
+				28DB75652171466E003709F4 /* mission_companion.h */,
 				282101FD2155941400697C30 /* mission_end.cpp */,
 				282101B42155941400697C30 /* mission_fail.cpp */,
 				282100B52155941400697C30 /* mission_place.cpp */,
@@ -1065,7 +1060,11 @@
 				282101322155941400697C30 /* npc.cpp */,
 				282101042155941400697C30 /* npc.h */,
 				2821006D2155941400697C30 /* npcmove.cpp */,
+				28DB75672171466E003709F4 /* npctalk_funcs.cpp */,
 				282101362155941400697C30 /* npctalk.cpp */,
+				28DB756A2171466E003709F4 /* npctalk.h */,
+				28DB756B2171466E003709F4 /* npctrade.cpp */,
+				28DB75662171466E003709F4 /* npctrade.h */,
 				2821020E2155941400697C30 /* omdata.h */,
 				282101282155941400697C30 /* optional.h */,
 				282101132155941400697C30 /* options.cpp */,
@@ -1100,6 +1099,8 @@
 				282100A42155941400697C30 /* player.cpp */,
 				282101082155941400697C30 /* player.h */,
 				2821010C2155941400697C30 /* pldata.h */,
+				287FA9B42175BE2E00E5A203 /* popup.cpp */,
+				287FA9B52175BE2E00E5A203 /* popup.h */,
 				282101062155941400697C30 /* posix_time.cpp */,
 				282101582155941400697C30 /* posix_time.h */,
 				282100D82155941400697C30 /* profession.cpp */,
@@ -1134,6 +1135,8 @@
 				2821005E2155941400697C30 /* scenario.h */,
 				282101242155941400697C30 /* scent_map.cpp */,
 				282101E32155941400697C30 /* scent_map.h */,
+				28702288219F812400B822CD /* sdl_wrappers.cpp */,
+				28702287219F812400B822CD /* sdl_wrappers.h */,
 				282100D72155941400697C30 /* sdltiles.cpp */,
 				282100AA2155941400697C30 /* shadowcasting.h */,
 				282100BF2155941400697C30 /* sidebar.cpp */,
@@ -1193,12 +1196,14 @@
 				282101172155941400697C30 /* vehicle.h */,
 				282101BD2155941400697C30 /* version.cmake */,
 				282100E22155941400697C30 /* version.cpp */,
+				28DB756C2171466E003709F4 /* version.h */,
 				282100D42155941400697C30 /* version.h.in */,
 				282100A12155941400697C30 /* visitable.cpp */,
 				282100BB2155941400697C30 /* visitable.h */,
 				282101812155941400697C30 /* vitamin.cpp */,
 				2821017A2155941400697C30 /* vitamin.h */,
 				282101112155941400697C30 /* vpart_position.h */,
+				28DB756D2171466E003709F4 /* vpart_range.h */,
 				282100D52155941400697C30 /* vpart_reference.h */,
 				282100E62155941400697C30 /* wcwidth.h */,
 				282101D12155941400697C30 /* wdirent.h */,
@@ -1380,6 +1385,7 @@
 				282102E72155941400697C30 /* monattack.cpp in Sources */,
 				282102462155941400697C30 /* itype.cpp in Sources */,
 				282102782155941400697C30 /* item_location.cpp in Sources */,
+				2879F1B721B223B200FD60B7 /* mapgen_caves.cpp in Sources */,
 				282102302155941400697C30 /* input.cpp in Sources */,
 				2821029F2155941400697C30 /* tutorial.cpp in Sources */,
 				28702289219F812500B822CD /* sdl_wrappers.cpp in Sources */,
