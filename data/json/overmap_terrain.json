@@ -9919,8 +9919,8 @@
   },
   {
     "type": "overmap_terrain",
-    "id": "natural_cave_vertical",
-    "name": "natural cave vertical",
+    "id": "natural_cave_descent",
+    "name": "natural cave descent",
     "sym": 48,
     "color": "red",
     "flags": [ "NO_ROTATE" ]

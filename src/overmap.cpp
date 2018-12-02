@@ -1467,7 +1467,7 @@ bool overmap::generate_sub( int const z )
                 }
             } else if( oter_above == "natural_cave_entrance" ) {
                 natural_cave_points.push_back( city( i, j, rng( 1, 5 + z ) ) );
-            } else if( oter_above == "natural_cave_vertical" ) {
+            } else if( oter_above == "natural_cave_descent" ) {
                 natural_cave_points.push_back( city( i, j, rng( 1, 5 + z ) ) );
             }
         }
@@ -2789,7 +2789,7 @@ bool overmap::build_natural_cave( int x, int y, int z, int s )
 {
     std::vector<point> generated_natural_cave;
     const oter_id natural_cave( "natural_cave" );
-    const oter_id natural_cave_vertical( "natural_cave_vertical" );
+    const oter_id natural_cave_descent("natural_cave_descent");
     const oter_id natural_cave_entrance( "natural_cave_entrance" );
 
     ter( x, y, z ) = natural_cave;
@@ -2842,7 +2842,7 @@ bool overmap::build_natural_cave( int x, int y, int z, int s )
     if( z_above == 0 ) {
         ter( p.x, p.y, z_above ) = natural_cave_entrance;
     } else {
-        ter( p.x, p.y, z_above ) = natural_cave_vertical;
+        ter( p.x, p.y, z_above ) = natural_cave_descent;
     }
 
     std::random_shuffle( generated_natural_cave.begin(), generated_natural_cave.end() );
@@ -2852,7 +2852,7 @@ bool overmap::build_natural_cave( int x, int y, int z, int s )
                                    generated_natural_cave.size() );
     for( auto elem : generated_natural_cave ) {
         if( ter( elem.x, elem.y, z ) == natural_cave ) {
-            ter( elem.x, elem.y, z ) = natural_cave_vertical;
+            ter( elem.x, elem.y, z ) = natural_cave_descent;
             verticals_down++;
         }
         if( verticals_down >= potential_verticals_down ) {

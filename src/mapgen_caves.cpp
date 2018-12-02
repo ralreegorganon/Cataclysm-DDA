@@ -135,10 +135,13 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         }
     }
 
-    if (o == "natural_cave_vertical") {
-        const point stair_point(SEEX - 1, SEEY - 1);
-        if (current[stair_point.x][stair_point.y] == 0) {
-            std::vector<point> targets = closest_points_first(width, stair_point.x, stair_point.y);
+    const tripoint abs_sub = m->get_abs_sub();
+    const tripoint slope_down_location(SEEX - 1, SEEY - 1, abs_sub.z);
+    const tripoint slope_up_location(SEEX, SEEY, abs_sub.z);
+
+    if (o == "natural_cave_descent") {
+        if (current[slope_down_location.x][slope_down_location.y] == 0) {
+            std::vector<point> targets = closest_points_first(width, slope_down_location.x, slope_down_location.y);
             for (auto &t : targets) {
                 if (t.x < 0 || t.x > width || t.y < 0 || t.y > height) {
                     continue;
@@ -146,7 +149,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
 
                 if (current[t.x][t.y] == 1) {
                     point src = point(t.x, t.y);
-                    point dest = stair_point;
+                    point dest = point(slope_down_location.x, slope_down_location.y);
                     pf::path path = route_to(src, dest, width, height);
                     for (const auto &node : path.nodes) {
                         current[node.x][node.y] = 1;
@@ -158,10 +161,9 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
     }
 
     if (is_ot_subtype("natural_cave_entrance", dat.above()) ||
-        is_ot_subtype("natural_cave_vertical", dat.above())) {
-        const point stair_point(SEEX, SEEY);
-        if (current[stair_point.x][stair_point.y] == 0) {
-            std::vector<point> targets = closest_points_first(width, stair_point.x, stair_point.y);
+        is_ot_subtype("natural_cave_descent", dat.above()) ) {
+        if (current[slope_up_location.x][slope_up_location.y] == 0) {
+            std::vector<point> targets = closest_points_first(width, slope_up_location.x, slope_up_location.y);
             for (auto &t : targets) {
                 if (t.x < 0 || t.x > width || t.y < 0 || t.y > height) {
                     continue;
@@ -169,7 +171,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
 
                 if (current[t.x][t.y] == 1) {
                     point src = point(t.x, t.y);
-                    point dest = stair_point;
+                    point dest = point(slope_up_location.x, slope_up_location.y);
                     pf::path path = route_to(src, dest, width, height);
                     for (const auto &node : path.nodes) {
                         current[node.x][node.y] = 1;
@@ -180,7 +182,6 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         }
     }
 
-    const tripoint abs_sub = m->get_abs_sub();
     fill_background(m, t_rock);
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
@@ -191,15 +192,17 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         }
     }
 
-    if( o == "natural_cave_vertical" ) {
-        const tripoint location(SEEX - 1, SEEY - 1, abs_sub.z);
-        m->ter_set(location, t_slope_down);
+    // if i am ascent, i need stairs up
+    // if i am descent, i need stairs down
+    // if above me is descent, i need stairs up
+
+    if( o == "natural_cave_descent" ) {
+        m->ter_set(slope_down_location, t_slope_down);
     }
 
     if( is_ot_subtype( "natural_cave_entrance", dat.above() ) ||
-        is_ot_subtype( "natural_cave_vertical", dat.above() ) ) {
-        const tripoint location(SEEX, SEEY, abs_sub.z);
-        m->ter_set(location, t_slope_up);
+        is_ot_subtype( "natural_cave_descent", dat.above() ) ) {
+        m->ter_set(slope_up_location, t_slope_up);
     }
 }
 

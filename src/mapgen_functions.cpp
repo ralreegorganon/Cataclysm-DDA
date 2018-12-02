@@ -176,7 +176,7 @@ building_gen_pointer get_mapgen_cfunction( const std::string &ident )
             { "tutorial", &mapgen_tutorial },
             { "natural_cave_entrance", &mapgen_natural_cave_entrance },
             { "natural_cave", &mapgen_natural_cave },
-            { "natural_cave_vertical", &mapgen_natural_cave },
+            { "natural_cave_descent", &mapgen_natural_cave },
         }
     };
     const auto iter = pointers.find( ident );
