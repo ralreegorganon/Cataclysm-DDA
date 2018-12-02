@@ -1476,6 +1476,12 @@ bool overmap::generate_sub( int const z )
     for( auto &i : goo_points ) {
         requires_sub |= build_slimepit( i.x, i.y, z, i.s );
     }
+
+    for (auto &ncp : natural_cave_points) {
+        bool cave = build_natural_cave(ncp.x, ncp.y, z, ncp.s);
+        requires_sub |= cave;
+    }
+
     const string_id<overmap_connection> sewer_tunnel( "sewer_tunnel" );
     connect_closest_points( sewer_points, z, *sewer_tunnel );
 
@@ -1579,11 +1585,6 @@ bool overmap::generate_sub( int const z )
     for( auto &i : shaft_points ) {
         ter( i.x, i.y, z ) = oter_id( "mine_shaft" );
         requires_sub = true;
-    }
-
-    for( auto &ncp : natural_cave_points ) {
-        bool cave = build_natural_cave( ncp.x, ncp.y, z, ncp.s );
-        requires_sub |= cave;
     }
 
     return requires_sub;
@@ -2828,13 +2829,18 @@ bool overmap::build_natural_cave( int x, int y, int z, int s )
         return false;
     }
 
-    std::random_shuffle( generated_natural_cave.begin(), generated_natural_cave.end() );
+    std::sort(generated_natural_cave.begin(), generated_natural_cave.end(), [&](const point& p1, const point&p2) {
+        return square_dist(x, y, p1.x, p1.y) > square_dist(x, y, p2.x, p2.y);
+    });
 
     const int z_above = z + 1;
 
     point p;
     for( auto elem : generated_natural_cave ) {
         p = elem;
+        if (z_above == 0) {
+            break;
+        }
         if( ter( p.x, p.y, z_above ) == natural_cave ) {
             break;
         }
@@ -2843,6 +2849,10 @@ bool overmap::build_natural_cave( int x, int y, int z, int s )
         ter( p.x, p.y, z_above ) = natural_cave_entrance;
     } else {
         ter( p.x, p.y, z_above ) = natural_cave_descent;
+    }
+
+    if (generated_natural_cave.size() <= 1) {
+        return false;
     }
 
     std::random_shuffle( generated_natural_cave.begin(), generated_natural_cave.end() );
