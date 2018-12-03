@@ -9,7 +9,6 @@
       "both": {
         "items": [
           "boots_rubber",
-          "canteen",
           "elbow_pads",
           "knee_pads",
           "gloves_work",
@@ -22,13 +21,15 @@
           "caving_undersuit",
           "caving_oversuit",
           "diving_watch",
-          "socks_neoprene"
+          "socks_neoprene",
+          "mre_veggy_box"
         ],
         "entries": [
             { "item": "battery", "count": 4 },
             { "item": "rope_30", "count": 4, "custom-flags": [ "no_auto_equip" ] },
             { "item": "caving_tackle_bag", "contents-item": ["wrench", "e_tool"] },
-            { "item": "caving_seat_harness", "contents-item": ["iceaxe", "knife_folding" ] }
+            { "item": "caving_seat_harness", "contents-item": ["iceaxe", "knife_folding" ] },
+            { "item": "water_clean",  "container-item": "canteen"}
         ]
       }
     }
