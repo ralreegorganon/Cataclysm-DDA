@@ -1465,9 +1465,9 @@ bool overmap::generate_sub( int const z )
                     ter( i, j, z ) = oter_id( "silo" );
                     requires_sub = true;
                 }
-            } else if( oter_above == "natural_cave_entrance" ) {
+            } else if(is_ot_subtype("natural_cave_entrance", oter_above)) {
                 natural_cave_points.push_back( city( i, j, rng( 1, 5 + z ) ) );
-            } else if( oter_above == "natural_cave_descent" ) {
+            } else if(is_ot_subtype("natural_cave_descent", oter_above)) {
                 natural_cave_points.push_back( city( i, j, rng( 1, 5 + z ) ) );
             }
         }
@@ -2789,11 +2789,12 @@ void overmap::place_rifts( int const z )
 bool overmap::build_natural_cave( int x, int y, int z, int s )
 {
     std::vector<point> generated_natural_cave;
-    const oter_id natural_cave( "natural_cave" );
+    const oter_id natural_cave_unremarkable("natural_cave_unremarkable");
+    const oter_id natural_cave_river( "natural_cave_river" );
     const oter_id natural_cave_descent("natural_cave_descent");
     const oter_id natural_cave_entrance( "natural_cave_entrance" );
 
-    ter( x, y, z ) = natural_cave;
+    ter( x, y, z ) = natural_cave_unremarkable;
     generated_natural_cave.push_back( point( x, y ) );
 
     std::set<point> candidates;
@@ -2806,18 +2807,18 @@ bool overmap::build_natural_cave( int x, int y, int z, int s )
         if( dist <= s * 2 ) {
             int dist_increment = s > 3 ? 3 : 2;
             if( one_in( dist / dist_increment + 1 ) ) {
-                ter( cx, cy, z ) = natural_cave;
+                ter( cx, cy, z ) = natural_cave_unremarkable;
                 generated_natural_cave.push_back( *cand );
-                if( ter( cx - 1, cy, z ) != natural_cave && abs( x - cx + 1 ) + abs( y - cy ) > dist ) {
+                if( ter( cx - 1, cy, z ) != natural_cave_unremarkable && abs( x - cx + 1 ) + abs( y - cy ) > dist ) {
                     candidates.insert( point( cx - 1, cy ) );
                 }
-                if( ter( cx + 1, cy, z ) != natural_cave && abs( x - cx - 1 ) + abs( y - cy ) > dist ) {
+                if( ter( cx + 1, cy, z ) != natural_cave_unremarkable && abs( x - cx - 1 ) + abs( y - cy ) > dist ) {
                     candidates.insert( point( cx + 1, cy ) );
                 }
-                if( ter( cx, cy - 1, z ) != natural_cave && abs( x - cx ) + abs( y - cy + 1 ) > dist ) {
+                if( ter( cx, cy - 1, z ) != natural_cave_unremarkable && abs( x - cx ) + abs( y - cy + 1 ) > dist ) {
                     candidates.insert( point( cx, cy - 1 ) );
                 }
-                if( ter( cx, cy + 1, z ) != natural_cave && abs( x - cx ) + abs( y - cy - 1 ) > dist ) {
+                if( ter( cx, cy + 1, z ) != natural_cave_unremarkable && abs( x - cx ) + abs( y - cy - 1 ) > dist ) {
                     candidates.insert( point( cx, cy + 1 ) );
                 }
             }
@@ -2841,7 +2842,7 @@ bool overmap::build_natural_cave( int x, int y, int z, int s )
         if (z_above == 0) {
             break;
         }
-        if( ter( p.x, p.y, z_above ) == natural_cave ) {
+        if( ter( p.x, p.y, z_above ) == natural_cave_unremarkable) {
             break;
         }
     }
@@ -2855,13 +2856,47 @@ bool overmap::build_natural_cave( int x, int y, int z, int s )
         return false;
     }
 
-    std::random_shuffle( generated_natural_cave.begin(), generated_natural_cave.end() );
+    const auto route_to = [&](const point & src, const point & dest, const int &width, const int &height, const int z) {
+        const auto estimate = [&](const pf::node & cur, const pf::node * prev) {
+            static const oter_str_id empty_rock("empty_rock");
+            const auto &id(get_ter(cur.x, cur.y, z));
+            const bool is_subtype = is_ot_subtype("natural_cave", id) || id == empty_rock;
+
+            if (!is_subtype) {
+                return pf::rejected;
+            }
+
+            const int dx = std::abs(cur.x - dest.x);
+            const int dy = std::abs(cur.y - dest.y);
+            const int d = 1;
+            const int d2 = 1;
+            const int terrain_factor = id == empty_rock ? 1 : 2;
+            const int dist = d * (dx + dy) + (d2 - 2 * d) * std::min(dx, dy) + terrain_factor;
+            return dist;
+        };
+        return pf::find_path(src, dest, width, height, estimate);
+    };
+
+    //static std::default_random_engine eng(std::chrono::system_clock::now().time_since_epoch().count());
+    //std::shuffle(generated_natural_cave.begin(), generated_natural_cave.end(), eng);
+    std::sort(generated_natural_cave.begin(), generated_natural_cave.end(), [&](const point& p1, const point&p2) {
+        return square_dist(x, y, p1.x, p1.y) > square_dist(x, y, p2.x, p2.y);
+    });
+
+    if (generated_natural_cave.size() >= 3) {
+        const point from = generated_natural_cave.at(0);
+        const point to = generated_natural_cave.at(1);
+        pf::path route = route_to(from, to, OMAPX, OMAPY, z);
+        for (const auto &elem : route.nodes) {
+            ter(elem.x, elem.y, z) = natural_cave_river;
+        }
+    }
 
     int verticals_down = 0;
     int potential_verticals_down = std::min( static_cast<std::vector<point>::size_type>( rng( 0, s ) ),
                                    generated_natural_cave.size() );
     for( auto elem : generated_natural_cave ) {
-        if( ter( elem.x, elem.y, z ) == natural_cave ) {
+        if( ter( elem.x, elem.y, z ) == natural_cave_unremarkable ) {
             ter( elem.x, elem.y, z ) = natural_cave_descent;
             verticals_down++;
         }

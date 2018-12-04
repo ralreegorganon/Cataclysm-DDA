@@ -9911,7 +9911,7 @@
   },
   {
     "type": "overmap_terrain",
-    "id": "natural_cave",
+    "id": "natural_cave_unremarkable",
     "name": "natural cave",
     "sym": 48,
     "color": "red",
@@ -9919,10 +9919,18 @@
   },
   {
     "type": "overmap_terrain",
+    "id": "natural_cave_river",
+    "name": "natural cave river",
+    "sym": 48,
+    "color": "blue",
+    "flags": [ "NO_ROTATE" ]
+  },
+  {
+    "type": "overmap_terrain",
     "id": "natural_cave_descent",
     "name": "natural cave descent",
     "sym": 48,
-    "color": "red",
+    "color": "yellow",
     "flags": [ "NO_ROTATE" ]
   }
 ]

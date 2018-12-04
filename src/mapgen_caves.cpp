@@ -53,8 +53,10 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
 
     std::vector<std::vector<int>> current;
 
+    // generate the rough layout, everything is either solid rock (0) or empty (1)
+
     if( one_in( 2 ) ) {
-        current = rise_automaton( width, height, 45, 5, 3, 12 );
+        current = rise_automaton( width, height, 45, 5, 3, 12, 1, 1 );
     } else {
         current = go_home_youre_drunk( width, height, 100 );
     }
@@ -99,6 +101,8 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         return pf::find_path( src, dest, width, height, estimate );
     };
 
+    // connect up this location with adjacent caves
+
     if( should_connect_n && current[SEEX][0] == 0 ) {
         point src = northmost;
         point dest = point( SEEX, 0 );
@@ -135,6 +139,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         }
     }
 
+    // carve out the path to our up and down locations 
     const tripoint abs_sub = m->get_abs_sub();
     const tripoint slope_down_location(SEEX - 1, SEEY - 1, abs_sub.z);
     const tripoint slope_up_location(SEEX, SEEY, abs_sub.z);
@@ -143,7 +148,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         if (current[slope_down_location.x][slope_down_location.y] == 0) {
             std::vector<point> targets = closest_points_first(width, slope_down_location.x, slope_down_location.y);
             for (auto &t : targets) {
-                if (t.x < 0 || t.x > width || t.y < 0 || t.y > height) {
+                if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
                     continue;
                 }
 
@@ -165,7 +170,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         if (current[slope_up_location.x][slope_up_location.y] == 0) {
             std::vector<point> targets = closest_points_first(width, slope_up_location.x, slope_up_location.y);
             for (auto &t : targets) {
-                if (t.x < 0 || t.x > width || t.y < 0 || t.y > height) {
+                if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
                     continue;
                 }
 
@@ -182,6 +187,127 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         }
     }
 
+
+
+    // make some rivers
+    std::vector<std::vector<int>> current_river;
+
+    if (is_ot_subtype("natural_cave_river", o)) {
+        // generate the rough layout, everything is either solid rock (0) or empty (1)
+        current_river = rise_automaton(width, height, 40, 5, 2, 16, 1, 2);
+
+        bool should_connect_n_river = is_ot_subtype("natural_cave_river", dat.north());
+        bool should_connect_s_river = is_ot_subtype("natural_cave_river", dat.south());
+        bool should_connect_w_river = is_ot_subtype("natural_cave_river", dat.west());
+        bool should_connect_e_river = is_ot_subtype("natural_cave_river", dat.east());
+
+        std::vector<point> dapoints_river;
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (current_river[i][j] == 1) {
+                    dapoints_river.emplace_back(point(i, j));
+                }
+            }
+        }
+
+        // Get the north and south most points.
+        auto north_south_most_river = std::minmax_element(dapoints_river.begin(),
+            dapoints_river.end(), [](const point & lhs, const point & rhs) {
+            return lhs.y < rhs.y;
+        });
+
+        // Get the west and east most points.
+        auto west_east_most_river = std::minmax_element(dapoints_river.begin(),
+            dapoints_river.end(), [](const point & lhs, const point & rhs) {
+            return lhs.x < rhs.x;
+        });
+
+        point northmost_river = *north_south_most_river.first;
+        point southmost_river = *north_south_most_river.second;
+        point westmost_river = *west_east_most_river.first;
+        point eastmost_river = *west_east_most_river.second;
+
+        const auto route_to_river = [&current_river](const point & src, const point & dest, const int &width,
+            const int &height) {
+            const auto estimate = [&](const pf::node & cur, const pf::node * prev) {
+                const int dx = std::abs(cur.x - dest.x);
+                const int dy = std::abs(cur.y - dest.y);
+                const int d = 1;
+                const int d2 = 1;
+                const int terrain_factor = current_river[cur.x][cur.y] == 1 ? 1 : rng(5, 10);
+                const int dist = d * (dx + dy) + (d2 - 2 * d) * std::min(dx, dy) + terrain_factor;
+                return dist;
+            };
+            return pf::find_path(src, dest, width, height, estimate);
+        };
+
+        // connect up this location with adjacent rivers
+
+        if (should_connect_n_river && current_river[SEEX][0] == 0) {
+            point src = northmost;
+            point dest = point(SEEX, 0);
+            pf::path path = route_to_river(src, dest, width, height);
+            for (const auto &node : path.nodes) {
+                std::vector<point> targets = closest_points_first(rng(1,2), node.x, node.y);
+                for (auto &t : targets) {
+                    if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
+                        continue;
+                    }
+                    current_river[t.x][t.y] = 1;
+                }
+            }
+        }
+
+        if (should_connect_s_river && current_river[SEEX][(SEEY * 2) - 1] == 0) {
+            point src = southmost_river;
+            point dest = point(SEEX, (SEEY * 2) - 1);
+            pf::path path = route_to_river(src, dest, width, height);
+            for (const auto &node : path.nodes) {
+                std::vector<point> targets = closest_points_first(rng(1, 2), node.x, node.y);
+                for (auto &t : targets) {
+                    if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
+                        continue;
+                    }
+                    current_river[t.x][t.y] = 1;
+                }
+            }
+        }
+
+        if (should_connect_w_river && current_river[0][SEEY] == 0) {
+            point src = westmost_river;
+            point dest = point(0, SEEY);
+            pf::path path = route_to_river(src, dest, width, height);
+            for (const auto &node : path.nodes) {
+                std::vector<point> targets = closest_points_first(rng(1, 2), node.x, node.y);
+                for (auto &t : targets) {
+                    if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
+                        continue;
+                    }
+                    current_river[t.x][t.y] = 1;
+                }
+            }
+        }
+        if (should_connect_e_river && current_river[(SEEX * 2) - 1][SEEY] == 0) {
+            point src = eastmost_river;
+            point dest = point((SEEX * 2) - 1, SEEY);
+            pf::path path = route_to_river(src, dest, width, height);
+            for (const auto &node : path.nodes) {
+                std::vector<point> targets = closest_points_first(rng(1, 2), node.x, node.y);
+                for (auto &t : targets) {
+                    if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
+                        continue;
+                    }
+                    current_river[t.x][t.y] = 1;
+                }
+            }
+        }
+    }
+
+
+    
+
+    // fill in the rocks/floor
+
     fill_background(m, t_rock);
     for (int i = 0; i < width; i++) {
         for (int j = 0; j < height; j++) {
@@ -192,10 +318,22 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         }
     }
 
+    if (is_ot_subtype("natural_cave_river", o)) {
+        // fill in the river
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                if (current_river[i][j] == 1) {
+                    const tripoint location(i, j, abs_sub.z);
+                    m->ter_set(location, t_water_dp);
+                }
+            }
+        }
+    }
+
     // if i am ascent, i need stairs up
     // if i am descent, i need stairs down
     // if above me is descent, i need stairs up
-
+    // fill in the slopes up/down
     if( o == "natural_cave_descent" ) {
         m->ter_set(slope_down_location, t_slope_down);
     }
@@ -316,7 +454,7 @@ std::vector<std::vector<int>> go_home_youre_drunk( int width, int height, int li
 }
 
 std::vector<std::vector<int>> rise_automaton( int width, int height, int initial_filled,
-                           int birth_thresh, int death_thresh, int iterations )
+                           int birth_thresh, int death_thresh, int iterations, int connection_radius_min, int connection_radius_max )
 {
 
     std::vector<std::vector<int>> current( width, std::vector<int>( height, 0 ) );
@@ -400,7 +538,6 @@ std::vector<std::vector<int>> rise_automaton( int width, int height, int initial
             
             // Mark this point as visited.
             visited.emplace( current_point );
-            
 
             if(current[current_point.x][current_point.y] == 1) {
                 cave_points.emplace_back( current_point );
@@ -463,7 +600,13 @@ std::vector<std::vector<int>> rise_automaton( int width, int height, int initial
         {
             pf::path path = route_to( *src, *dest, width, height );
             for( const auto &node : path.nodes ) {
-                current[node.x][node.y] = 1;
+                std::vector<point> targets = closest_points_first(rng(connection_radius_min, connection_radius_max), node.x, node.y);
+                for (auto &t : targets) {
+                    if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
+                        continue;
+                    }
+                    current[t.x][t.y] = 1;
+                }
             }
         }
     }
