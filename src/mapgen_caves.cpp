@@ -227,6 +227,9 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         point southmost_river = *north_south_most_river.second;
         point westmost_river =  *west_east_most_river.first;
         point eastmost_river =  *west_east_most_river.second;
+        
+        constexpr int river_radius_min = 1;
+        constexpr int river_radius_max = 2;
 
         const auto route_to_river = [&current_river](const point & src, const point & dest, const int &width,
             const int &height) {
@@ -249,7 +252,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
             point dest = point(SEEX, 0);
             pf::path path = route_to_river(src, dest, width, height);
             for (const auto &node : path.nodes) {
-                std::vector<point> targets = closest_points_first(rng(1,1), node.x, node.y);
+                std::vector<point> targets = closest_points_first(rng(river_radius_min, river_radius_max), node.x, node.y);
                 for (auto &t : targets) {
                     if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
                         continue;
@@ -264,7 +267,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
             point dest = point(SEEX, (SEEY * 2) - 1);
             pf::path path = route_to_river(src, dest, width, height);
             for (const auto &node : path.nodes) {
-                std::vector<point> targets = closest_points_first(rng(1, 1), node.x, node.y);
+                std::vector<point> targets = closest_points_first(rng(river_radius_min, river_radius_max), node.x, node.y);
                 for (auto &t : targets) {
                     if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
                         continue;
@@ -279,7 +282,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
             point dest = point(0, SEEY);
             pf::path path = route_to_river(src, dest, width, height);
             for (const auto &node : path.nodes) {
-                std::vector<point> targets = closest_points_first(rng(1, 1), node.x, node.y);
+                std::vector<point> targets = closest_points_first(rng(river_radius_min, river_radius_max), node.x, node.y);
                 for (auto &t : targets) {
                     if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
                         continue;
@@ -293,7 +296,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
             point dest = point((SEEX * 2) - 1, SEEY);
             pf::path path = route_to_river(src, dest, width, height);
             for (const auto &node : path.nodes) {
-                std::vector<point> targets = closest_points_first(rng(1, 1), node.x, node.y);
+                std::vector<point> targets = closest_points_first(rng(river_radius_min, river_radius_max), node.x, node.y);
                 for (auto &t : targets) {
                     if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
                         continue;
