@@ -190,11 +190,12 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
 
 
     // make some rivers
-    std::vector<std::vector<int>> current_river;
+    std::vector<std::vector<int>> current_river(width, std::vector<int>(height, 0));
+    current_river[rng(0, width - 1)][rng(0, height - 1)] = 1;
 
     if (is_ot_subtype("natural_cave_river", o)) {
         // generate the rough layout, everything is either solid rock (0) or empty (1)
-        current_river = rise_automaton(width, height, 40, 5, 2, 16, 1, 2);
+        //current_river = rise_automaton(width, height, 40, 5, 2, 16, 1, 2);
 
         bool should_connect_n_river = is_ot_subtype("natural_cave_river", dat.north());
         bool should_connect_s_river = is_ot_subtype("natural_cave_river", dat.south());
@@ -224,8 +225,8 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
 
         point northmost_river = *north_south_most_river.first;
         point southmost_river = *north_south_most_river.second;
-        point westmost_river = *west_east_most_river.first;
-        point eastmost_river = *west_east_most_river.second;
+        point westmost_river =  *west_east_most_river.first;
+        point eastmost_river =  *west_east_most_river.second;
 
         const auto route_to_river = [&current_river](const point & src, const point & dest, const int &width,
             const int &height) {
@@ -234,7 +235,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
                 const int dy = std::abs(cur.y - dest.y);
                 const int d = 1;
                 const int d2 = 1;
-                const int terrain_factor = current_river[cur.x][cur.y] == 1 ? 1 : rng(5, 10);
+                const int terrain_factor = current_river[cur.x][cur.y] == 1 ? 1 : rng(2, 4);
                 const int dist = d * (dx + dy) + (d2 - 2 * d) * std::min(dx, dy) + terrain_factor;
                 return dist;
             };
@@ -244,11 +245,11 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
         // connect up this location with adjacent rivers
 
         if (should_connect_n_river && current_river[SEEX][0] == 0) {
-            point src = northmost;
+            point src = northmost_river;
             point dest = point(SEEX, 0);
             pf::path path = route_to_river(src, dest, width, height);
             for (const auto &node : path.nodes) {
-                std::vector<point> targets = closest_points_first(rng(1,2), node.x, node.y);
+                std::vector<point> targets = closest_points_first(rng(1,1), node.x, node.y);
                 for (auto &t : targets) {
                     if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
                         continue;
@@ -263,7 +264,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
             point dest = point(SEEX, (SEEY * 2) - 1);
             pf::path path = route_to_river(src, dest, width, height);
             for (const auto &node : path.nodes) {
-                std::vector<point> targets = closest_points_first(rng(1, 2), node.x, node.y);
+                std::vector<point> targets = closest_points_first(rng(1, 1), node.x, node.y);
                 for (auto &t : targets) {
                     if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
                         continue;
@@ -278,7 +279,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
             point dest = point(0, SEEY);
             pf::path path = route_to_river(src, dest, width, height);
             for (const auto &node : path.nodes) {
-                std::vector<point> targets = closest_points_first(rng(1, 2), node.x, node.y);
+                std::vector<point> targets = closest_points_first(rng(1, 1), node.x, node.y);
                 for (auto &t : targets) {
                     if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
                         continue;
@@ -292,7 +293,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &t
             point dest = point((SEEX * 2) - 1, SEEY);
             pf::path path = route_to_river(src, dest, width, height);
             for (const auto &node : path.nodes) {
-                std::vector<point> targets = closest_points_first(rng(1, 2), node.x, node.y);
+                std::vector<point> targets = closest_points_first(rng(1, 1), node.x, node.y);
                 for (auto &t : targets) {
                     if (t.x < 0 || t.x >= width || t.y < 0 || t.y >= height) {
                         continue;
