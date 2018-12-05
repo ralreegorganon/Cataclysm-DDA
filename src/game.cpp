@@ -2313,6 +2313,7 @@ input_context get_default_mode_input_context()
     ctxt.register_action( "reload" );
     ctxt.register_action( "unload" );
     ctxt.register_action( "throw" );
+    ctxt.register_action( "throw_blind" );
     ctxt.register_action( "fire" );
     ctxt.register_action( "fire_burst" );
     ctxt.register_action( "select_fire_mode" );
@@ -6408,11 +6409,20 @@ void game::peek()
 
 void game::peek( const tripoint &p )
 {
+    peek_action_opt pa;
+    cata::optional<peek_action_opt> peek_action = pa;
+
     u.moves -= 200;
     tripoint prev = u.pos();
     u.setpos( p );
-    look_around();
+    tripoint center = p;
+    look_around( catacurses::window(), center, center, false, false, peek_action );
     u.setpos( prev );
+
+    if( peek_action->action_opt == PA_BLIND_THROW ) {
+        plthrow( INT_MIN, p );
+    }
+
     draw_ter();
     wrefresh( w_terrain );
 }
@@ -6898,13 +6908,15 @@ void game::zones_manager()
         wrefresh( w_zones_info );
 
         tripoint center = u.pos() + u.view_offset;
-        const cata::optional<tripoint> first = look_around( w_zones_info, center, center, false, true );
+        cata::optional<peek_action_opt> peek_action = cata::nullopt;
+        const cata::optional<tripoint> first = look_around( w_zones_info, center, center, false, true, peek_action );
         if( first )
         {
             mvwprintz( w_zones_info, 3, 2, c_white, _( "Select second point." ) );
             wrefresh( w_zones_info );
 
-            const cata::optional<tripoint> second = look_around( w_zones_info, center, *first, true, true );
+            const cata::optional<tripoint> second = look_around( w_zones_info, center, *first, true, true,
+                    peek_action );
             if( second ) {
                 werase( w_zones_info );
                 wrefresh( w_zones_info );
@@ -7247,11 +7259,13 @@ void game::zones_manager()
 cata::optional<tripoint> game::look_around()
 {
     tripoint center = u.pos() + u.view_offset;
-    return look_around( catacurses::window(), center, center, false, false );
+    cata::optional<peek_action_opt> peek_action = cata::nullopt;
+    return look_around( catacurses::window(), center, center, false, false, peek_action );
 }
 
 cata::optional<tripoint> game::look_around( catacurses::window w_info, tripoint &center,
-        const tripoint start_point, bool has_first_point, bool select_zone )
+        const tripoint start_point, bool has_first_point, bool select_zone,
+        cata::optional<peek_action_opt> &peek_action )
 {
     bVMonsterLookFire = false;
     // TODO: Make this `true`
@@ -7305,6 +7319,10 @@ cata::optional<tripoint> game::look_around( catacurses::window w_info, tripoint 
     }
     ctxt.register_action( "MOUSE_MOVE" );
     ctxt.register_action( "CENTER" );
+
+    if( peek_action ) {
+        ctxt.register_action( "throw_blind" );
+    }
 
     ctxt.register_action( "debug_scent" );
     ctxt.register_action( "CONFIRM" );
@@ -7481,8 +7499,11 @@ cata::optional<tripoint> game::look_around( catacurses::window w_info, tripoint 
             }
         } else if( action == "TIMEOUT" ) {
             blink = !blink;
+        } else if( action == "throw_blind" ) {
+            peek_action->action_opt = PA_BLIND_THROW;
         }
-    } while( action != "QUIT" && action != "CONFIRM" && action != "SELECT" && action != "TRAVEL_TO" );
+    } while( action != "QUIT" && action != "CONFIRM" && action != "SELECT" && action != "TRAVEL_TO" &&
+             action != "throw_blind" );
 
     if( m.has_zlevels() && center.z != old_levz ) {
         m.build_map_cache( old_levz );
@@ -8788,7 +8809,7 @@ void game::drop_in_direction()
     }
 }
 
-void game::plthrow( int pos )
+void game::plthrow( int pos, const cata::optional<tripoint> &blind_throw_from_pos )
 {
     if( u.has_active_mutation( trait_SHELL2 ) ) {
         add_msg( m_info, _( "You can't effectively throw while you're in your shell." ) );
@@ -8844,12 +8865,29 @@ void game::plthrow( int pos )
         }
     }
 
+    // Shift our position to our "peeking" position, so that the UI
+    // for picking a throw point lets us target the location we couldn't
+    // otherwise see.
+    const tripoint original_player_position = u.pos();
+    if( blind_throw_from_pos ) {
+        u.setpos( *blind_throw_from_pos );
+        draw_ter();
+    }
+
     temp_exit_fullscreen();
     m.draw( w_terrain, u.pos() );
 
+    const target_mode throwing_target_mode = blind_throw_from_pos ? TARGET_MODE_THROW_BLIND :
+            TARGET_MODE_THROW;
     // target_ui() sets x and y, or returns empty vector if we canceled (by pressing Esc)
-    std::vector<tripoint> trajectory = target_handler().target_ui( u, TARGET_MODE_THROW, &thrown,
+    std::vector<tripoint> trajectory = target_handler().target_ui( u, throwing_target_mode, &thrown,
                                        range );
+
+    // If we previously shifted our position, put ourselves back now that we've picked our target.
+    if( blind_throw_from_pos ) {
+        u.setpos( original_player_position );
+    }
+
     if( trajectory.empty() ) {
         return;
     }
@@ -8860,7 +8898,7 @@ void game::plthrow( int pos )
     } else {
         u.i_rem( -1 );
     }
-    u.throw_item( trajectory.back(), thrown );
+    u.throw_item( trajectory.back(), thrown, blind_throw_from_pos );
     reenter_fullscreen();
 }
 

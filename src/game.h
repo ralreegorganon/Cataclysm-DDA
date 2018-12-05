@@ -136,6 +136,15 @@ struct liquid_dest_opt {
     tripoint pos;
 };
 
+enum peek_action : int {
+    PA_NULL,
+    PA_BLIND_THROW
+};
+
+struct peek_action_opt {
+    peek_action action_opt = PA_NULL;
+};
+
 class game
 {
         friend class editmap;
@@ -565,7 +574,8 @@ class game
         // Look at nearby terrain ';', or select zone points
         cata::optional<tripoint> look_around();
         cata::optional<tripoint> look_around( catacurses::window w_info, tripoint &center,
-                                              tripoint start_point, bool has_first_point, bool select_zone );
+                                              tripoint start_point, bool has_first_point, bool select_zone,
+                                              cata::optional<peek_action_opt> &peek_action );
 
         // Shared method to print "look around" info
         void print_all_tile_info( const tripoint &lp, const catacurses::window &w_look, int column,
@@ -964,7 +974,8 @@ class game
         void wield( item_location &loc );
 
         void chat(); // Talk to a nearby NPC  'C'
-        void plthrow( int pos = INT_MIN ); // Throw an item  't'
+        void plthrow( int pos = INT_MIN,
+                      const cata::optional<tripoint> &blind_throw_from_pos = cata::nullopt ); // Throw an item  't'
 
         // Internal methods to show "look around" info
         void print_fields_info( const tripoint &lp, const catacurses::window &w_look, int column,

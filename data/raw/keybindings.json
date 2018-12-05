@@ -1565,6 +1565,13 @@
   },
   {
     "type": "keybinding",
+    "name": "Blind Throw Item",
+    "category": "LOOK",
+    "id": "throw_blind",
+    "bindings": [ { "input_method": "keyboard", "key": "T" } ]
+  },
+  {
+    "type": "keybinding",
     "name": "Fire Wielded Item",
     "category": "DEFAULTMODE",
     "id": "fire",
