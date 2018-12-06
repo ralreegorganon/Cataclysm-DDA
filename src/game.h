@@ -137,12 +137,13 @@ struct liquid_dest_opt {
 };
 
 enum peek_action : int {
-    PA_NULL,
     PA_BLIND_THROW
+    // obvious future additional value is PA_BLIND_FIRE
 };
 
-struct peek_action_opt {
-    peek_action action_opt = PA_NULL;
+struct look_around_result {
+    cata::optional<tripoint> position;
+    cata::optional<peek_action> peek_action;
 };
 
 class game
@@ -573,9 +574,8 @@ class game
 
         // Look at nearby terrain ';', or select zone points
         cata::optional<tripoint> look_around();
-        cata::optional<tripoint> look_around( catacurses::window w_info, tripoint &center,
-                                              tripoint start_point, bool has_first_point, bool select_zone,
-                                              cata::optional<peek_action_opt> &peek_action );
+        look_around_result look_around( catacurses::window w_info, tripoint &center,
+                                        tripoint start_point, bool has_first_point, bool select_zone, bool peeking );
 
         // Shared method to print "look around" info
         void print_all_tile_info( const tripoint &lp, const catacurses::window &w_look, int column,
