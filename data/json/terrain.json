@@ -493,7 +493,7 @@
     "symbol": ".",
     "color": "light_gray",
     "move_cost": 2,
-    "roof": "t_flat_roof",
+    "roof": "t_open_air",
     "flags": [ "TRANSPARENT", "INDOORS", "FLAT", "ROAD" ],
     "bash": { "ter_set": "t_null", "str_min": 75, "str_max": 400, "str_min_supported": 100, "bash_below": true }
   },
@@ -628,7 +628,6 @@
       "str_min": 50,
       "str_max": 400,
       "str_min_supported": 100,
-      "bash_below": true,
       "items": [ { "item": "rock", "count": [ 2, 10 ] }, { "item": "rebar", "count": [ 0, 4 ] } ]
     }
   },
@@ -647,7 +646,6 @@
       "str_min": 50,
       "str_max": 400,
       "str_min_supported": 100,
-      "bash_below": true,
       "items": [ { "item": "rock", "count": [ 2, 10 ] }, { "item": "rebar", "count": [ 0, 4 ] } ]
     }
   },
@@ -665,7 +663,6 @@
       "str_min": 50,
       "str_max": 400,
       "str_min_supported": 100,
-      "bash_below": true,
       "items": [ { "item": "rock", "count": [ 2, 10 ] } ]
     }
   },

@@ -3118,7 +3118,7 @@ void map::bash_ter_furn( const tripoint &p, bash_params &params )
             if (params_below.success && params_below.bashed_solid) {
                 // If we bashed out the floor and the terrain below, 
                 // don't put a new roof back on the terrain.
-                ter_set(p, t_hole);
+                ter_set(p, t_open_air);
             }
             else {
                 // If we bashed our floor but not the terrain below, then
