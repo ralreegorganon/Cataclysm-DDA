@@ -2857,7 +2857,7 @@ ter_id map::get_roof( const tripoint &p, const bool allow_air )
         return t_dirt;
     }
 
-    if( p.z == -1 && new_ter == t_rock_floor ) {
+    if( p.z == -1 && new_ter == t_rock_floor.id() ) {
         // A hack to work around not having a "solid earth" tile
         new_ter = t_dirt;
     }
@@ -3018,6 +3018,9 @@ void map::bash_ter_furn( const tripoint &p, bash_params &params )
     const bool collapses = smash_ter && has_flag( "COLLAPSES", p );
     const bool supports = smash_ter && has_flag( "SUPPORTS_ROOF", p );
 
+    // Make a copy of our params for bashing the z-level below us.
+    bash_params params_below = params;
+
     const bool tent = smash_furn && !bash->tent_centers.empty();
     // Special code to collapse the tent if destroyed
     if( tent ) {
@@ -3089,16 +3092,17 @@ void map::bash_ter_furn( const tripoint &p, bash_params &params )
     } else if( bash->ter_set ) {
         // If the terrain has a valid post-destroy terrain, set it
         ter_set( p, bash->ter_set );
+        success = true;
     } else {
         tripoint below( p.x, p.y, p.z - 1 );
         const auto &ter_below = ter( below ).obj();
         if( bash->bash_below && ter_below.has_flag( "SUPPORTS_ROOF" ) ) {
             // When bashing the tile below, don't allow bashing the floor
-            bash_params params_below = params; // Make a copy
             bash_ter_furn( below, params_below );
         }
 
         ter_set( p, t_open_air );
+        success = true;
     }
 
     if( !tent ) {
@@ -3111,8 +3115,17 @@ void map::bash_ter_furn( const tripoint &p, bash_params &params )
             ter_set( p, t_dirt );
         } else {
             tripoint below( p.x, p.y, p.z - 1 );
-            const auto roof = get_roof( below, params.bash_floor && ter( below ).obj().movecost != 0 );
-            ter_set( p, roof );
+            if (params_below.success && params_below.bashed_solid) {
+                // If we bashed out the floor and the terrain below, 
+                // don't put a new roof back on the terrain.
+                ter_set(p, t_hole);
+            }
+            else {
+                // If we bashed our floor but not the terrain below, then
+                // make the floor of this the roof of the terrain below.
+                const auto roof = get_roof(below, params.bash_floor && ter(below).obj().movecost != 0);
+                ter_set(p, roof);
+            }
         }
     }
 
