@@ -393,7 +393,9 @@ void mission_start::place_bandit_camp( mission *miss )
     // but better to get it working.
     g->u.set_mutation( trait_id( "PROF_FED" ) );
 
-    tripoint site = target_om_ter_random_or_create( "bandit_camp_1", 1, miss, false, 50, "forest" );
+    const overmap_special_id os_bandit_camp( "bandit_camp" );
+    tripoint site = target_om_ter_random_or_create( "bandit_camp_1", 1, miss, false, 50, "forest",
+                    os_bandit_camp );
 
     tinymap bay1;
     bay1.load( site.x * 2, site.y * 2, site.z, false );
