@@ -1799,8 +1799,10 @@ void mission_start::reveal_cathedral( mission *miss )
 
 void mission_start::reveal_refugee_center( mission *miss )
 {
+    const overmap_special_id os_evac_center( "evac_center" );
     const tripoint your_pos = g->u.global_omt_location();
-    const tripoint center_pos = overmap_buffer.find_closest( your_pos, "evac_center_18", 0, false );
+    const tripoint center_pos = overmap_buffer.find_closest( your_pos, "evac_center_18", 0, false,
+                                false, os_evac_center );
 
     if( center_pos == overmap::invalid_tripoint ) {
         add_msg( _( "You don't know where the address could be..." ) );
