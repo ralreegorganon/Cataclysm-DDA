@@ -117,12 +117,13 @@ static bool reveal_road( const tripoint &source, const tripoint &dest, overmapbu
  * and returns the mission target.
  */
 static tripoint target_om_ter( const std::string &omter, int reveal_rad, mission *miss,
-                               bool must_see, int target_z = 0 )
+                               bool must_see, int target_z = 0,
+                               const cata::optional<overmap_special_id> om_special = cata::nullopt )
 {
     // Missions are normally on z-level 0, but allow an optional argument.
     tripoint loc = g->u.global_omt_location();
     loc.z = target_z;
-    const tripoint place = overmap_buffer.find_closest( loc, omter, 0, must_see );
+    const tripoint place = overmap_buffer.find_closest( loc, omter, 0, must_see, false, om_special );
     if( place != overmap::invalid_tripoint && reveal_rad >= 0 ) {
         overmap_buffer.reveal( place, reveal_rad );
     }
@@ -131,13 +132,14 @@ static tripoint target_om_ter( const std::string &omter, int reveal_rad, mission
 }
 
 static tripoint target_om_ter_random( const std::string &omter, int reveal_rad, mission *miss,
-                                      bool must_see, int range, tripoint loc = overmap::invalid_tripoint )
+                                      bool must_see, int range, tripoint loc = overmap::invalid_tripoint,
+                                      const cata::optional<overmap_special_id> om_special = cata::nullopt )
 {
     if( loc == overmap::invalid_tripoint ) {
         loc = g->u.global_omt_location();
     }
 
-    auto places = overmap_buffer.find_all( loc, omter, range, must_see );
+    auto places = overmap_buffer.find_all( loc, omter, range, must_see, false, om_special );
     if( places.empty() ) {
         return g->u.global_omt_location();
     }
@@ -165,12 +167,25 @@ static tripoint target_om_ter_random( const std::string &omter, int reveal_rad, 
  * that fails, it will print a debug message.
  */
 static tripoint target_om_ter_random_or_create( const std::string &omter, int reveal_rad,
-        mission *miss, bool must_see, int range, const std::string &replace_omter )
+        mission *miss, bool must_see, int range, const std::string &replace_omter,
+        const cata::optional<overmap_special_id> om_special = cata::nullopt )
 {
-    tripoint site = target_om_ter_random( omter, reveal_rad, miss, must_see, range );
+    tripoint site = target_om_ter_random( omter, reveal_rad, miss, must_see, range,
+                                          g->u.global_omt_location(), om_special );
 
-    // If no suitable site is found nearby, make one in an unvisited tile of type `replace_omter`
+    // If no suitable site is found nearby...
     if( site == g->u.global_omt_location() ) {
+        // Try to create the special, if this requires a special.
+        if( om_special ) {
+            bool placed = overmap_buffer.place_special( *om_special, site, range );
+            if( placed ) {
+                site = target_om_ter( omter, reveal_rad, miss, must_see, 0, om_special );
+                miss->set_target( site );
+                return site;
+            }
+        }
+
+        // ...or make one in an unvisited tile of type `replace_omter`
         for( int tries = 10 * range; tries > 0; --tries ) {
             site = target_om_ter_random( replace_omter, 1, miss, false, range );
             if( !overmap_buffer.is_explored( site.x, site.y, site.z ) ) {
