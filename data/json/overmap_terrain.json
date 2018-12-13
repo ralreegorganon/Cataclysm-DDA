@@ -9900,5 +9900,41 @@
     "name": "trailhead",
     "sym": 84,
     "color": "brown"
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "debug_explosive_testing_range_1",
+    "name": "evac shelter",
+    "sym": 47,
+    "color": "red",
+    "see_cost": 2,
+    "flags": [ "NO_ROTATE" ]
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "debug_explosive_testing_range_2",
+    "name": "evac shelter",
+    "sym": 47,
+    "color": "red",
+    "see_cost": 2,
+    "flags": [ "NO_ROTATE" ]
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "debug_explosive_testing_range_3",
+    "name": "evac shelter",
+    "sym": 47,
+    "color": "red",
+    "see_cost": 2,
+    "flags": [ "NO_ROTATE" ]
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "debug_explosive_testing_range_4",
+    "name": "evac shelter",
+    "sym": 47,
+    "color": "red",
+    "see_cost": 2,
+    "flags": [ "NO_ROTATE" ]
   }
 ]
