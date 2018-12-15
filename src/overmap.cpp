@@ -9,6 +9,7 @@
 #include "line.h"
 #include "map.h"
 #include "map_iterator.h"
+#include "mapbuffer.h"
 #include "mapgen.h"
 #include "mapgen_functions.h"
 #include "messages.h"
@@ -3776,6 +3777,17 @@ std::shared_ptr<npc> overmap::find_npc( const int id ) const
         }
     }
     return nullptr;
+}
+
+bool overmap::is_omt_generated( const tripoint &loc ) const
+{
+    if( !inbounds( loc ) ) {
+        return false;
+    }
+
+    const bool is_generated = MAPBUFFER.lookup_submap( omt_to_sm_copy( loc ) ) != nullptr;
+
+    return is_generated;
 }
 
 overmap_special_id overmap_specials::create_building_from( const string_id<oter_type_t> &base )
