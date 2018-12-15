@@ -286,6 +286,22 @@ overmap *overmapbuffer::get_existing_om_global( const tripoint &p )
     return get_existing( om_pos.x, om_pos.y );
 }
 
+bool overmapbuffer::is_omt_generated(const tripoint &loc)
+{
+    overmap *om = get_existing_om_global(loc);
+
+    // If the overmap doesn't exist, then for sure the local mapgen
+    // hasn't happened.
+    if (om == nullptr) {
+        return false;
+    }
+
+    // We need our coordinates to be overmap-local.
+    const tripoint om_pos = omt_to_om_copy(loc);
+
+    return om->is_omt_generated(om_pos);
+}
+
 bool overmapbuffer::has_note( int x, int y, int z )
 {
     const overmap *om = get_existing_om_global( x, y );
