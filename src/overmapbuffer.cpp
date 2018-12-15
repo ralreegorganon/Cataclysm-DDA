@@ -650,13 +650,44 @@ bool overmapbuffer::check_ot_subtype( const std::string &type, int x, int y, int
     return om.check_ot_subtype( type, x, y, z );
 }
 
+bool overmapbuffer::check_overmap_special_type( const overmap_special_id &id, const tripoint &loc )
+{
+    overmap &om = get_om_global( loc );
+    const tripoint om_pos = omt_to_om_copy(loc);
+    return om.check_overmap_special_type( id, om_pos);
+}
+
+
+bool overmapbuffer::is_findable_location( const tripoint &location, const std::string &type,
+        bool must_be_seen, bool allow_subtype_matches, cata::optional<overmap_special_id> om_special )
+{
+    const bool type_matches = allow_subtype_matches
+                              ? check_ot_subtype( type, location.x, location.y, location.z )
+                              : check_ot_type( type, location.x, location.y, location.z );
+    if( !type_matches ) {
+        return false;
+    }
+
+    const bool meets_seen_criteria = !must_be_seen || seen( location.x, location.y, location.z );
+    if( !meets_seen_criteria ) {
+        return false;
+    }
+
+    const bool meets_om_special_criteria = !om_special ||
+                                           check_overmap_special_type( *om_special, location );
+    if( !meets_om_special_criteria ) {
+        return false;
+    }
+
+    return true;
+}
+
 tripoint overmapbuffer::find_closest( const tripoint &origin, const std::string &type,
-                                      int const radius, bool must_be_seen, bool allow_subtype_matches )
+                                      int const radius, bool must_be_seen, bool allow_subtype_matches,
+                                      cata::optional<overmap_special_id> om_special )
 {
     // Check the origin before searching adjacent tiles!
-    if( allow_subtype_matches
-        ? check_ot_subtype( type, origin.x, origin.y, origin.z )
-        : check_ot_type( type, origin.x, origin.y, origin.z ) ) {
+    if( is_findable_location( origin, type, must_be_seen, allow_subtype_matches, om_special ) ) {
         return origin;
     }
 
@@ -684,47 +715,27 @@ tripoint overmapbuffer::find_closest( const tripoint &origin, const std::string 
         // south is +y, north is -y
         for( int i = 0; i < dist * 2; i++ ) {
             //start at northwest, scan north edge
-            int x = origin.x - dist + i;
-            int y = origin.y - dist;
-            if( allow_subtype_matches
-                ? check_ot_subtype( type, x, y, z )
-                : check_ot_type( type, x, y, z ) ) {
-                if( !must_be_seen || seen( x, y, z ) ) {
-                    return tripoint( x, y, z );
-                }
+            const tripoint n_loc( origin.x - dist + i, origin.y - dist, z );
+            if( is_findable_location( n_loc, type, must_be_seen, allow_subtype_matches, om_special ) ) {
+                return n_loc;
             }
 
             //start at southeast, scan south
-            x = origin.x + dist - i;
-            y = origin.y + dist;
-            if( allow_subtype_matches
-                ? check_ot_subtype( type, x, y, z )
-                : check_ot_type( type, x, y, z ) ) {
-                if( !must_be_seen || seen( x, y, z ) ) {
-                    return tripoint( x, y, z );
-                }
+            const tripoint s_loc( origin.x + dist - i, origin.y + dist, z );
+            if( is_findable_location( s_loc, type, must_be_seen, allow_subtype_matches, om_special ) ) {
+                return tripoint( s_loc );
             }
 
             //start at southwest, scan west
-            x = origin.x - dist;
-            y = origin.y + dist - i;
-            if( allow_subtype_matches
-                ? check_ot_subtype( type, x, y, z )
-                : check_ot_type( type, x, y, z ) ) {
-                if( !must_be_seen || seen( x, y, z ) ) {
-                    return tripoint( x, y, z );
-                }
+            const tripoint w_loc( origin.x - dist, origin.y + dist - i, z );
+            if( is_findable_location( w_loc, type, must_be_seen, allow_subtype_matches, om_special ) ) {
+                return tripoint( w_loc );
             }
 
             //start at northeast, scan east
-            x = origin.x + dist;
-            y = origin.y - dist + i;
-            if( allow_subtype_matches
-                ? check_ot_subtype( type, x, y, z )
-                : check_ot_type( type, x, y, z ) ) {
-                if( !must_be_seen || seen( x, y, z ) ) {
-                    return tripoint( x, y, z );
-                }
+            const tripoint e_loc( origin.x + dist, origin.y - dist + i, z );
+            if( is_findable_location( e_loc, type, must_be_seen, allow_subtype_matches, om_special ) ) {
+                return tripoint( e_loc );
             }
         }
     }
@@ -732,18 +743,17 @@ tripoint overmapbuffer::find_closest( const tripoint &origin, const std::string 
 }
 
 std::vector<tripoint> overmapbuffer::find_all( const tripoint &origin, const std::string &type,
-        int dist, bool must_be_seen )
+        int dist, bool must_be_seen, bool allow_subtype_matches,
+        cata::optional<overmap_special_id> om_special )
 {
     std::vector<tripoint> result;
     // dist == 0 means search a whole overmap diameter.
     dist = dist ? dist : OMAPX;
     for( int x = origin.x - dist; x <= origin.x + dist; x++ ) {
         for( int y = origin.y - dist; y <= origin.y + dist; y++ ) {
-            if( must_be_seen && !seen( x, y, origin.z ) ) {
-                continue;
-            }
-            if( check_ot_type( type, x, y, origin.z ) ) {
-                result.push_back( tripoint( x, y, origin.z ) );
+            const tripoint search_loc( x, y, origin.z );
+            if( is_findable_location( search_loc, type, must_be_seen, allow_subtype_matches, om_special ) ) {
+                result.push_back( search_loc );
             }
         }
     }
@@ -751,9 +761,11 @@ std::vector<tripoint> overmapbuffer::find_all( const tripoint &origin, const std
 }
 
 tripoint overmapbuffer::find_random( const tripoint &origin, const std::string &type,
-                                     int dist, bool must_be_seen )
+                                     int dist, bool must_be_seen, bool allow_subtype_matches,
+                                     cata::optional<overmap_special_id> om_special )
 {
-    return random_entry( find_all( origin, type, dist, must_be_seen ), overmap::invalid_tripoint );
+    return random_entry( find_all( origin, type, dist, must_be_seen, allow_subtype_matches,
+                                   om_special ), overmap::invalid_tripoint );
 }
 
 std::shared_ptr<npc> overmapbuffer::find_npc( int id )
