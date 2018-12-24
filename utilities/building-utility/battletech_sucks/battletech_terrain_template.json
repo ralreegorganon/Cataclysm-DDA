@@ -1,0 +1,19 @@
+{
+        "type" : "overmap_terrain",
+        "id" : "battletech_bullshit_",
+        "name" : "WBVS",
+        "sym" : 84,
+        "color" : "white",
+        "see_cost" : 5,
+        "mondensity" : 2,
+        "sidewalk" : true,
+        "_Building_Utility" : {
+                "cell_num" : {
+                        "string_format" : {
+                                "battletech_bullshit_%d" : [
+                                        "id"
+                                ]
+                        }
+                }
+        }
+}

@@ -1,0 +1,42 @@
+[
+    {
+        "color": "white",
+        "id": "battletech_bullshit_1",
+        "mondensity": 2,
+        "name": "WBVS",
+        "see_cost": 5,
+        "sidewalk": true,
+        "sym": 84,
+        "type": "overmap_terrain"
+    },
+    {
+        "color": "white",
+        "id": "battletech_bullshit_2",
+        "mondensity": 2,
+        "name": "WBVS",
+        "see_cost": 5,
+        "sidewalk": true,
+        "sym": 84,
+        "type": "overmap_terrain"
+    },
+    {
+        "color": "white",
+        "id": "battletech_bullshit_3",
+        "mondensity": 2,
+        "name": "WBVS",
+        "see_cost": 5,
+        "sidewalk": true,
+        "sym": 84,
+        "type": "overmap_terrain"
+    },
+    {
+        "color": "white",
+        "id": "battletech_bullshit_4",
+        "mondensity": 2,
+        "name": "WBVS",
+        "see_cost": 5,
+        "sidewalk": true,
+        "sym": 84,
+        "type": "overmap_terrain"
+    }
+]
