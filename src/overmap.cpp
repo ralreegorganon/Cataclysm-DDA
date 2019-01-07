@@ -1314,6 +1314,71 @@ void overmap::generate( const overmap *north, const overmap *east,
         }
     }
 
+    // Sort the cities by size, largest first.
+    std::sort( cities.begin(), cities.end(), []( const city & lhs,
+    const city & rhs ) {
+        return lhs.size > rhs.size;
+    } );
+
+    const string_id<overmap_connection> local_road( "local_road" );
+    
+    if( !cities.empty() ) {
+        const city &the_big_city = cities[0];
+        for( const auto &elem : cities ) {
+            build_connection( *local_road, lay_out_connection( *local_road, the_big_city.pos, elem.pos, 0, false, 2 ), 0 );
+        }
+
+        /*
+        for (auto first = cities.begin(); first != cities.end(); first++){
+            for (auto second = first + 1; second != cities.end(); second++){
+                build_connection( first->pos, second->pos, 0, *local_road, false );
+            }
+        }
+        */
+
+        for( const auto &elem : cities ) {
+            std::vector<city> result;
+            result.reserve( cities.size() );
+            std::transform( cities.begin(), cities.end(), std::back_inserter( result ),
+            [&]( city & element ) {
+                const auto distance = rl_dist( element.pos, elem.pos );
+                return city {element.pos, std::max( distance - element.size - elem.size, 0 )};
+            } );
+            std::sort( result.begin(), result.end(), []( const city & lhs,
+            const city & rhs ) {
+                return lhs.size < rhs.size;
+            } );
+
+            for( const auto &closest_city : result ) {
+                build_connection( *local_road, lay_out_connection( *local_road, elem.pos, closest_city.pos, 0, false, 5 ), 0 );
+            }
+        }
+
+        for( const auto &elem : roads_out ) {
+            build_connection( *local_road, lay_out_connection( *local_road, elem.pos, the_big_city.pos, 0, false, 5 ), 0 );
+
+            for( const auto &c : cities ) {
+                build_connection( *local_road, lay_out_connection( *local_road, elem.pos, c.pos, 0, false, 5 ), 0 );
+            }
+        }
+    }
+
+    /*
+    std::vector<point> road_points;
+    road_points.reserve( roads_out.size() + cities.size() );
+    for( const auto &elem : roads_out ) {
+        road_points.emplace_back( elem.pos );
+    }
+    for( const auto &elem : cities ) {
+        road_points.emplace_back( elem.pos.x, elem.pos.y );
+    }
+    connect_closest_points( road_points, 0, *local_road );
+     */
+
+
+    //connect_closest_points( road_points, 0, *local_road );
+
+    /*
     std::vector<point> road_points; // cities and roads_out together
     // Compile our master list of roads; it's less messy if roads_out is first
     road_points.reserve( roads_out.size() + cities.size() );
@@ -1333,6 +1398,7 @@ void overmap::generate( const overmap *north, const overmap *east,
     // After we've placed all the specials and connected everything else via roads,
     // try and place some trailheads.
     place_forest_trailheads();
+     */
 
     polish_river();
 
@@ -2790,7 +2856,7 @@ void overmap::place_rifts( const int z )
 }
 
 pf::path overmap::lay_out_connection( const overmap_connection &connection, const point &source,
-                                      const point &dest, int z, const bool must_be_unexplored ) const
+                                      const point &dest, int z, const bool must_be_unexplored, const int new_connection_penalty ) const
 {
     const auto estimate = [&]( const pf::node & cur, const pf::node * prev ) {
         const auto &id( get_ter( cur.x, cur.y, z ) );
@@ -2833,7 +2899,8 @@ pf::path overmap::lay_out_connection( const overmap_connection &connection, cons
         const int dy = dest.y - cur.y;
         const int dist = subtype->is_orthogonal() ? std::abs( dx ) + std::abs( dy ) : std::sqrt(
                              dx * dx + dy * dy );
-        const int existency_mult = existing_connection ? 1 : 5; // Prefer existing connections.
+        const int existency_mult = existing_connection ? 1 :
+                                   new_connection_penalty; // Prefer existing connections.
 
         return existency_mult * dist + subtype->basic_cost;
     };
@@ -2975,7 +3042,8 @@ void overmap::build_connection( const overmap_connection &connection, const pf::
 void overmap::build_connection( const point &source, const point &dest, int z,
                                 const overmap_connection &connection, const bool must_be_unexplored )
 {
-    build_connection( connection, lay_out_connection( connection, source, dest, z, must_be_unexplored ),
+    build_connection( connection, lay_out_connection( connection, source, dest, z, must_be_unexplored,
+                      5 ),
                       z );
 }
 

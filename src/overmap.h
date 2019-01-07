@@ -351,7 +351,7 @@ class overmap
 
         // Connection laying
         pf::path lay_out_connection( const overmap_connection &connection, const point &source,
-                                     const point &dest, int z, const bool must_be_unexplored ) const;
+                                     const point &dest, int z, const bool must_be_unexplored, const int new_connection_penalty ) const;
         pf::path lay_out_street( const overmap_connection &connection, const point &source,
                                  om_direction::type dir, size_t len ) const;
 
