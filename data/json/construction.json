@@ -2527,5 +2527,17 @@
     ],
     "pre_terrain" : "t_floor",
     "post_terrain" : "f_pillow_fort"
+  },
+  {
+    "type" : "construction",
+    "description" : "Build Fire Pit",
+    "category" : "CONSTRUCT",
+    "required_skills" : [ [ "survival", 1 ] ],
+    "time" : 15,
+    "components" : [
+      [ [ "rock", 5 ]  ]
+    ],
+    "pre_terrain" : "t_pit_shallow",
+    "post_terrain" : "t_fire_pit"
   }
 ]

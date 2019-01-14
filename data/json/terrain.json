@@ -8050,5 +8050,23 @@
       "ter_set": "t_dirt",
       "items": [ { "item": "pipe", "count": [ 1, 2 ] }, { "item": "scrap", "count": [ 1, 40 ] } ]
     }
+  },
+  {
+    "type": "terrain",
+    "id": "t_fire_pit",
+    "name": "fire pit",
+    "description": "A shallow pit dug into the earth and lined with rocks to contain a fire.",
+    "symbol": "0",
+    "color": "red",
+    "move_cost": 8,
+    "flags": [ "TRANSPARENT", "CONTAINER", "FIRE_CONTAINER", "PLACE_ITEM", "EASY_DECONSTRUCT" ],
+    "deconstruct": { "ter_set": "t_pit_shallow", "items": [ { "item": "rock", "count": 5 } ] },
+    "bash": {
+      "str_min": 50,
+      "str_max": 100,
+      "sound": "thump",
+      "ter_set": "t_pit_shallow",
+      "items": [ { "item": "rock", "count": 5 } ]
+    }
   }
 ]
