@@ -1,0 +1,18 @@
+[
+    {
+      "type": "MOD_INFO",
+      "ident": "NaturalWilderness",
+      "name": "Natural Wilderness",
+      "authors": [ "ralreegorganon" ],
+      "description": "Only allow natural features to spawn in the wilderness. Best with city size 0 and wilderness scenario starts. Using this with scenarios that start in man-made locations will cause errors.",
+      "category": "misc_additions",
+      "dependencies": [ "dda" ]
+    },
+    {
+      "type": "region_overlay",
+      "id": "NaturalWilderness_overlay",
+      "regions": [ "all" ],
+      "overmap_feature_flag_settings": { "whitelist": [ "NATURAL" ] }
+    }
+  ]
+  
