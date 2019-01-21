@@ -20,7 +20,7 @@
         "city_sizes" : [0, 12],
         "occurrences" : [0, 10],
         "rotate" : false,
-        "flags" : [ "BLOB", "CLASSIC" ]
+        "flags" : [ "BLOB", "CLASSIC", "NATURAL" ]
     },{
         "type" : "overmap_special",
         "id" : "Hotel",
@@ -783,6 +783,7 @@
         "city_distance" : [10, -1],
         "city_sizes" : [0, 20],
         "occurrences" : [0, 3],
+        "flags": [ "NATURAL" ],
         "rotate" : false,
         "spawns" : { "group" : "GROUP_ANT", "population":[1000,2000], "radius":[10,30] }
     },{
@@ -795,6 +796,7 @@
         "city_distance" : [10, -1],
         "city_sizes" : [0, 20],
         "occurrences" : [0, 3],
+        "flags": [ "NATURAL" ],
         "rotate" : false,
         "spawns" : { "group" : "GROUP_ANT_ACID", "population":[800,1600], "radius":[10,30] }
     },{
@@ -807,6 +809,7 @@
         "locations" : [ "forest" ],
         "city_sizes" : [0, 12],
         "occurrences" : [0, 500],
+        "flags": [ "NATURAL" ],
         "rotate" : false
     },{
         "type" : "overmap_special",
@@ -817,6 +820,7 @@
         "locations" : [ "land", "swamp" ],
         "city_sizes" : [0, 12],
         "occurrences" : [0, 4],
+        "flags": [ "NATURAL" ],
         "rotate" : false,
         "spawns" : { "group" : "GROUP_GOO", "population":[100,200], "radius":[2,10] }
     },{
@@ -829,6 +833,7 @@
         "city_distance" : [5, -1],
         "city_sizes" : [0, 12],
         "occurrences" : [0, 3],
+        "flags": [ "NATURAL" ],
         "rotate" : false,
         "spawns" : { "group" : "GROUP_FUNGI", "population":[600,1200], "radius":[30,50] }
     },{
@@ -841,6 +846,7 @@
         "city_distance" : [5, -1],
         "city_sizes" : [0, 12],
         "occurrences" : [0, 2],
+        "flags": [ "NATURAL" ],
         "rotate" : false,
         "spawns" : { "group" : "GROUP_FUNGI_TOWER", "population":[125,175], "radius":[2,2] }
     },{
@@ -853,6 +859,7 @@
         "city_distance" : [5, -1],
         "city_sizes" : [0, 12],
         "occurrences" : [0, 2],
+        "flags": [ "NATURAL" ],
         "rotate" : false,
         "spawns" : { "group" : "GROUP_FUNGI_FLOWERS", "population":[50,100], "radius":[2,4] }
     },{
@@ -866,6 +873,7 @@
         "locations" : [ "forest" ],
         "city_sizes" : [0, 12],
         "occurrences" : [0, 4],
+        "flags": [ "NATURAL" ],
         "rotate" : false,
         "spawns" : { "group" : "GROUP_TRIFFID", "population":[800,1300], "radius":[12,20] }
     },{
@@ -893,6 +901,7 @@
         "locations" : [ "land" ],
         "city_sizes" : [0, 12],
         "occurrences" : [0, 30],
+        "flags": [ "NATURAL" ],
         "rotate" : false
     },{
         "type" : "overmap_special",
@@ -1803,7 +1812,7 @@
         "city_distance" : [1, -1],
         "occurrences" : [0, 30],
         "rotate" : false,
-        "flags" : [ "CLASSIC" ]
+        "flags" : [ "CLASSIC", "NATURAL" ]
     },{
         "type" : "overmap_special",
         "id" : "basin",
@@ -1814,7 +1823,7 @@
         "city_distance" : [1, -1],
         "occurrences" : [0, 12],
         "rotate" : false,
-        "flags" : [ "CLASSIC" ]
+        "flags" : [ "CLASSIC", "NATURAL" ]
   },{
      "type" : "overmap_special",
      "id" : "bog",
@@ -1825,7 +1834,7 @@
     "city_distance" : [1, -1],
     "occurrences" : [0, 9],
     "rotate" : false,
-    "flags" : [ "CLASSIC" ]
+    "flags" : [ "CLASSIC", "NATURAL" ]
   },{
     "type": "overmap_special",
     "id": "Swamp Shack",
