@@ -4134,13 +4134,23 @@ void mapgen_forest( map *m, oter_id terrain_type, mapgendata dat, const time_poi
         }
     };
 
+    std::vector<ter_furn_id> placements;
+    placements.resize(SEEX * 2 + SEEY * 2);
+
     // Loop through each location in this overmap terrain and attempt to place a feature and
     // terrain dependent furniture.
     for( int x = 0; x < SEEX * 2; x++ ) {
         for( int y = 0; y < SEEY * 2; y++ ) {
             const ter_furn_id feature = get_blended_feature( x, y );
-            ter_or_furn_set( m, x, y, feature );
-            set_terrain_dependent_furniture( feature.ter, x, y );
+            placements[y * SEEY * 2 + x] = feature;
+        }
+    }
+
+    for (int x = 0; x < SEEX * 2; x++) {
+        for (int y = 0; y < SEEY * 2; y++) {
+            const ter_furn_id feature = placements[y * SEEY * 2 + x];
+            ter_or_furn_set(m, x, y, feature);
+            set_terrain_dependent_furniture(feature.ter, x, y);
         }
     }
 

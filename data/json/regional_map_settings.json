@@ -285,7 +285,11 @@
           "water": { "sequence": 3, "chance": 512, "clear_types": false, "types": { "t_water_sh": 1 } }
         },
         "clear_terrain_furniture": false,
-        "terrain_furniture": {  }
+        "terrain_furniture": {  },
+        "clear_cluster_weights": false,
+        "cluster_weights": {
+          "t_tree": 1000
+        }
       },
       "forest_water": {
         "sparseness_adjacency_factor": 2,

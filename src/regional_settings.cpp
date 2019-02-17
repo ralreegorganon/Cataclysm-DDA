@@ -101,6 +101,7 @@ void load_forest_biome( JsonObject &jo, forest_biome &forest_biome, const bool o
     read_and_set_or_throw<bool>( jo, "clear_groundcover", forest_biome.clear_groundcover, !overlay );
     read_and_set_or_throw<bool>( jo, "clear_terrain_furniture", forest_biome.clear_terrain_furniture,
                                  !overlay );
+    read_and_set_or_throw<bool>(jo, "clear_cluster_weight", forest_biome.clear_cluster_weights, !overlay);
 
     if( forest_biome.clear_components ) {
         forest_biome.unfinalized_biome_components.clear();
@@ -156,6 +157,28 @@ void load_forest_biome( JsonObject &jo, forest_biome &forest_biome, const bool o
                 load_forest_biome_terrain_dependent_furniture( terrain_furniture_jo,
                         forest_biome.unfinalized_terrain_dependent_furniture[name],
                         overlay );
+            }
+        }
+    }
+
+    if (forest_biome.clear_cluster_weights) {
+        forest_biome.unfinalized_cluster_weights.clear();
+    }
+
+    if (!jo.has_object("cluster_weights")) {
+        if (!overlay) {
+            jo.throw_error("cluster_weights required");
+        }
+    }
+    else {
+        JsonObject cluster_weights_jo = jo.get_object("cluster_weights");
+        std::set<std::string> keys = cluster_weights_jo.get_member_names();
+        for (const auto &key : keys) {
+            int weight = 0;
+            if (key != "//") {
+                if (cluster_weights_jo.read(key, weight)) {
+                    forest_biome.unfinalized_cluster_weights[key] = weight;
+                }
             }
         }
     }
@@ -740,6 +763,7 @@ void forest_biome_component::finalize()
         } else if( fid.is_valid() ) {
             tf_id.furn = fid.id();
         } else {
+            debugmsg("Tried to add invalid terrain or furniture %s to forest_mapgen_settings types.", pr.first.c_str());
             continue;
         }
         types.add( tf_id, pr.second );
@@ -793,6 +817,7 @@ void forest_biome::finalize()
     for( const std::pair<std::string, int> &pr : unfinalized_groundcover ) {
         const ter_str_id tid( pr.first );
         if( !tid.is_valid() ) {
+            debugmsg("Tried to add invalid terrain %s to forest_mapgen_settings groundcover.", tid.c_str());
             continue;
         }
         groundcover.add( tid.id(), pr.second );
@@ -802,6 +827,25 @@ void forest_biome::finalize()
         pr.second.finalize();
         const ter_id t( pr.first );
         terrain_dependent_furniture[t] = pr.second;
+    }
+
+    for (const std::pair<std::string, int> &pr : unfinalized_cluster_weights) {
+        ter_furn_id tf_id;
+        tf_id.ter = t_null;
+        tf_id.furn = f_null;
+        const ter_str_id tid(pr.first);
+        const furn_str_id fid(pr.first);
+        if (tid.is_valid()) {
+            tf_id.ter = tid.id();
+        }
+        else if (fid.is_valid()) {
+            tf_id.furn = fid.id();
+        }
+        else {
+            debugmsg("Tried to add invalid terrain or furniture %s to forest_mapgen_settings cluster_weights.", pr.first.c_str());
+            continue;
+        }
+        cluster_weights.emplace(tf_id, pr.second);
     }
 }
 

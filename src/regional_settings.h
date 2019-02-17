@@ -71,6 +71,14 @@ struct ter_furn_id {
     ter_furn_id();
 };
 
+struct ter_furn_id_compare
+{
+    bool operator() (const ter_furn_id& lhs, const ter_furn_id& rhs) const
+    {
+        return lhs.furn < rhs.furn && lhs.ter < rhs.ter;
+    }
+};
+
 /*
  * template for random bushes and such.
  * supports occasional boost to a single ter/furn type (clustered blueberry bushes for example)
@@ -123,6 +131,8 @@ struct forest_biome {
     std::map<std::string, forest_biome_terrain_dependent_furniture>
     unfinalized_terrain_dependent_furniture;
     std::map<ter_id, forest_biome_terrain_dependent_furniture> terrain_dependent_furniture;
+    std::map<std::string, int> unfinalized_cluster_weights;
+    std::map<ter_furn_id, int, ter_furn_id_compare> cluster_weights;
     int sparseness_adjacency_factor = 0;
     int item_group_chance = 0;
     int item_spawn_iterations = 0;
@@ -130,6 +140,7 @@ struct forest_biome {
     bool clear_components = false;
     bool clear_groundcover = false;
     bool clear_terrain_furniture = false;
+    bool clear_cluster_weights = false;
 
     ter_furn_id pick() const;
     void finalize();
