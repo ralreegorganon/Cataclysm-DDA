@@ -4336,3 +4336,16 @@ void place_stairs( map *m, oter_id terrain_type, mapgendata dat )
         }
     }
 }
+
+void convert_regional_terrain(map *m, mapgendata dat) {
+
+    static const ter_id t_region_groundcover("t_region_groundcover");
+
+    for (int i = 0; i < SEEX * 2; i++) {
+        for (int j = 0; j < SEEY * 2; j++) {
+            if (m->ter(i, j) == t_region_groundcover) {
+                m->ter_set(i, j, *dat.region.default_groundcover.pick());
+            }
+        }
+    }
+}

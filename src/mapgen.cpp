@@ -2250,6 +2250,8 @@ void mapgen_function_json::generate( map *m, const oter_id &terrain_type, const 
 
     objects.apply( md, 0, 0, d );
 
+    convert_regional_terrain(m, md);
+
     m->rotate( rotation.get() );
 
     if( terrain_type->is_rotatable() ) {

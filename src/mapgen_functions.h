@@ -240,5 +240,6 @@ void mtrap_set( map *m, int x, int y, trap_id type );
 void madd_field( map *m, int x, int y, field_id type, int density );
 
 void place_stairs( map *m, oter_id terrain_type, mapgendata dat );
+void convert_regional_terrain(map *m, mapgendata dat);
 
 #endif

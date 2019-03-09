@@ -21,6 +21,15 @@
   },
   {
     "type": "terrain",
+    "id": "t_region_groundcover",
+    "name": "this should never actually show up, it's a pseudo terrain",
+    "symbol": " ",
+    "color": "black",
+    "move_cost": 2,
+    "flags": [ "TRANSPARENT", "NOITEM" ]
+  },
+  {
+    "type": "terrain",
     "id": "t_open_air_rooved",
     "name": "open air",
     "symbol": " ",

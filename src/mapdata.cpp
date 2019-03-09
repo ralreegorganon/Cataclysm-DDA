@@ -844,7 +844,7 @@ void set_ter_ids()
     t_railroad_track_on_tie = ter_id( "t_railroad_track_on_tie" );
     t_railroad_track_h_on_tie = ter_id( "t_railroad_track_h_on_tie" );
     t_railroad_track_v_on_tie = ter_id( "t_railroad_track_v_on_tie" );
-    t_railroad_track_d_on_tie = ter_id( "t_railroad_track_d_on_tie" );
+    t_railroad_track_d_on_tie = ter_id("t_railroad_track_d_on_tie");
 
     for( auto &elem : terrain_data.get_all() ) {
         ter_t &ter = const_cast<ter_t &>( elem );
