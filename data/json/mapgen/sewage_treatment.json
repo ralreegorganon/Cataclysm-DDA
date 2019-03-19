@@ -1,0 +1,81 @@
+[{
+        "type": "palette",
+        "id": "sewage_treatment_palette",
+        "terrain": {
+            " ": "t_floor",
+            ";": "t_window",
+            "#": "t_wall",
+            "|": "t_wall_glass",
+            "~": "t_sewage",
+            "g": "t_grate",
+            "1": "t_sewage_pipe",
+            "&": "t_sewage_pump",
+            "+": "t_door_c",
+            "D": "t_door_locked",
+            "M": "t_door_metal_locked",
+            "<": "t_stairs_up",
+            ">": "t_stairs_down",
+            "6": "t_console"
+        },
+        "furniture": {
+            "C": "f_counter"
+        }
+    },
+    {
+        "type": "mapgen",
+        "method": "json",
+        "om_terrain": ["sewage_treatment"],
+        "object": {
+            "fill_ter": "t_floor",
+            "rows": [
+                "#;;;+;;#################",
+                "#      #               #",
+                "#      #               #",
+                "#CCC   #  ~~~~   ~~~~  #",
+                "#      #  ~~~~   ~~~~  #",
+                "####+###  ~~~~   ~~~~  #",
+                "#C     |  ~~~~   ~~~~  #",
+                "#C     |               #",
+                "#C     |               #",
+                "#C     |               #",
+                "#C     |  ~~~~   ~~~~  #",
+                "#C     |  ~~~~   ~~~~  #",
+                "#C     |  ~~~~   ~~~~  #",
+                "#C     |  ~~~~   ~~~~  #",
+                "#####+##               #",
+                "#1> #  #      ##########",
+                "#1  #  #      # ~~gg~~ #",
+                "#1  #  +      + ~~gg~~ #",
+                "#1  #  #      # ~~~~~~ #",
+                "#16 M 6#      #  ~~~~  #",
+                "########||||||#   ~~   #",
+                "#&~~~~~~~~~~~~~~~~~~   D",
+                "#&~~~~~~~~~~~~~~~~~~   #",
+                "########################"
+            ],
+            "palettes": ["sewage_treatment_palette"],
+            "computers": {
+                "6": {
+                    "name": "EnviroCom OS v2.03",
+                    "security": 1,
+                    "options": [
+                        {
+                            "name": "Unlock stairs",
+                            "action": "open",
+                            "security": 0
+                        }
+                    ],
+                    "failures": [{
+                        "action": "shutdown"
+                    }]
+                }
+            },
+            "place_items": [{
+                "item": "sewage_plant",
+                "x": 1,
+                "y": [6, 13],
+                "chance": 80
+            }]
+        }
+    }
+]

@@ -4325,65 +4325,6 @@ ___DEEE|.R.|...,,...|sss\n",
         spawn_artifact( tripoint( rng( SEEX, SEEX + 1 ), rng( 2, 3 ), abs_sub.z ) );
         return;
 
-    } else if( terrain_type == "sewage_treatment" ) {
-
-        fill_background( this, t_floor ); // Set all to floor
-        line( this, t_wall,  0,  0, 23,  0 ); // Top wall
-        line( this, t_window,  1,  0,  6,  0 ); // Its windows
-        line( this, t_wall,  0, 23, 23, 23 ); // Bottom wall
-        line( this, t_wall,  1,  5,  6,  5 ); // Interior wall (front office)
-        line( this, t_wall,  1, 14,  6, 14 ); // Interior wall (equipment)
-        line( this, t_wall,  1, 20,  7, 20 ); // Interior wall (stairs)
-        line( this, t_wall, 14, 15, 22, 15 ); // Interior wall (tank)
-        line( this, t_wall,  0,  1,  0, 22 ); // Left wall
-        line( this, t_wall, 23,  1, 23, 22 ); // Right wall
-        line( this, t_wall,  7,  1,  7,  5 ); // Interior wall (front office)
-        line( this, t_wall,  7, 14,  7, 19 ); // Interior wall (stairs)
-        line( this, t_wall,  4, 15,  4, 19 ); // Interior wall (mid-stairs)
-        line( this, t_wall, 14, 15, 14, 20 ); // Interior wall (tank)
-        line( this, t_wall_glass,  7,  6,  7, 13 ); // Interior glass (equipment)
-        line( this, t_wall_glass,  8, 20, 13, 20 ); // Interior glass (flow)
-        line_furn( this, f_counter,  1,  3,  3,  3 ); // Desk (front office);
-        line_furn( this, f_counter,  1,  6,  1, 13 ); // Counter (equipment);
-        // Central tanks:
-        square( this, t_sewage, 10,  3, 13,  6 );
-        square( this, t_sewage, 17,  3, 20,  6 );
-        square( this, t_sewage, 10, 10, 13, 13 );
-        square( this, t_sewage, 17, 10, 20, 13 );
-        // Drainage tank
-        square( this, t_sewage, 16, 16, 21, 18 );
-        square( this, t_grate,  18, 16, 19, 17 );
-        line( this, t_sewage, 17, 19, 20, 19 );
-        line( this, t_sewage, 18, 20, 19, 20 );
-        line( this, t_sewage,  2, 21, 19, 21 );
-        line( this, t_sewage,  2, 22, 19, 22 );
-        // Pipes and pumps
-        line( this, t_sewage_pipe,  1, 15,  1, 19 );
-        line( this, t_sewage_pump,  1, 21,  1, 22 );
-        // Stairs down
-        ter_set( 2, 15, t_stairs_down );
-        // Now place doors
-        ter_set( rng( 2, 5 ), 0, t_door_c );
-        ter_set( rng( 3, 5 ), 5, t_door_c );
-        ter_set( 5, 14, t_door_c );
-        ter_set( 7, rng( 15, 17 ), t_door_c );
-        ter_set( 14, rng( 17, 19 ), t_door_c );
-        if( one_in( 3 ) ) { // back door
-            ter_set( 23, rng( 19, 22 ), t_door_locked );
-        }
-        ter_set( 4, 19, t_door_metal_locked );
-        ter_set( 2, 19, t_console );
-        ter_set( 6, 19, t_console );
-        // Computers to unlock stair room, and items
-        tmpcomp = add_computer( tripoint( 2,  19, abs_sub.z ), _( "EnviroCom OS v2.03" ), 1 );
-        tmpcomp->add_option( _( "Unlock stairs" ), COMPACT_OPEN, 0 );
-        tmpcomp->add_failure( COMPFAIL_SHUTDOWN );
-
-        tmpcomp = add_computer( tripoint( 6,  19, abs_sub.z ), _( "EnviroCom OS v2.03" ), 1 );
-        tmpcomp->add_option( _( "Unlock stairs" ), COMPACT_OPEN, 0 );
-        tmpcomp->add_failure( COMPFAIL_SHUTDOWN );
-        place_items( "sewage_plant", 80, 1, 6, 1, 13, false, 0 );
-
     } else if( terrain_type == "sewage_treatment_hub" ) {
         // Stairs up, center of 3x3 of treatment_below
 
