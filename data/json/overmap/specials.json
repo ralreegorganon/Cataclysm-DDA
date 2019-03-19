@@ -1436,12 +1436,13 @@
             { "point" : [0,1,-1],  "overmap" : "pump_station_5_north" }
         ],
         "connections" : [
-            { "point" : [0,-1,0], "terrain" : "road" }
+            { "point" : [0,-1,0], "terrain" : "road" },
+            { "point" : [1,-1,-1], "terrain": "sewer", "connection" : "sewer_tunnel" }
         ],
         "locations" : [ "land" ],
-        "city_distance" : [ 1,4 ],
+        "city_distance" : [ 1, -1 ],
         "city_sizes" : [ 4, 12 ],
-        "occurrences" : [ 0, 1 ],
+        "occurrences" : [ 1, 4 ],
         "flags" : ["CLASSIC"]
     },{
         "type" : "overmap_special",

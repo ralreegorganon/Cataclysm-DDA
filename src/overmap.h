@@ -427,4 +427,9 @@ bool is_ot_subtype( const char *otype, const oter_id &oter );
 */
 om_special_sectors get_sectors( const int sector_width );
 
+namespace om_lines
+{
+constexpr bool has_segment( size_t line, om_direction::type dir );
+}
+
 #endif

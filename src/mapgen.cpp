@@ -6439,6 +6439,18 @@ $$$$-|-|=HH-|-HHHH-|####\n",
 
     // Now, fix sewers and subways so that they interconnect.
 
+
+    if (is_ot_type("sewer", terrain_type)) {
+        if (t_west->has_flag(sewer_connection) && !is_ot_type("sewer", t_west) && connects_to(t_west, 1)) {
+            for (int i = 0; i < SEEX; i++) {
+                for (int j = SEEY - 2; j < SEEY + 2; j++) {
+                    ter_set(i, j, t_sewage);
+                }
+            }
+        }
+    }
+
+
     if( is_ot_type( "subway", terrain_type ) ) { // FUUUUU it's IF ELIF ELIF ELIF's mini-me =[
         if( is_ot_type( "sewer", t_north ) &&
             !connects_to( terrain_type, 0 ) ) {
@@ -7251,6 +7263,48 @@ void map::rotate( int turns )
 // Hideous function, I admit...
 bool connects_to( const oter_id &there, int dir )
 {
+    const bool is_valid_type = there.obj().has_flag( sewer_connection ) ||
+                               there.obj().has_flag( ant_connection );
+
+    if (!is_valid_type) {
+        return false;
+    }
+
+    if (there.obj().is_linear()) {
+        const size_t line = there.obj().get_line();
+
+        switch (dir) {
+        case 2:
+            return om_lines::has_segment(line, om_direction::type::south);
+        case 3:
+            return om_lines::has_segment(line, om_direction::type::west);
+        case 0:
+            return om_lines::has_segment(line, om_direction::type::north);
+        case 1:
+            return om_lines::has_segment(line, om_direction::type::east);
+        default:
+            debugmsg("Connects_to with dir of %d", dir);
+            return false;
+        }
+    }
+    else {
+        switch (dir) {
+        case 2:
+            return there.obj().has_flag(connects_south);
+        case 3:
+            return there.obj().has_flag(connects_west);
+        case 0:
+            return there.obj().has_flag(connects_north);
+        case 1:
+            return there.obj().has_flag(connects_east);
+        default:
+            debugmsg("Connects_to with dir of %d", dir);
+            return false;
+        }
+    }
+    
+
+    /*
     switch( dir ) {
         case 2:
             if( there == "sewer_ns"   || there == "sewer_es" || there == "sewer_sw" ||
@@ -7291,7 +7345,7 @@ bool connects_to( const oter_id &there, int dir )
         default:
             debugmsg( "Connects_to with dir of %d", dir );
             return false;
-    }
+    }*/
 }
 
 void science_room( map *m, int x1, int y1, int x2, int y2, int z, int rotate )

@@ -2344,7 +2344,7 @@
     "mapgen_end": [ { "method": "builtin", "name": "subway_end" } ],
     "mapgen_tee": [ { "method": "builtin", "name": "subway_tee" } ],
     "mapgen_four_way": [ { "method": "builtin", "name": "subway_four_way" } ],
-    "flags": [ "LINEAR" ]
+    "flags": [ "LINEAR", "SUBWAY" ]
   },
   {
     "type": "overmap_terrain",
@@ -2352,7 +2352,7 @@
     "name": "sewer",
     "color": "green",
     "see_cost": 5,
-    "flags": [ "LINEAR" ]
+    "flags": [ "LINEAR", "SEWER" ]
   },
   {
     "type": "overmap_terrain",
@@ -2360,7 +2360,7 @@
     "name": "ant tunnel",
     "color": "brown",
     "see_cost": 5,
-    "flags": [ "LINEAR" ]
+    "flags": [ "LINEAR", "ANT" ]
   },
   {
     "type": "overmap_terrain",
@@ -2818,7 +2818,8 @@
     "sym": 4194414,
     "color": "green",
     "see_cost": 999,
-    "mondensity": 2
+    "mondensity": 2,
+    "flags": [ "SEWER", "CONNECTS_EAST" ]
   },
   {
     "type": "overmap_terrain",
