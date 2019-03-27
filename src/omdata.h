@@ -341,6 +341,7 @@ struct overmap_special_connection {
     string_id<oter_type_t> terrain; // TODO: Remove it.
     string_id<overmap_connection> connection;
     bool existing = false;
+    std::set<std::string> flags;
 
     template<typename JsonStream>
     void deserialize( JsonStream &jsin ) {
@@ -350,6 +351,7 @@ struct overmap_special_connection {
         jo.read( "existing", existing );
         jo.read( "connection", connection );
         assign( jo, "from", from );
+        jo.read("flags", flags);
     }
 };
 

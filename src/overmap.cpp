@@ -3563,22 +3563,89 @@ void overmap::place_special( const overmap_special &special, const tripoint &p,
             }
         }
     }
-    // Make connections.
-    if( cit ) {
-        for( const auto &elem : special.connections ) {
-            if( elem.connection ) {
-                const tripoint rp( p + om_direction::rotate( elem.p, dir ) );
-                om_direction::type initial_dir = elem.initial_dir;
 
-                if( initial_dir != om_direction::type::invalid ) {
-                    initial_dir = om_direction::add( initial_dir, dir );
-                }
+    std::map<std::string, point> connection_targets;
+    for (const auto &elem : special.connections) {
+        if (!elem.connection) {
+            continue;
+        }
 
-                build_connection( cit.pos, point( rp.x, rp.y ), elem.p.z, *elem.connection, must_be_unexplored,
-                                  initial_dir );
+        const tripoint rp(p + om_direction::rotate(elem.p, dir));
+        om_direction::type initial_dir = elem.initial_dir;
+
+        if (initial_dir != om_direction::type::invalid) {
+            initial_dir = om_direction::add(initial_dir, dir);
+        }
+
+        point target_pos;
+
+        const int can_use_cities = get_option<int>("CITY_SIZE") > 0;
+
+        if (elem.flags.empty() && !cit) {
+            // no flags and no associated city, bail (previous default behavior).
+            continue;
+        }
+        else if (elem.flags.empty()) {
+            target_pos = cit.pos;
+        }
+        else if (can_use_cities && elem.flags.count("RANDOM_CITY") > 0) {
+            target_pos = random_entry(cities, cit).pos;
+        }
+            /*
+            std::vector<point> overmap::find_terrain( const std::string &term, int zlevel )
+{
+    std::vector<point> found;
+    for( int x = 0; x < OMAPX; x++ ) {
+        for( int y = 0; y < OMAPY; y++ ) {
+            if( seen( x, y, zlevel ) &&
+                lcmatch( ter( x, y, zlevel )->get_name(), term ) ) {
+                found.push_back( global_base_point() + point( x, y ) );
             }
         }
     }
+    return found;
+}
+
+const city &overmap::get_nearest_city( const tripoint &p ) const
+{
+    int distance = 999;
+    const city *res = nullptr;
+    for( const auto &elem : cities ) {
+        const int dist = elem.get_distance_from( p );
+        if( dist < distance ) {
+            distance = dist;
+            res = &elem;
+        }
+    }
+    if( res != nullptr ) {
+        return *res;
+    }
+    static city invalid_city;
+    return invalid_city;
+}
+
+tripoint overmap::find_random_omt( const std::string &omt_base_type ) const
+{
+    std::vector<tripoint> valid;
+    for( int i = 0; i < OMAPX; i++ ) {
+        for( int j = 0; j < OMAPY; j++ ) {
+            for( int k = -OVERMAP_DEPTH; k <= OVERMAP_HEIGHT; k++ ) {
+                if( get_ter( i, j, k )->get_type_id().str() == omt_base_type ) {
+                    valid.push_back( tripoint( i, j, k ) );
+                }
+            }
+        }
+    }
+    return random_entry( valid, invalid_tripoint );
+}
+            */
+
+
+
+        build_connection(target_pos, point(rp.x, rp.y), elem.p.z, *elem.connection, must_be_unexplored,
+            initial_dir);
+    }
+
     // Place spawns.
     if( special.spawns.group ) {
         const overmap_special_spawns &spawns = special.spawns;
