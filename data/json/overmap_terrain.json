@@ -5418,5 +5418,16 @@
     "type": "overmap_terrain",
     "id": "ws_regional_dump_3_3",
     "copy-from": "generic_regional_dump"
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "lake",
+    "copy-from": "generic_water",
+    "name": "lake",
+    "sym": 126,
+    "color": "blue",
+    "see_cost": 1,
+    "mapgen": [ { "method": "builtin", "name": "river_center" } ],
+    "flags": [ "NO_ROTATE" ]
   }
 ]

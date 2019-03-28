@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "cata_utility.h"
+#include "cellular_automata.h"
 #include "coordinate_conversions.h"
 #include "debug.h"
 #include "game.h"
@@ -1425,12 +1426,85 @@ void overmap::generate( const overmap *north, const overmap *east,
         }
     }
 
+    int width = 80;
+    int height = 80;
+    
+    std::vector<std::vector<int>> lakes = CellularAutomata::generate_cellular_automaton( width, height, 45, 12, 3, 4 );
+    
+    std::unordered_set<point> visited;
+    
+    const auto get_lake = [&]( point starting_point, std::vector<point> &lake_points ) {
+        std::queue<point> to_check;
+        to_check.push( starting_point );
+        while( !to_check.empty() ) {
+            const point current_point = to_check.front();
+            to_check.pop();
+            
+            // We've been here before, so bail.
+            if( visited.find( current_point ) != visited.end() ) {
+                continue;
+            }
+            
+            // This point is out of bounds, so bail.
+            bool in_bounds = current_point.x >= 0 && current_point.x < width && current_point.y >= 0 && current_point.y < height;
+            if( !in_bounds ) {
+                continue;
+            }
+            
+            // Mark this point as visited.
+            visited.emplace( current_point );
+            
+            if(lakes[current_point.x][current_point.y] == 1) {
+                lake_points.emplace_back( current_point );
+                to_check.push( point( current_point.x, current_point.y + 1 ) );
+                to_check.push( point( current_point.x, current_point.y - 1 ) );
+                to_check.push( point( current_point.x + 1, current_point.y ) );
+                to_check.push( point( current_point.x - 1, current_point.y ) );
+            }
+        }
+        return;
+    };
+    
+    std::vector<std::vector<point>> all_lakes;
+    
+    for( int i = 0; i < width; i++ ) {
+        for( int j = 0; j < height; j++ ) {
+            if(lakes[i][j] == 0) {
+                continue;
+            }
+            
+            point seed_point( i, j );
+            
+            if( visited.find( seed_point ) != visited.end() ) {
+                continue;
+            }
+            
+            std::vector<point> lake_points;
+            get_lake(seed_point, lake_points);
+            all_lakes.emplace_back(lake_points);
+        }
+    }
+    
+    sort(all_lakes.begin(), all_lakes.end(),
+         [](const std::vector<point> & a, const std::vector<point> & b) -> bool
+    {
+        return a.size() > b.size();
+    });
+    
+    std::vector<point> the_one_and_only = all_lakes.front();
+    
+    
+    
+    for( const auto &p : the_one_and_only ) {
+        ter( p.x, p.y, 0 ) = oter_id( "lake" );
+    }
+
     // Cities and forests come next.
     // These are agnostic of adjacent maps, so it's very simple.
-    place_cities();
+    //place_cities();
     place_forest();
 
-    place_forest_trails();
+    //place_forest_trails();
 
     // Ideally we should have at least two exit points for roads, on different sides
     if( roads_out.size() < 2 ) {
