@@ -1295,20 +1295,21 @@ void overmap::generate( const overmap *north, const overmap *east,
     for (int x = 0; x < OMAPX; x++) {
         for (int y = 0; y < OMAPY; y++) {
             point global_omt = global_base_point() + point(x, y);
-            float r = scaled_octave_noise_3d(8, 0.5, 0.1, 0, 1, global_omt.x, global_omt.y, modSEED);
-            r = std::powf(r, 0.5f);
-            if (r > 0.75) {
+            //float r = scaled_octave_noise_3d(8, 0.5, 0.1, 0, 1, global_omt.x, global_omt.y, modSEED);
+            float r = std::abs(octave_noise_3d(8, 0.5, 0.1, global_omt.x, global_omt.y, modSEED));
+            r = std::powf(r, 1);
+            if (r > 0.1) {
 
-                for (int mx = -1; mx < 2; mx++) {
+                /*for (int mx = -1; mx < 2; mx++) {
                     for (int my = -1; my < 2; my++) {
                         const int dx = clamp(x + mx, 0, OMAPX - 1);
                         const int dy = clamp(y + my, 0, OMAPY - 1);
                         grow_forest_oter_id(ter(dx, dy, 0), false);
                     }
-                }
+                }*/
 
 
-                //ter(x, y, 0) = ot_forest;
+                ter(x, y, 0) = ot_forest;
             }
         }
     }
@@ -1371,7 +1372,7 @@ void overmap::generate( const overmap *north, const overmap *east,
             get_forest(seed_point, forest_points);
 
             
-            if (forest_points.empty() || forest_points.size() > static_cast<std::vector<point>::size_type> (50)) {
+            if (forest_points.empty() || forest_points.size() > static_cast<std::vector<point>::size_type> (5)) {
                 continue;
             }
 
