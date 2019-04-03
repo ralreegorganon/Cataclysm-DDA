@@ -40,6 +40,7 @@
 #include "regional_settings.h"
 #include "rng.h"
 #include "rotatable_symbols.h"
+#include "simplexnoise.h"
 #include "simple_pathfinding.h"
 #include "translations.h"
 
@@ -1270,10 +1271,119 @@ void overmap::set_scent( const tripoint &loc, const scent_trace &new_scent )
     scents[loc] = new_scent;
 }
 
+void grow_forest_oter_id(oter_id &oid, bool swampy)
+{
+    if (swampy && (oid == ot_field || oid == ot_forest)) {
+        oid = ot_forest_water;
+    }
+    else if (oid == ot_forest) {
+        oid = ot_forest_thick;
+    }
+    else if (oid == ot_field) {
+        oid = ot_forest;
+    }
+}
+
 void overmap::generate( const overmap *north, const overmap *east,
                         const overmap *south, const overmap *west,
                         overmap_special_batch &enabled_specials )
 {
+    const unsigned modSEED = g->get_seed() % 32768;
+
+       
+
+    for (int x = 0; x < OMAPX; x++) {
+        for (int y = 0; y < OMAPY; y++) {
+            point global_omt = global_base_point() + point(x, y);
+            float r = scaled_octave_noise_3d(8, 0.5, 0.1, 0, 1, global_omt.x, global_omt.y, modSEED);
+            r = std::powf(r, 0.5f);
+            if (r > 0.75) {
+
+                for (int mx = -1; mx < 2; mx++) {
+                    for (int my = -1; my < 2; my++) {
+                        const int dx = clamp(x + mx, 0, OMAPX - 1);
+                        const int dy = clamp(y + my, 0, OMAPY - 1);
+                        grow_forest_oter_id(ter(dx, dy, 0), false);
+                    }
+                }
+
+
+                //ter(x, y, 0) = ot_forest;
+            }
+        }
+    }
+
+    std::unordered_set<point> visited;
+
+    const auto get_forest = [&](point starting_point, std::vector<point> &forest_points) {
+        std::queue<point> to_check;
+        to_check.push(starting_point);
+        while (!to_check.empty()) {
+            const point current_point = to_check.front();
+            to_check.pop();
+
+            // We've been here before, so bail.
+            if (visited.find(current_point) != visited.end()) {
+                continue;
+            }
+
+            // This point is out of bounds, so bail.
+            if (!inbounds(current_point, 1)) {
+                continue;
+            }
+
+            // Mark this point as visited.
+            visited.emplace(current_point);
+
+            // If this point is a valid forest type, then add it to our collection
+            // of forest points.
+            const auto current_terrain = ter(current_point.x, current_point.y, 0);
+            if (current_terrain == "forest" || current_terrain == "forest_thick" ||
+                current_terrain == "forest_water") {
+                forest_points.emplace_back(current_point);
+                to_check.push(point(current_point.x, current_point.y + 1));
+                to_check.push(point(current_point.x, current_point.y - 1));
+                to_check.push(point(current_point.x + 1, current_point.y));
+                to_check.push(point(current_point.x - 1, current_point.y));
+            }
+        }
+
+        return;
+    };
+
+    for (int i = 0; i < OMAPX; i++) {
+        for (int j = 0; j < OMAPY; j++) {
+            oter_id oter = ter(i, j, 0);
+            if (!is_ot_type("forest", oter)) {
+                continue;
+            }
+
+            point seed_point(i, j);
+
+            // If we've already visited this point, we don't need to
+            // process it since it's already part of another forest.
+            if (visited.find(seed_point) != visited.end()) {
+                continue;
+            }
+
+            // Get the contiguous forest from this point.
+            std::vector<point> forest_points;
+            get_forest(seed_point, forest_points);
+
+            
+            if (forest_points.empty() || forest_points.size() > static_cast<std::vector<point>::size_type> (50)) {
+                continue;
+            }
+
+            for (const auto &elem : forest_points) {
+                ter(elem.x, elem.y, 0) = ot_field;
+            }
+        }
+    }
+
+
+
+
     dbg( D_INFO ) << "overmap::generate start...";
     std::vector<point> river_start;// West/North endpoints of rivers
     std::vector<point> river_end; // East/South endpoints of rivers
@@ -1428,7 +1538,10 @@ void overmap::generate( const overmap *north, const overmap *east,
     // Cities and forests come next.
     // These are agnostic of adjacent maps, so it's very simple.
     place_cities();
-    place_forest();
+
+    //place_forest();
+
+    
 
     place_forest_trails();
 
@@ -2016,16 +2129,7 @@ void overmap::signal_hordes( const tripoint &p, const int sig_power )
     }
 }
 
-void grow_forest_oter_id( oter_id &oid, bool swampy )
-{
-    if( swampy && ( oid == ot_field || oid == ot_forest ) ) {
-        oid = ot_forest_water;
-    } else if( oid == ot_forest ) {
-        oid = ot_forest_thick;
-    } else if( oid == ot_field ) {
-        oid = ot_forest;
-    }
-}
+
 
 void overmap::place_forest()
 {
