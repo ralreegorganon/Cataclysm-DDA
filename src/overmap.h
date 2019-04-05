@@ -331,9 +331,10 @@ class overmap
         void convert_terrain( const std::unordered_map<tripoint, std::string> &needs_conversion );
 
         // Overall terrain
+        void place_rivers(const overmap* north, const overmap* east, const overmap* south, const overmap* west);
         void place_river( point pa, point pb );
         void place_forest();
-
+        void place_forest_new();
         void place_forest_trails();
         void place_forest_trailheads();
 
