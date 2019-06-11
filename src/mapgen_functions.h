@@ -220,9 +220,10 @@ bool run_mapgen_func( const std::string &mapgen_id, map *m, oter_id terrain_type
                       const time_point &turn, float intensity );
 std::pair<std::map<ter_id, int>, std::map<furn_id, int>> get_changed_ids_from_update(
             const std::string &update_mapgen_id );
-                             
-std::vector<std::vector<int>> rise_automaton(int width, int height, int initial_filled, int birth_thresh, int death_thresh, int iterations);
-std::vector<std::vector<int>> go_home_youre_drunk(int width, int height, int limit);
-void blooming_booming(int width, int height, std::vector<std::vector<int>> &current);
+
+std::vector<std::vector<int>> rise_automaton( int width, int height, int initial_filled,
+                           int birth_thresh, int death_thresh, int iterations );
+std::vector<std::vector<int>> go_home_youre_drunk( int width, int height, int limit );
+void blooming_booming( int width, int height, std::vector<std::vector<int>> &current );
 
 #endif

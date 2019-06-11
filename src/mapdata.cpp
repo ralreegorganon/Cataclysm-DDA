@@ -894,12 +894,12 @@ void set_ter_ids()
     t_railroad_track_h_on_tie = ter_id( "t_railroad_track_h_on_tie" );
     t_railroad_track_v_on_tie = ter_id( "t_railroad_track_v_on_tie" );
     t_railroad_track_d_on_tie = ter_id( "t_railroad_track_d_on_tie" );
-    t_dirt_cave = ter_id("t_dirt_cave");
-    t_sand_cave = ter_id("t_sand_cave");
-    t_clay_cave = ter_id("t_clay_cave");
-    t_moss_cave = ter_id("t_moss_cave");
-    t_water_sh_cave= ter_id( "t_water_sh_cave" );
-    t_water_dp_cave= ter_id( "t_water_dp_cave" );
+    t_dirt_cave = ter_id( "t_dirt_cave" );
+    t_sand_cave = ter_id( "t_sand_cave" );
+    t_clay_cave = ter_id( "t_clay_cave" );
+    t_moss_cave = ter_id( "t_moss_cave" );
+    t_water_sh_cave = ter_id( "t_water_sh_cave" );
+    t_water_dp_cave = ter_id( "t_water_dp_cave" );
 
     for( auto &elem : terrain_data.get_all() ) {
         ter_t &ter = const_cast<ter_t &>( elem );
