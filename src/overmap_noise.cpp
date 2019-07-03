@@ -35,4 +35,12 @@ float om_noise_layer_lake::noise_at( const point &local_omt_pos ) const
     return r;
 }
 
-} // namespace om_noise
+float om_noise_layer_human_population_density::noise_at( const point &local_omt_pos ) const
+{
+    const point p = global_omt_pos( local_omt_pos );
+    float r = scaled_octave_noise_3d( 8, 0.5, 0.001 * city_spacing, 0, 1, p.x, p.y, get_seed() );
+    float x = city_size/8;
+    return std::min(r * powf(x, 0.5), 1.0f);
+}
+
+} // namespace om_noise 

@@ -67,3 +67,29 @@ TEST_CASE( "om_noise_layer_lake_export", "[.]" )
     export_raw_noise( "lake-map-raw.pgm", f, OMAPX * 5, OMAPY * 5 );
     export_interpreted_noise( "lake-map-interp.pgm", f, OMAPX * 5, OMAPY * 5, 0.25 );
 }
+
+TEST_CASE( "om_noise_layer_human_population_density_export", "[.]" )
+{
+    const om_noise::om_noise_layer_human_population_density f1( {0, 0}, 1920237457, 8, 4 );
+    const om_noise::om_noise_layer_human_population_density f2( {0, 0}, 1920237457, 8, 1 );
+    const om_noise::om_noise_layer_human_population_density f3( {0, 0}, 1920237457, 8, 8 );
+    const om_noise::om_noise_layer_human_population_density f4( {0, 0}, 1920237457, 1, 4 );
+    const om_noise::om_noise_layer_human_population_density f5( {0, 0}, 1920237457, 1, 1 );
+    const om_noise::om_noise_layer_human_population_density f6( {0, 0}, 1920237457, 1, 8 );
+    const om_noise::om_noise_layer_human_population_density f7( {0, 0}, 1920237457, 16, 4 );
+    const om_noise::om_noise_layer_human_population_density f8( {0, 0}, 1920237457, 16, 1 );
+    const om_noise::om_noise_layer_human_population_density f9( {0, 0}, 1920237457, 16, 8 );
+
+    // export_interpreted_noise( "human-population-density-raw-8-4.pgm", f1, OMAPX * 5, OMAPY * 5, 0.5 );
+    // export_interpreted_noise( "human-population-density-raw-8-1.pgm", f2, OMAPX * 5, OMAPY * 5, 0.5 );
+    // export_interpreted_noise( "human-population-density-raw-8-8.pgm", f3, OMAPX * 5, OMAPY * 5, 0.5 );
+    export_raw_noise( "human-population-density-raw-8-4.pgm", f1, OMAPX * 5, OMAPY * 5 );
+    export_raw_noise( "human-population-density-raw-8-1.pgm", f2, OMAPX * 5, OMAPY * 5 );
+    export_raw_noise( "human-population-density-raw-8-8.pgm", f3, OMAPX * 5, OMAPY * 5 );
+    // export_raw_noise( "human-population-density-raw-1-4.pgm", f4, OMAPX * 5, OMAPY * 5 );
+    // export_raw_noise( "human-population-density-raw-1-1.pgm", f5, OMAPX * 5, OMAPY * 5 );
+    // export_raw_noise( "human-population-density-raw-1-8.pgm", f6, OMAPX * 5, OMAPY * 5 );
+    // export_raw_noise( "human-population-density-raw-16-4.pgm", f7, OMAPX * 5, OMAPY * 5 );
+    // export_raw_noise( "human-population-density-raw-16-1.pgm", f8, OMAPX * 5, OMAPY * 5 );
+    // export_raw_noise( "human-population-density-raw-16-8.pgm", f9, OMAPX * 5, OMAPY * 5 );
+}

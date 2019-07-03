@@ -78,6 +78,23 @@ class om_noise_layer_lake : public om_noise_layer
         float noise_at( const point &local_omt_pos ) const override;
 };
 
+class om_noise_layer_human_population_density : public om_noise_layer
+{
+    public:
+        om_noise_layer_human_population_density( const point &global_base_point, unsigned seed,
+                int city_size, int city_spacing )
+            : om_noise_layer( global_base_point, seed ),
+              city_size( city_size ),
+              city_spacing( city_spacing ) {
+        }
+
+        float noise_at( const point &local_omt_pos ) const override;
+
+    protected:
+        int city_size;
+        int city_spacing;
+};
+
 } // namespace om_noise
 
 #endif
