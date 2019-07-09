@@ -1873,10 +1873,20 @@ void options_manager::add_options_world_default()
 
     mOptionsSort["world_default"]++;
 
-    add( "CITY_SIZE", "world_default", translate_marker( "Size of cities" ),
+    add( "CITY_SIZE", "world_default", translate_marker( "Most common city size" ),
          translate_marker( "A number determining how large cities are.  0 disables cities, roads and any scenario requiring a city start." ),
-         0, 16, 8
+         0, 90, 8
        );
+
+    add("CITY_SIZE_MIN", "world_default", translate_marker("Minimum city size"),
+        translate_marker("A number determining how large cities are."),
+        1, 90, 1
+    );
+
+    add("CITY_SIZE_MAX", "world_default", translate_marker("Maximum city size"),
+        translate_marker("A number determining how large cities are."),
+        1, 90, 16
+    );
 
     add( "CITY_SPACING", "world_default", translate_marker( "City spacing" ),
          translate_marker( "A number determining how far apart cities are.  Warning, small numbers lead to very slow mapgen." ),

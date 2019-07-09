@@ -1442,7 +1442,7 @@ void overmap::generate( const overmap *north, const overmap *east,
     place_cities();
     place_forest_trails();
     place_roads( north, east, south, west );
-    place_specials( enabled_specials );
+    //place_specials( enabled_specials );
     place_forest_trailheads();
 
     polish_river();
@@ -2777,6 +2777,9 @@ void overmap::place_cities()
         return;
     }
 
+    const int op_city_size_min = get_option<int>("CITY_SIZE_MIN");
+    const int op_city_size_max = get_option<int>("CITY_SIZE_MAX");
+
     // spacing dictates how much of the map is covered in cities
     //   city  |  cities  |   size N cities per overmap
     // spacing | % of map |  2  |  4  |  8  |  12 |  16
@@ -2804,15 +2807,15 @@ void overmap::place_cities()
     const double city_map_coverage_ratio = 1.0 / std::pow( 2.0, op_city_spacing );
     const int city_omts_per_overmap = std::min(valid_city_location_omt_count, static_cast<int>(omts_per_overmap * city_map_coverage_ratio));
 
-    const auto estimated_omts_per_city = [](const int op_city_size) {
-        return (op_city_size * 2 + 1) * (op_city_size * 2 + 1) * 3 / 4;
+    const auto estimated_omts_per_city = [](const int city_size) {
+        return (city_size * 2 + 1) * (city_size * 2 + 1) * 3 / 4;
     };
 
 
     const auto calc_city_size = [](const int min, const int mode, const int max) {
         std::piecewise_linear_distribution<double> rng_triangle_dist;
-        constexpr std::array<double, 5> w{ 0, 1, 0 };
-        std::array<double, 5> i{ min, mode, max };
+        constexpr std::array<double, 3> w{ 0, 1, 0 };
+        std::array<double, 3> i{ min, mode, max };
         return rng_triangle_dist(rng_get_engine(), std::piecewise_linear_distribution<>::param_type(i.begin(), i.end(), w.begin()));
     };
 
@@ -2821,7 +2824,7 @@ void overmap::place_cities()
     int total_estimated_city_omts = 0;
     while (total_estimated_city_omts < city_omts_per_overmap) {
         city tmp;
-        tmp.size = calc_city_size(1, op_city_size, 32);
+        tmp.size = calc_city_size(op_city_size_min, op_city_size, op_city_size_max);
         cities.push_back(tmp);
         total_estimated_city_omts += estimated_omts_per_city(tmp.size);
     }
@@ -2840,7 +2843,7 @@ void overmap::place_cities()
             // don't draw cities across the edge of the map, they will get clipped
             int cx = rng(placing_city.size - 1, OMAPX - placing_city.size);
             int cy = rng(placing_city.size - 1, OMAPY - placing_city.size);
-            if (ter(cx, cy, 0) == settings.default_oter) {
+            if (ter(cx, cy, 0) == settings.default_oter || is_ot_match("forest", ter(cx, cy, 0), ot_match_type::prefix)) {
                 ter(cx, cy, 0) = oter_id("road_nesw"); // every city starts with an intersection
                 placing_city.pos = { cx, cy };
 
