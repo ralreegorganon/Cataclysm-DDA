@@ -1744,9 +1744,21 @@ class jmapgen_nested : public jmapgen_piece
         jmapgen_nested( JsonObject &jsi ) : jmapgen_piece(), neighbors( jsi.get_object( "neighbors" ) ) {
             load_weighted_entries( jsi, "chunks", entries );
             load_weighted_entries( jsi, "else_chunks", else_entries );
+            if (jsi.has_string("start")) {
+                const time_duration start_offset = read_from_json_string<time_duration>(*jsi.get_raw("start"), time_duration::units);
+                start = calendar::start + start_offset;
+            }
+            if (jsi.has_string("end")) {
+                const time_duration end_offset = read_from_json_string<time_duration>(*jsi.get_raw("end"), time_duration::units);
+                end = calendar::start + end_offset;
+            }
         }
         void apply( const mapgendata &dat, const jmapgen_int &x, const jmapgen_int &y,
                     const float d, mission * ) const override {
+            if (calendar::turn < start || calendar::turn > end) {
+                return;
+            }
+
             const std::string *res = neighbors.test( dat ) ? entries.pick() : else_entries.pick();
             if( res == nullptr || res->empty() || *res == "null" ) {
                 // This will be common when neighbors.test(...) is false, since else_entires is often empty.

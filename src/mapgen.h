@@ -151,7 +151,7 @@ struct jmapgen_setmap {
 class jmapgen_piece
 {
     protected:
-        jmapgen_piece() : repeat( 1, 1 ) { }
+        jmapgen_piece() : repeat( 1, 1 ), start(calendar::start), end(calendar::INDEFINITELY_LONG) { }
     public:
         /** Sanity-check this piece */
         virtual void check( const std::string &/*oter_name*/ ) const { }
@@ -160,6 +160,8 @@ class jmapgen_piece
                             float mon_density, mission *miss = nullptr ) const = 0;
         virtual ~jmapgen_piece() = default;
         jmapgen_int repeat;
+        time_point start;
+        time_point end;
         virtual bool has_vehicle_collision( const mapgendata &/*dat*/, int /*offset_x*/,
                                             int /*offset_y*/ ) const {
             return false;
