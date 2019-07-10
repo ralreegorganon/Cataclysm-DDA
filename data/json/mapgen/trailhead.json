@@ -150,7 +150,7 @@
     "type": "mapgen",
     "method": "json",
     "om_terrain": [ "trailhead" ],
-    "weight": 5,
+    "weight": 5000,
     "object": {
       "rows": [
         ",,,,,,,,,,,,,,,,,,,,,,,,",
@@ -185,7 +185,10 @@
         { "signage": "<family_name> Trail", "x": 10, "y": 20 },
         { "signage": "PLEASE  No fish cleaning or dish washing.", "x": 19, "y": 15 }
       ],
-      "place_nested": [ { "chunks": [ [ "null", 2 ], [ "trailhead_sub_graffiti_snippet", 1 ] ], "x": 5, "y": [ 18, 20 ] } ]
+      "place_nested": [ 
+        { "chunks": [ [ "null", 2 ], [ "trailhead_sub_graffiti_snippet", 1 ] ], "x": 5, "y": [ 18, 20 ] },
+        { "chunks": [ "trailhead_sub_warning_graffiti_snippet" ], "x": 9, "y": 19, "start": "10 days" } 
+      ]
     }
   },
   {
@@ -193,6 +196,12 @@
     "method": "json",
     "nested_mapgen_id": "trailhead_sub_graffiti_snippet",
     "object": { "mapgensize": [ 1, 1 ], "place_graffiti": [ { "snippet": "trailhead_graffiti", "x": 0, "y": 0 } ] }
+  },
+  {
+    "type": "mapgen",
+    "method": "json",
+    "nested_mapgen_id": "trailhead_sub_warning_graffiti_snippet",
+    "object": { "mapgensize": [ 1, 1 ], "place_graffiti": [ { "snippet": "trailhead_warning_graffiti", "x": 0, "y": 0 } ] }
   },
   {
     "type": "snippet",
@@ -222,6 +231,13 @@
       "<given_name> + <given_name> forever",
       "N = R * fp * ne * fl * fi * fc * L  drake was right",
       "kilroy was here"
+    ]
+  },
+  {
+    "type": "snippet",
+    "category": "trailhead_warning_graffiti",
+    "text": [
+      "don't dead open inside"
     ]
   }
 ]
