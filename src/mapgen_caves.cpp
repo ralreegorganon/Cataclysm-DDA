@@ -49,10 +49,10 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &,
     constexpr int width = SEEX * 2;
     constexpr int height = SEEY * 2;
 
-    bool should_connect_n = is_ot_subtype( "natural_cave", dat.north() );
-    bool should_connect_s = is_ot_subtype( "natural_cave", dat.south() );
-    bool should_connect_w = is_ot_subtype( "natural_cave", dat.west() );
-    bool should_connect_e = is_ot_subtype( "natural_cave", dat.east() );
+    bool should_connect_n = is_ot_match("natural_cave", dat.north(), ot_match_type::prefix);
+    bool should_connect_s = is_ot_match( "natural_cave", dat.south(), ot_match_type::prefix);
+    bool should_connect_w = is_ot_match( "natural_cave", dat.west(), ot_match_type::prefix);
+    bool should_connect_e = is_ot_match( "natural_cave", dat.east(), ot_match_type::prefix);
 
     std::vector<std::vector<int>> current;
 
@@ -169,8 +169,8 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &,
         }
     }
 
-    if( is_ot_subtype( "natural_cave_entrance", dat.above() ) ||
-        is_ot_subtype( "natural_cave_descent", dat.above() ) ) {
+    if( is_ot_match( "natural_cave_entrance", dat.above(), ot_match_type::type) ||
+        is_ot_match( "natural_cave_descent", dat.above(), ot_match_type::type) ) {
         if( current[slope_up_location.x][slope_up_location.y] == 0 ) {
             std::vector<point> targets = closest_points_first( width, slope_up_location.x,
                                          slope_up_location.y );
@@ -198,14 +198,14 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &,
     std::vector<std::vector<int>> current_river( width, std::vector<int>( height, 0 ) );
     current_river[rng( 0, width - 1 )][rng( 0, height - 1 )] = 1;
 
-    if( is_ot_subtype( "natural_cave_river", o ) ) {
+    if( is_ot_match( "natural_cave_river", o, ot_match_type::type) ) {
         // generate the rough layout, everything is either solid rock (0) or empty (1)
         //current_river = rise_automaton(width, height, 40, 5, 2, 16, 1, 2);
 
-        bool should_connect_n_river = is_ot_subtype( "natural_cave_river", dat.north() );
-        bool should_connect_s_river = is_ot_subtype( "natural_cave_river", dat.south() );
-        bool should_connect_w_river = is_ot_subtype( "natural_cave_river", dat.west() );
-        bool should_connect_e_river = is_ot_subtype( "natural_cave_river", dat.east() );
+        bool should_connect_n_river = is_ot_match( "natural_cave_river", dat.north(), ot_match_type::type);
+        bool should_connect_s_river = is_ot_match( "natural_cave_river", dat.south(), ot_match_type::type);
+        bool should_connect_w_river = is_ot_match( "natural_cave_river", dat.west(), ot_match_type::type);
+        bool should_connect_e_river = is_ot_match( "natural_cave_river", dat.east(), ot_match_type::type);
 
         std::vector<point> dapoints_river;
         for( int i = 0; i < width; i++ ) {
@@ -333,7 +333,7 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &,
         }
     }
 
-    if( is_ot_subtype( "natural_cave_river", o ) ) {
+    if(is_ot_match( "natural_cave_river", o, ot_match_type::type) ) {
         // fill in the river
         for( int i = 0; i < width; i++ ) {
             for( int j = 0; j < height; j++ ) {
@@ -353,8 +353,8 @@ void mapgen_natural_cave( map *m, oter_id o, mapgendata dat, const time_point &,
         m->ter_set( slope_down_location, t_slope_down );
     }
 
-    if( is_ot_subtype( "natural_cave_entrance", dat.above() ) ||
-        is_ot_subtype( "natural_cave_descent", dat.above() ) ) {
+    if(is_ot_match( "natural_cave_entrance", dat.above(), ot_match_type::type) ||
+        is_ot_match( "natural_cave_descent", dat.above(), ot_match_type::type) ) {
         m->ter_set( slope_up_location, t_slope_up );
     }
 }
@@ -835,7 +835,7 @@ void overmap::build_natural_cave_network()
                 const tripoint l_w( i - 1, j, z );
 
                 const oter_id cur_t = ter( l );
-                if( is_ot_subtype( "lab", cur_t ) ) {
+                if( is_ot_match( "lab", cur_t, ot_match_type::contains) ) {
                     if( ter( l_n ) == empty_rock ) {
                         targets.push_back( l_n );
                     } else if( ter( l_s ) == empty_rock ) {
@@ -918,10 +918,10 @@ void overmap::build_natural_cave_network()
     for( size_t i = 0; i < max_remarkable; i++ ) {
         const tripoint l = unremarkable[i];
 
-        const bool has_n = is_ot_subtype( "natural_cave", ter( tripoint( l.x, l.y - 1, l.z ) ) );
-        const bool has_s = is_ot_subtype( "natural_cave", ter( tripoint( l.x, l.y + 1, l.z ) ) );
-        const bool has_e = is_ot_subtype( "natural_cave", ter( tripoint( l.x + 1, l.y, l.z ) ) );
-        const bool has_w = is_ot_subtype( "natural_cave", ter( tripoint( l.x - 1, l.y, l.z ) ) );
+        const bool has_n = is_ot_match( "natural_cave", ter( tripoint( l.x, l.y - 1, l.z ) ), ot_match_type::prefix);
+        const bool has_s = is_ot_match( "natural_cave", ter( tripoint( l.x, l.y + 1, l.z ) ), ot_match_type::prefix);
+        const bool has_e = is_ot_match( "natural_cave", ter( tripoint( l.x + 1, l.y, l.z ) ), ot_match_type::prefix);
+        const bool has_w = is_ot_match( "natural_cave", ter( tripoint( l.x - 1, l.y, l.z ) ), ot_match_type::prefix);
 
         oter_id &cur_t = ter( tripoint( l ) );
 
