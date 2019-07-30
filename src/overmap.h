@@ -377,7 +377,8 @@ class overmap
 
         // Connection laying
         pf::path lay_out_connection( const overmap_connection &connection, const point &source,
-                                     const point &dest, int z, bool must_be_unexplored ) const;
+                                     const point &dest, int z, bool must_be_unexplored, 
+                                     const bool require_new_connection ) const;
         pf::path lay_out_street( const overmap_connection &connection, const point &source,
                                  om_direction::type dir, size_t len ) const;
 
@@ -385,6 +386,7 @@ class overmap
                                const om_direction::type &initial_dir = om_direction::type::invalid );
         void build_connection( const point &source, const point &dest, int z,
                                const overmap_connection &connection, bool must_be_unexplored,
+                               const bool require_new_connection,
                                const om_direction::type &initial_dir = om_direction::type::invalid );
         void connect_closest_points( const std::vector<point> &points, int z,
                                      const overmap_connection &connection );

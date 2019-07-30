@@ -2593,11 +2593,8 @@ void overmap::place_controlled_access_highway( const overmap *, const overmap *,
     const string_id<overmap_connection> sbc( "controlled_access_highway_southbound" );
 
     std::vector<point> highway_points = {
-        {90, 2},
-        {90, 40},
-        {91, 40},
-        {91, 45},
-        {170, 45}
+        {90, 1},
+        {90, 3},
     };
 
     std::vector<pf::node> all_nb_nodes;
@@ -2606,9 +2603,13 @@ void overmap::place_controlled_access_highway( const overmap *, const overmap *,
     {
         const point start = *i;
         const point end = *(i+1);
-        const pf::path path = lay_out_connection(*nbc, start, end, 0, false);
+        const pf::path path = lay_out_connection(*nbc, start, end, 0, false, true);
         build_connection(*nbc, path, 0);
         all_nb_nodes.insert(std::end(all_nb_nodes), std::rbegin(path.nodes), std::rend(path.nodes));
+    }
+
+    if (all_nb_nodes.empty()) {
+        return;
     }
     
     pf::path all_sb_nodes;
@@ -2617,8 +2618,32 @@ void overmap::place_controlled_access_highway( const overmap *, const overmap *,
     point pos = all_nb_nodes.front().pos() + om_direction::displace(om_direction::turn_left(dir));
     point end = all_nb_nodes.back().pos() + om_direction::displace(om_direction::turn_left(end_dir));
     
-    const pf::path path = lay_out_connection(*sbc, pos, end, 0, false);
-    build_connection(*sbc, path, 0);
+
+    while (pos != end) {
+        const bool highway_to_right = is_ot_match("controlled_access_highway_northbound", ter(tripoint((pos + om_direction::displace(om_direction::turn_right(dir))), 0)), ot_match_type::type);
+        const tripoint advance_p = tripoint((pos + om_direction::displace(om_direction::opposite(dir))), 0);
+        const std::string blam = ter(advance_p).id().c_str();
+        const overmap_connection::subtype *subtype = sbc->pick_subtype_for(ter(advance_p));
+        const bool can_advance = subtype;
+
+        if (highway_to_right) {
+            all_sb_nodes.nodes.emplace_back(pf::node(pos.x, pos.y, static_cast<int>(dir), 0));
+            if (can_advance) {
+                pos = pos + om_direction::displace(om_direction::opposite(dir));
+            }
+            else {
+                dir = om_direction::turn_left(dir);
+            }
+        }
+        else {
+            all_sb_nodes.nodes.emplace_back(pf::node(pos.x, pos.y, static_cast<int>(dir), 0));
+            dir = om_direction::turn_right(dir);
+            pos = pos + om_direction::displace(om_direction::opposite(dir));
+        }
+    }
+    all_sb_nodes.nodes.emplace_back(pf::node(pos.x, pos.y, static_cast<int>(dir), 0));
+
+    build_connection(*sbc, all_sb_nodes, 0);
     
 //    all_sb_nodes.nodes.emplace_back(pf::node(pos.x, pos.y, static_cast<int>(dir), 0));
 //    all_sb_nodes.nodes.emplace_back(pf::node(end.x, end.y, static_cast<int>(end_dir), 0));
@@ -3368,7 +3393,7 @@ void overmap::build_mine( const tripoint &origin, int s )
 }
 
 pf::path overmap::lay_out_connection( const overmap_connection &connection, const point &source,
-                                      const point &dest, int z, const bool must_be_unexplored ) const
+                                      const point &dest, int z, const bool must_be_unexplored, const bool require_new_connection ) const
 {
     const auto estimate = [&]( const pf::node & cur, const pf::node * prev ) {
         const auto &id( get_ter( tripoint( cur.pos, z ) ) );
@@ -3380,6 +3405,10 @@ pf::path overmap::lay_out_connection( const overmap_connection &connection, cons
         }
 
         const bool existing_connection = connection.has( id );
+
+        if (existing_connection && require_new_connection && cur.pos() != source && cur.pos() != dest) {
+            return pf::rejected;
+        }
 
         // Only do this check if it needs to be unexplored and there isn't already a connection.
         if( must_be_unexplored && !existing_connection ) {
@@ -3552,9 +3581,9 @@ void overmap::build_connection( const overmap_connection &connection, const pf::
 
 void overmap::build_connection( const point &source, const point &dest, int z,
                                 const overmap_connection &connection, const bool must_be_unexplored,
-                                const om_direction::type &initial_dir )
+                                const bool require_new_connection, const om_direction::type &initial_dir )
 {
-    build_connection( connection, lay_out_connection( connection, source, dest, z, must_be_unexplored ),
+    build_connection( connection, lay_out_connection( connection, source, dest, z, must_be_unexplored, require_new_connection),
                       z, initial_dir );
 }
 
@@ -3575,7 +3604,7 @@ void overmap::connect_closest_points( const std::vector<point> &points, int z,
             }
         }
         if( closest > 0 ) {
-            build_connection( points[i], points[k], z, connection, false );
+            build_connection( points[i], points[k], z, connection, false, false );
         }
     }
 }
@@ -3959,7 +3988,7 @@ void overmap::place_special( const overmap_special &special, const tripoint &p,
                     initial_dir = om_direction::add( initial_dir, dir );
                 }
 
-                build_connection( cit.pos, rp.xy(), elem.p.z, *elem.connection, must_be_unexplored,
+                build_connection( cit.pos, rp.xy(), elem.p.z, *elem.connection, must_be_unexplored, false,
                                   initial_dir );
             }
         }

@@ -16,7 +16,7 @@
     "type": "overmap_terrain",
     "id": "controlled_access_highway_southbound",
     "name": "highway",
-    "color": "light_blue",
+    "color": "light_red",
     "see_cost": 1,
     "mapgen_straight": [ { "method": "builtin", "name": "controlled_access_highway_straight" } ],
     "mapgen_curved": [ { "method": "builtin", "name": "controlled_access_highway_curved" } ],
