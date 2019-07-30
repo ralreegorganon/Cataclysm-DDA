@@ -205,6 +205,14 @@ void mapgen_tutorial( map *m, oter_id terrain_type, mapgendata dat, const time_p
                       float density );
 void mapgen_lake_shore( map *m, oter_id terrain_type, mapgendata dat, const time_point &time,
                         float density );
+void mapgen_controlled_access_highway_straight( map *m, oter_id terrain_type, mapgendata dat,
+                                   const time_point &time, float density );
+void mapgen_controlled_access_highway_curved( map *m, oter_id terrain_type, mapgendata dat,
+                                 const time_point &time, float density );
+void mapgen_controlled_access_highway_tee( map *m, oter_id terrain_type, mapgendata dat, const time_point &time,
+                              float density );
+void mapgen_controlled_access_highway_four_way( map *m, oter_id terrain_type, mapgendata dat,
+                                   const time_point &time, float density );
 
 // Temporary wrappers
 void mremove_trap( map *m, int x, int y );

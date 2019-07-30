@@ -41,5 +41,21 @@
       { "terrain": "railroad_level_crossing", "locations": [ "railroad_level_crossing_allowed" ], "basic_cost": 1 },
       { "terrain": "railroad_bridge", "locations": [ "water" ], "basic_cost": 1, "flags": [ "ORTHOGONAL" ] }
     ]
+  },
+  {
+    "type": "overmap_connection",
+    "id": "controlled_access_highway_northbound",
+    "subtypes": [
+      { "terrain": "controlled_access_highway_northbound", "locations": [ "land" ], "flags": [ "ORTHOGONAL" ] },
+      { "terrain": "controlled_access_highway_northbound", "locations": [ "water" ], "flags": [ "ORTHOGONAL" ] }
+    ]
+  },
+  {
+    "type": "overmap_connection",
+    "id": "controlled_access_highway_southbound",
+    "subtypes": [
+      { "terrain": "controlled_access_highway_southbound", "locations": [ "land" ], "flags": [ "ORTHOGONAL" ] },
+      { "terrain": "controlled_access_highway_southbound", "locations": [ "water" ], "flags": [ "ORTHOGONAL" ] }
+    ]
   }
 ]

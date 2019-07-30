@@ -1,6 +1,32 @@
 [
   {
     "type": "overmap_terrain",
+    "id": "controlled_access_highway_northbound",
+    "name": "highway",
+    "color": "light_blue",
+    "see_cost": 1,
+    "mapgen_straight": [ { "method": "builtin", "name": "controlled_access_highway_straight" } ],
+    "mapgen_curved": [ { "method": "builtin", "name": "controlled_access_highway_curved" } ],
+    "mapgen_end": [ { "method": "builtin", "name": "controlled_access_highway_end" } ],
+    "mapgen_tee": [ { "method": "builtin", "name": "controlled_access_highway_tee" } ],
+    "mapgen_four_way": [ { "method": "builtin", "name": "controlled_access_highway_four_way" } ],
+    "flags": [ "LINEAR" ]
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "controlled_access_highway_southbound",
+    "name": "highway",
+    "color": "light_blue",
+    "see_cost": 1,
+    "mapgen_straight": [ { "method": "builtin", "name": "controlled_access_highway_straight" } ],
+    "mapgen_curved": [ { "method": "builtin", "name": "controlled_access_highway_curved" } ],
+    "mapgen_end": [ { "method": "builtin", "name": "controlled_access_highway_end" } ],
+    "mapgen_tee": [ { "method": "builtin", "name": "controlled_access_highway_tee" } ],
+    "mapgen_four_way": [ { "method": "builtin", "name": "controlled_access_highway_four_way" } ],
+    "flags": [ "LINEAR" ]
+  },
+  {
+    "type": "overmap_terrain",
     "id": "hiway_ns",
     "copy-from": "generic_transportation",
     "name": "highway",

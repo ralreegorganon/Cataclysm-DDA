@@ -1435,7 +1435,7 @@ void overmap::set_scent( const tripoint &loc, const scent_trace &new_scent )
 
 void overmap::generate( const overmap *north, const overmap *east,
                         const overmap *south, const overmap *west,
-                        overmap_special_batch &enabled_specials )
+                        overmap_special_batch & )
 {
     dbg( D_INFO ) << "overmap::generate start...";
 
@@ -1443,11 +1443,12 @@ void overmap::generate( const overmap *north, const overmap *east,
     place_lakes();
     place_forests();
     place_swamps();
-    place_cities();
-    place_forest_trails();
-    place_roads( north, east, south, west );
-    place_specials( enabled_specials );
-    place_forest_trailheads();
+    place_controlled_access_highway(north, east, south, west);
+    // place_cities();
+    // place_forest_trails();
+    // place_roads( north, east, south, west );
+    // place_specials( enabled_specials );
+    // place_forest_trailheads();
 
     polish_river();
 
@@ -2584,6 +2585,112 @@ void overmap::place_swamps()
             }
         }
     }
+}
+
+void overmap::place_controlled_access_highway( const overmap *, const overmap *, const overmap *, const overmap * )
+{
+    const string_id<overmap_connection> nbc( "controlled_access_highway_northbound" );
+    const string_id<overmap_connection> sbc( "controlled_access_highway_southbound" );
+
+    std::vector<point> highway_points = {
+        {90, 2},
+        {90, 40},
+        {91, 40},
+        {91, 45},
+        {170, 45}
+    };
+
+    std::vector<pf::node> all_nb_nodes;
+    
+    for(auto i = highway_points.begin(); i < highway_points.end() - 1; i++)
+    {
+        const point start = *i;
+        const point end = *(i+1);
+        const pf::path path = lay_out_connection(*nbc, start, end, 0, false);
+        build_connection(*nbc, path, 0);
+        all_nb_nodes.insert(std::end(all_nb_nodes), std::rbegin(path.nodes), std::rend(path.nodes));
+    }
+    
+    pf::path all_sb_nodes;
+    om_direction::type dir = static_cast<om_direction::type>(all_nb_nodes.begin()[1].dir);
+    om_direction::type end_dir = static_cast<om_direction::type>((all_nb_nodes.rbegin()[1]).dir);
+    point pos = all_nb_nodes.front().pos() + om_direction::displace(om_direction::turn_left(dir));
+    point end = all_nb_nodes.back().pos() + om_direction::displace(om_direction::turn_left(end_dir));
+    
+    const pf::path path = lay_out_connection(*sbc, pos, end, 0, false);
+    build_connection(*sbc, path, 0);
+    
+//    all_sb_nodes.nodes.emplace_back(pf::node(pos.x, pos.y, static_cast<int>(dir), 0));
+//    all_sb_nodes.nodes.emplace_back(pf::node(end.x, end.y, static_cast<int>(end_dir), 0));
+//    build_connection(*sbc, all_sb_nodes, 0);
+
+//    for(auto i = highway_points.begin(); i < highway_points.end() - 1; i++)
+//    {
+//        const point start = (*i) + point(-1, 0);
+//        const point end = (*(i+1)) + point(-1, 0);
+//        const pf::path path = lay_out_connection(*sbc, start, end, 0, false);
+//        build_connection(*sbc, path, 0);
+//    }
+
+    // // straight down to the south
+    // {
+    //     const point start(90, 2);
+    //     const point end(90, 40);
+    //     const pf::path path = lay_out_connection(*nbc, start, end, 0, false);
+    //     build_connection(*nbc, path, 0);
+    // }
+    // {
+    //     const point start(89, 2);
+    //     const point end(89, 41);
+    //     const auto path = lay_out_connection(*sbc, start, end, 0, false);
+    //     build_connection(*sbc, path, 0);
+    // }
+
+
+    // // move 1 to the east
+    // {
+    //     const point start(90, 40);
+    //     const point end(91, 40);
+    //     const pf::path path = lay_out_connection(*nbc, start, end, 0, false);
+    //     build_connection(*nbc, path, 0);
+    // }
+    // {
+    //     const point start(89, 41);
+    //     const point end(90, 41);
+    //     const auto path = lay_out_connection(*sbc, start, end, 0, false);
+    //     build_connection(*sbc, path, 0);
+    // }
+
+    // // move 5 to south
+    // {
+    //     const point start(91, 40);
+    //     const point end(91, 45);
+    //     const pf::path path = lay_out_connection(*nbc, start, end, 0, false);
+    //     build_connection(*nbc, path, 0);
+    // }
+    // {
+    //     const point start(90, 41);
+    //     const point end(90, 46);
+    //     const auto path = lay_out_connection(*sbc, start, end, 0, false);
+    //     build_connection(*sbc, path, 0);
+    // }
+
+
+    // // move a bunch east
+    // {
+    //     const point start(91, 45);
+    //     const point end(170, 45);
+    //     const pf::path path = lay_out_connection(*nbc, start, end, 0, false);
+    //     build_connection(*nbc, path, 0);
+    // }
+    // {
+    //     const point start(90, 46);
+    //     const point end(170, 46);
+    //     const auto path = lay_out_connection(*sbc, start, end, 0, false);
+    //     build_connection(*sbc, path, 0);
+    // }
+    
+
 }
 
 void overmap::place_roads( const overmap *north, const overmap *east, const overmap *south,

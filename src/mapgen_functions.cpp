@@ -178,6 +178,11 @@ building_gen_pointer get_mapgen_cfunction( const std::string &ident )
             { "ants_queen", &mapgen_ants_queen },
             { "tutorial", &mapgen_tutorial },
             { "lake_shore", &mapgen_lake_shore },
+            { "controlled_access_highway_straight",    &mapgen_controlled_access_highway_straight },
+            { "controlled_access_highway_curved",      &mapgen_controlled_access_highway_curved },
+            { "controlled_access_highway_end",         &mapgen_controlled_access_highway_straight },
+            { "controlled_access_highway_tee",         &mapgen_controlled_access_highway_tee },
+            { "controlled_access_highway_four_way",    &mapgen_controlled_access_highway_four_way },
         }
     };
     const auto iter = pointers.find( ident );
@@ -4542,6 +4547,167 @@ void mapgen_lake_shore( map *m, oter_id, mapgendata dat, const time_point &turn,
     // pick up shallow water from our extended terrain. Now turn those nulls into t_water_sh.
     m->translate( t_null, t_water_sh );
 }
+
+void mapgen_controlled_access_highway_straight( map *m, oter_id terrain_type, mapgendata dat,
+                                   const time_point &turn,
+                                   float density )
+{
+    mapgen_forest( m, oter_str_id( "forest_thick" ).id(), dat, turn, density );
+
+    const auto center_offset = [&dat]() {
+        return rng( -dat.region.forest_trail.trail_center_variance,
+                    dat.region.forest_trail.trail_center_variance );
+    };
+
+    const auto width_offset = [&dat]() {
+        return rng( dat.region.forest_trail.trail_width_offset_min,
+                    dat.region.forest_trail.trail_width_offset_max );
+    };
+
+    int center_x = SEEX + center_offset();
+    int center_y = SEEY + center_offset();
+
+    for( int i = 0; i < SEEX * 2; i++ ) {
+        for( int j = 0; j < SEEY * 2; j++ ) {
+            if( i > center_x - width_offset() && i < center_x + width_offset() ) {
+                m->furn_set( i, j, f_null );
+                m->ter_set( i, j, *dat.region.forest_trail.trail_terrain.pick() );
+            }
+        }
+    }
+
+    if( terrain_type == "forest_trail_ew" || terrain_type == "forest_trail_end_east" ||
+        terrain_type == "forest_trail_end_west" ) {
+        m->rotate( 1 );
+    }
+
+    m->place_items( "forest_trail", 75, center_x - 2, center_y - 2, center_x + 2, center_y + 2, true,
+                    turn );
+}
+
+void mapgen_controlled_access_highway_curved( map *m, oter_id terrain_type, mapgendata dat,
+                                 const time_point &turn,
+                                 float density )
+{
+    mapgen_forest( m, oter_str_id( "forest_thick" ).id(), dat, turn, density );
+
+    const auto center_offset = [&dat]() {
+        return rng( -dat.region.forest_trail.trail_center_variance,
+                    dat.region.forest_trail.trail_center_variance );
+    };
+
+    const auto width_offset = [&dat]() {
+        return rng( dat.region.forest_trail.trail_width_offset_min,
+                    dat.region.forest_trail.trail_width_offset_max );
+    };
+
+    int center_x = SEEX + center_offset();
+    int center_y = SEEY + center_offset();
+
+    for( int i = 0; i < SEEX * 2; i++ ) {
+        for( int j = 0; j < SEEY * 2; j++ ) {
+            if( ( i > center_x - width_offset() && i < center_x + width_offset() &&
+                  j < center_y + width_offset() ) ||
+                ( j > center_y - width_offset() && j < center_y + width_offset() &&
+                  i > center_x - width_offset() ) ) {
+                m->furn_set( i, j, f_null );
+                m->ter_set( i, j, *dat.region.forest_trail.trail_terrain.pick() );
+            }
+        }
+    }
+
+    if( terrain_type == "forest_trail_es" ) {
+        m->rotate( 1 );
+    }
+    if( terrain_type == "forest_trail_sw" ) {
+        m->rotate( 2 );
+    }
+    if( terrain_type == "forest_trail_wn" ) {
+        m->rotate( 3 );
+    }
+
+    m->place_items( "forest_trail", 75, center_x - 2, center_y - 2, center_x + 2, center_y + 2, true,
+                    turn );
+}
+
+void mapgen_controlled_access_highway_tee( map *m, oter_id terrain_type, mapgendata dat, const time_point &turn,
+                              float density )
+{
+    mapgen_forest( m, oter_str_id( "forest_thick" ).id(), dat, turn, density );
+
+    const auto center_offset = [&dat]() {
+        return rng( -dat.region.forest_trail.trail_center_variance,
+                    dat.region.forest_trail.trail_center_variance );
+    };
+
+    const auto width_offset = [&dat]() {
+        return rng( dat.region.forest_trail.trail_width_offset_min,
+                    dat.region.forest_trail.trail_width_offset_max );
+    };
+
+    int center_x = SEEX + center_offset();
+    int center_y = SEEY + center_offset();
+
+    for( int i = 0; i < SEEX * 2; i++ ) {
+        for( int j = 0; j < SEEY * 2; j++ ) {
+            if( ( i > center_x - width_offset() && i < center_x + width_offset() ) ||
+                ( j > center_y - width_offset() &&
+                  j < center_y + width_offset() && i > center_x - width_offset() ) ) {
+                m->furn_set( i, j, f_null );
+                m->ter_set( i, j, *dat.region.forest_trail.trail_terrain.pick() );
+            }
+        }
+    }
+
+    if( terrain_type == "forest_trail_esw" ) {
+        m->rotate( 1 );
+    }
+    if( terrain_type == "forest_trail_nsw" ) {
+        m->rotate( 2 );
+    }
+    if( terrain_type == "forest_trail_new" ) {
+        m->rotate( 3 );
+    }
+
+    m->place_items( "forest_trail", 75, center_x - 2, center_y - 2, center_x + 2, center_y + 2, true,
+                    turn );
+}
+
+void mapgen_controlled_access_highway_four_way( map *m, oter_id, mapgendata dat, const time_point &turn,
+                                   float density )
+{
+    mapgen_forest( m, oter_str_id( "forest_thick" ).id(), dat, turn, density );
+
+    const auto center_offset = [&dat]() {
+        return rng( -dat.region.forest_trail.trail_center_variance,
+                    dat.region.forest_trail.trail_center_variance );
+    };
+
+    const auto width_offset = [&dat]() {
+        return rng( dat.region.forest_trail.trail_width_offset_min,
+                    dat.region.forest_trail.trail_width_offset_max );
+    };
+
+    int center_x = SEEX + center_offset();
+    int center_y = SEEY + center_offset();
+
+    for( int i = 0; i < SEEX * 2; i++ ) {
+        for( int j = 0; j < SEEY * 2; j++ ) {
+            if( ( i > center_x - width_offset() && i < center_x + width_offset() ) ||
+                ( j > center_y - width_offset() &&
+                  j < center_y + width_offset() ) ) {
+                m->furn_set( i, j, f_null );
+                m->ter_set( i, j, *dat.region.forest_trail.trail_terrain.pick() );
+            }
+        }
+    }
+
+    m->place_items( "forest_trail", 75, center_x - 2, center_y - 2, center_x + 2, center_y + 2, true,
+                    turn );
+}
+
+
+
 
 void mremove_trap( map *m, int x, int y )
 {

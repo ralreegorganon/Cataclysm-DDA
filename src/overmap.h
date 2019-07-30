@@ -357,6 +357,8 @@ class overmap
 
         void place_roads( const overmap *north, const overmap *east, const overmap *south,
                           const overmap *west );
+        void place_controlled_access_highway( const overmap *north, const overmap *east, const overmap *south,
+                          const overmap *west );
 
         // City Building
         overmap_special_id pick_random_building_to_place( int town_dist ) const;
