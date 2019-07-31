@@ -32,6 +32,7 @@ class JsonOut;
 class overmapbuffer;
 class item;
 class npc;
+struct condition_context;
 
 enum npc_mission : int;
 
@@ -67,6 +68,7 @@ enum mission_goal {
     MGOAL_COMPUTER_TOGGLE,   // Activating the correct terminal will complete the mission
     MGOAL_KILL_MONSTER_SPEC,  // Kill a number of monsters from a given species
     MGOAL_TALK_TO_NPC,       // Talk to a given NPC
+    MGOAL_CONDITION,         // Satisfy the dynamically created condition and talk to the mission giver
     NUM_MGOAL
 };
 const std::unordered_map<std::string, mission_goal> mission_goal_strs = { {
@@ -85,7 +87,8 @@ const std::unordered_map<std::string, mission_goal> mission_goal_strs = { {
         { "MGOAL_RECRUIT_NPC_CLASS", MGOAL_RECRUIT_NPC_CLASS },
         { "MGOAL_COMPUTER_TOGGLE", MGOAL_COMPUTER_TOGGLE },
         { "MGOAL_KILL_MONSTER_SPEC", MGOAL_KILL_MONSTER_SPEC },
-        { "MGOAL_TALK_TO_NPC", MGOAL_TALK_TO_NPC }
+        { "MGOAL_TALK_TO_NPC", MGOAL_TALK_TO_NPC },
+        { "MGOAL_CONDITION", MGOAL_CONDITION }
     }
 };
 
@@ -229,6 +232,9 @@ struct mission_type {
 
     std::map<std::string, std::string> dialogue;
 
+    // A dynamic goal condition invoked by MGOAL_CONDITION.
+    std::function<bool( const condition_context & )> goal_condition;
+
     mission_type() = default;
     mission_type( mission_type_id ID, const std::string &NAME, mission_goal GOAL, int DIF, int VAL,
                   bool URGENT,
@@ -265,6 +271,8 @@ struct mission_type {
 
     bool parse_funcs( JsonObject &jo, std::function<void( mission * )> &phase_func );
     void load( JsonObject &jo, const std::string &src );
+
+    bool test_goal_condition( const condition_context &d ) const;
 };
 
 class mission
