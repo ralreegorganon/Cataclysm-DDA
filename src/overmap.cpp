@@ -2595,6 +2595,8 @@ void overmap::place_controlled_access_highway( const overmap *, const overmap *,
     std::vector<point> highway_points = {
         {90, 1},
         {90, 3},
+        {120, 3},
+        {120, 50}
     };
 
     std::vector<pf::node> all_nb_nodes;
@@ -2615,8 +2617,8 @@ void overmap::place_controlled_access_highway( const overmap *, const overmap *,
     pf::path all_sb_nodes;
     om_direction::type dir = static_cast<om_direction::type>(all_nb_nodes.begin()[1].dir);
     om_direction::type end_dir = static_cast<om_direction::type>((all_nb_nodes.rbegin()[1]).dir);
-    point pos = all_nb_nodes.front().pos() + om_direction::displace(om_direction::turn_left(dir));
-    point end = all_nb_nodes.back().pos() + om_direction::displace(om_direction::turn_left(end_dir));
+    point pos = all_nb_nodes.front().pos + om_direction::displace(om_direction::turn_left(dir));
+    point end = all_nb_nodes.back().pos + om_direction::displace(om_direction::turn_left(end_dir));
     
 
     while (pos != end) {
@@ -2627,7 +2629,7 @@ void overmap::place_controlled_access_highway( const overmap *, const overmap *,
         const bool can_advance = subtype;
 
         if (highway_to_right) {
-            all_sb_nodes.nodes.emplace_back(pf::node(pos.x, pos.y, static_cast<int>(dir), 0));
+            all_sb_nodes.nodes.emplace_back(pf::node(point(pos.x, pos.y), static_cast<int>(dir), 0));
             if (can_advance) {
                 pos = pos + om_direction::displace(om_direction::opposite(dir));
             }
@@ -2636,12 +2638,12 @@ void overmap::place_controlled_access_highway( const overmap *, const overmap *,
             }
         }
         else {
-            all_sb_nodes.nodes.emplace_back(pf::node(pos.x, pos.y, static_cast<int>(dir), 0));
+            all_sb_nodes.nodes.emplace_back(pf::node(point(pos.x, pos.y), static_cast<int>(dir), 0));
             dir = om_direction::turn_right(dir);
             pos = pos + om_direction::displace(om_direction::opposite(dir));
         }
     }
-    all_sb_nodes.nodes.emplace_back(pf::node(pos.x, pos.y, static_cast<int>(dir), 0));
+    all_sb_nodes.nodes.emplace_back(pf::node(point(pos.x, pos.y), static_cast<int>(dir), 0));
 
     build_connection(*sbc, all_sb_nodes, 0);
     
@@ -3406,7 +3408,7 @@ pf::path overmap::lay_out_connection( const overmap_connection &connection, cons
 
         const bool existing_connection = connection.has( id );
 
-        if (existing_connection && require_new_connection && cur.pos() != source && cur.pos() != dest) {
+        if (existing_connection && require_new_connection && cur.pos != source && cur.pos != dest) {
             return pf::rejected;
         }
 
