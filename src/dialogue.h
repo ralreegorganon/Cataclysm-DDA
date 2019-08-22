@@ -86,12 +86,14 @@ struct talk_topic {
 struct talk_effect_fun_t {
     private:
         std::function<void( const dialogue &d )> function;
+        std::function<bool(const dialogue &d)> condition;
 
     public:
         talk_effect_fun_t() = default;
         talk_effect_fun_t( talkfunction_ptr effect );
         talk_effect_fun_t( std::function<void( npc & )> effect );
         talk_effect_fun_t( std::function<void( const dialogue &d )> fun );
+        void set_condition(std::function<bool(const dialogue& d)> condition_func);
         void set_companion_mission( const std::string &role_id );
         void set_add_effect( JsonObject jo, const std::string &member, bool is_npc = false );
         void set_remove_effect( JsonObject jo, const std::string &member, bool is_npc = false );
@@ -126,7 +128,14 @@ struct talk_effect_fun_t {
             if( !function ) {
                 return;
             }
-            return function( d );
+
+            if (!condition) {
+                return function(d);
+            }
+
+            if (condition(d)) {
+                return function(d);
+            }
         }
 };
 

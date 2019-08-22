@@ -1678,6 +1678,13 @@ talk_effect_fun_t::talk_effect_fun_t( std::function<void( const dialogue &d )> f
     };
 }
 
+void talk_effect_fun_t::set_condition(std::function<bool(const dialogue& d)> condition_func) 
+{
+    condition = [condition_func](const dialogue& d) {
+        return condition_func(d);
+    };
+}
+
 void talk_effect_fun_t::set_companion_mission( const std::string &role_id )
 {
     function = [role_id]( const dialogue & d ) {
@@ -2296,6 +2303,13 @@ void talk_effect_t::parse_sub_effect( JsonObject jo )
     } else {
         jo.throw_error( "invalid sub effect syntax :" + jo.str() );
     }
+
+    if (jo.has_member("condition")) {
+        std::function<bool(const dialogue&)> condition;
+        read_condition<dialogue>(jo, "condition", condition, true);
+        subeffect_fun.set_condition(condition);
+    }
+
     set_effect( subeffect_fun );
 }
 
