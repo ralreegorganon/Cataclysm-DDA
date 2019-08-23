@@ -510,9 +510,23 @@ bool mission_type::parse_funcs( JsonObject &jo, std::function<void( mission * )>
     /* this is a kind of gross hijack of the dialogue responses effect system, but I don't want to
      * write that code in two places so here it goes.
      */
+
+    // Load the unconditional effects.
     talk_effect_t talk_effects;
     talk_effects.load_effect( jo );
-    phase_func = [ funcs, talk_effects ]( mission * miss ) {
+
+    // Load the effects that may have conditions.
+    std::vector<json_dynamic_line_effect> conditional_effects;
+    if( jo.has_array( "conditional_effect" ) ) {
+        JsonArray effect_array = jo.get_array( "conditional_effect" );
+        while( effect_array.has_more() ) {
+            JsonObject conditional_effect_jo = effect_array.next_object();
+            json_dynamic_line_effect conditional_effect( conditional_effect_jo, id.str() );
+            conditional_effects.emplace_back( conditional_effect );
+        }
+    }
+
+    phase_func = [ funcs, talk_effects, conditional_effects]( mission * miss ) {
         ::dialogue d;
         d.beta = g->find_npc( miss->get_npc_id() );
         standard_npc default_npc( "Default" );
@@ -520,9 +534,19 @@ bool mission_type::parse_funcs( JsonObject &jo, std::function<void( mission * )>
             d.beta = &default_npc;
         }
         d.alpha = &g->u;
+
+        // Apply all of the unconditional effects.
         for( const talk_effect_fun_t &effect : talk_effects.effects ) {
             effect( d );
         }
+
+        // Test and apply all of the conditional effects.
+        for( const json_dynamic_line_effect &effect : conditional_effects ) {
+            if( effect.test_condition( d ) ) {
+                effect.apply( d );
+            }
+        }
+
         for( auto &mission_function : funcs ) {
             mission_function( miss );
         }
