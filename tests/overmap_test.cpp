@@ -1,6 +1,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "catch/catch.hpp"
 #include "map.h"
@@ -106,3 +107,30 @@ TEST_CASE( "default_overmap_generation_has_non_mandatory_specials_at_origin" )
     CHECK( found_optional == true );
 }
 
+TEST_CASE( "overmap_generation_statistics" )
+{
+    std::map<oter_id, int> occurrences;
+    int count = 0;
+    for( point p : closest_points_first( 1, point_zero ) ) {
+        count++;
+        if( !overmap_buffer.has( p ) ) {
+            overmap_special_batch test_specials = overmap_specials::get_default_batch( p );
+            overmap_buffer.create_custom_overmap( p, test_specials );
+        }
+        overmap *om = overmap_buffer.get_existing( p );
+        for( int z = -OVERMAP_DEPTH; z <= OVERMAP_HEIGHT; z++ ) {
+            for( int x = 0; x < OMAPX; ++x ) {
+                for( int y = 0; y < OMAPY; ++y ) {
+                    const oter_id t = om->get_ter( { x, y, z } );
+                    occurrences[t] += 1;
+                }
+            }
+        }
+    }
+
+    for(auto &x : occurrences) {
+        std::cout << x.first.id().str() << " , " << x.second << std::endl;
+    }
+ 
+    CHECK(count == 10);
+}
