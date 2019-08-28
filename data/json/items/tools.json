@@ -2346,6 +2346,20 @@
     "flags": [ "FISH_GOOD" ]
   },
   {
+    "id": "gillnet",
+    "type": "TOOL",
+    "name": "gillnet",
+    "description": "This fishing net consists of a single netting wall kept vertical by a floatline and a weighted groundline.  Small plastic floats are evenly distributed along the floatline, while lead weights are evenly distributed along groundline.  Fish swim into the net and pass only part way through.  When it struggles to free itself, the twine slips behind the gill cover and prevents escape.",
+    "weight": 1100,
+    "volume": "1500 ml",
+    "price": 500,
+    "to_hit": -2,
+    "material": ["plastic", "lead"],
+    "symbol": "H",
+    "color": "white",
+    "use_action": "set_gillnet"
+  },
+  {
     "id": "flamable_arrow",
     "type": "TOOL",
     "category": "ammo",
