@@ -41,5 +41,13 @@
       { "terrain": "railroad_level_crossing", "locations": [ "railroad_level_crossing_allowed" ], "basic_cost": 1 },
       { "terrain": "railroad_bridge", "locations": [ "water" ], "basic_cost": 1, "flags": [ "ORTHOGONAL" ] }
     ]
+  },
+  {
+    "type": "overmap_connection",
+    "id": "limited_access_highway",
+    "subtypes": [
+      { "terrain": "limited_access_highway", "locations": [ "land" ], "flags": [ "ORTHOGONAL" ] },
+      { "terrain": "limited_access_highway", "locations": [ "water" ], "flags": [ "ORTHOGONAL" ] }
+    ]
   }
 ]

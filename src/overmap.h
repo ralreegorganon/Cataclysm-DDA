@@ -357,6 +357,8 @@ class overmap
 
         void place_roads( const overmap *north, const overmap *east, const overmap *south,
                           const overmap *west );
+        void place_limited_access_highways( const overmap *north, const overmap *east, const overmap *south,
+                                            const overmap *west );
 
         void populate_connections_out_from_neighbors( const overmap *north, const overmap *east,
                 const overmap *south, const overmap *west );
