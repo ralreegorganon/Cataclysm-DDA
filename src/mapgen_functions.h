@@ -205,6 +205,9 @@ void mapgen_tutorial( map *m, oter_id terrain_type, mapgendata dat, const time_p
                       float density );
 void mapgen_lake_shore( map *m, oter_id terrain_type, mapgendata dat, const time_point &turn,
                         float density );
+void mapgen_limited_access_highway( map *m, oter_id terrain_type, mapgendata dat,
+                                    const time_point &turn,
+                                    float density );
 
 // Temporary wrappers
 void mremove_trap( map *m, int x, int y );

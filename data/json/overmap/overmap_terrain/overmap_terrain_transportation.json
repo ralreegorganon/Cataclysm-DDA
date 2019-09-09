@@ -734,5 +734,18 @@
     "color": "dark_gray",
     "see_cost": 5,
     "extras": "build"
+  },
+  {
+    "type": "overmap_terrain",
+    "id": "limited_access_highway",
+    "name": "highway (limited access)",
+    "color": "light_blue",
+    "see_cost": 1,
+    "mapgen_straight": [ { "method": "builtin", "name": "limited_access_highway" } ],
+    "mapgen_curved": [ { "method": "builtin", "name": "limited_access_highway" } ],
+    "mapgen_end": [ { "method": "builtin", "name": "limited_access_highway" } ],
+    "mapgen_tee": [ { "method": "builtin", "name": "limited_access_highway" } ],
+    "mapgen_four_way": [ { "method": "builtin", "name": "limited_access_highway" } ],
+    "flags": [ "LINEAR" ]
   }
 ]

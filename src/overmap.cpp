@@ -1432,7 +1432,7 @@ void overmap::set_scent( const tripoint &loc, const scent_trace &new_scent )
 
 void overmap::generate( const overmap *north, const overmap *east,
                         const overmap *south, const overmap *west,
-                        overmap_special_batch &enabled_specials )
+                        overmap_special_batch &/*enabled_specials*/ )
 {
     dbg( D_INFO ) << "overmap::generate start...";
 
@@ -1440,11 +1440,13 @@ void overmap::generate( const overmap *north, const overmap *east,
     place_lakes();
     place_forests();
     place_swamps();
-    place_cities();
     place_forest_trails();
-    place_roads( north, east, south, west );
-    place_specials( enabled_specials );
-    place_forest_trailheads();
+    place_limited_access_highways( north, east, south, west );
+
+    // place_cities();
+    // place_roads( north, east, south, west );
+    // place_specials( enabled_specials );
+    // place_forest_trailheads();
 
     polish_river();
 
@@ -2674,6 +2676,85 @@ void overmap::place_roads( const overmap *north, const overmap *east, const over
     // And finally connect them via roads.
     const string_id<overmap_connection> local_road( "local_road" );
     connect_closest_points( road_points, 0, *local_road );
+}
+
+void overmap::place_limited_access_highways( const overmap *north, const overmap *east,
+        const overmap *south,
+        const overmap *west )
+{
+    if( north != nullptr ) {
+        for( auto &i : north->limited_access_highways_out ) {
+            if( i.y == OMAPY - 1 ) {
+                limited_access_highways_out.push_back( {i.x, 0, 0} );
+            }
+        }
+    }
+    if( west != nullptr ) {
+        for( auto &i : west->limited_access_highways_out ) {
+            if( i.x == OMAPX - 1 ) {
+                limited_access_highways_out.push_back( { 0, i.y, 0 } );
+            }
+        }
+    }
+    if( south != nullptr ) {
+        for( auto &i : south->limited_access_highways_out ) {
+            if( i.y == 0 ) {
+                limited_access_highways_out.push_back( { i.x, OMAPY - 1, 0} );
+            }
+        }
+    }
+    if( east != nullptr ) {
+        for( auto &i : east->limited_access_highways_out ) {
+            if( i.x == 0 ) {
+                limited_access_highways_out.push_back( { OMAPX - 1, i.y, 0} );
+            }
+        }
+    }
+
+    if( limited_access_highways_out.size() < 2 ) {
+        std::vector<tripoint> viable_exits;
+        tripoint tmp;
+        if( north == nullptr ) {
+            do {
+                tmp = tripoint( rng( 10, OMAPX - 11 ), 0, 0 );
+            } while( is_river( ter( tmp ) ) || is_river( ter( tmp + point_east ) ) ||
+                     is_river( ter( tmp + point_west ) ) );
+            viable_exits.push_back( tmp );
+        }
+        if( east == nullptr ) {
+            do {
+                tmp = tripoint( OMAPX - 1, rng( 10, OMAPY - 11 ), 0 );
+            } while( is_river( ter( tmp ) ) || is_river( ter( tmp + point_north ) ) ||
+                     is_river( ter( tmp + point_south ) ) );
+            viable_exits.push_back( tmp );
+        }
+        if( south == nullptr ) {
+            do {
+                tmp = tripoint( rng( 10, OMAPX - 11 ), OMAPY - 1, 0 );
+            } while( is_river( ter( tmp ) ) || is_river( ter( tmp + point_east ) ) ||
+                     is_river( ter( tmp + point_west ) ) );
+            viable_exits.push_back( tmp );
+        }
+        if( west == nullptr ) {
+            do {
+                tmp = tripoint( 0, rng( 10, OMAPY - 11 ), 0 );
+            } while( is_river( ter( tmp ) ) || is_river( ter( tmp + point_north ) ) ||
+                     is_river( ter( tmp + point_south ) ) );
+            viable_exits.push_back( tmp );
+        }
+        while( limited_access_highways_out.size() < 2 && !viable_exits.empty() ) {
+            limited_access_highways_out.push_back( random_entry_removed( viable_exits ) );
+        }
+    }
+
+    const string_id<overmap_connection> limited_access_highway( "limited_access_highway" );
+    for( auto i = limited_access_highways_out.begin(); i < limited_access_highways_out.end() - 1;
+         i++ ) {
+        const point start = ( *i ).xy();
+        const point end = ( *( i + 1 ) ).xy();
+        const pf::path path = lay_out_connection( *limited_access_highway, start, end, 0, false );
+        build_connection( *limited_access_highway, path, 0 );
+    }
 }
 
 void overmap::place_river( point pa, point pb )

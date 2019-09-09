@@ -271,6 +271,7 @@ class overmap
         std::vector<basecamp> camps;
         std::vector<city> cities;
         std::vector<city> roads_out;
+        std::vector<tripoint> limited_access_highways_out;
         cata::optional<basecamp *> find_camp( const point &p );
         /// Adds the npc to the contained list of npcs ( @ref npcs ).
         void insert_npc( std::shared_ptr<npc> who );
@@ -357,6 +358,8 @@ class overmap
 
         void place_roads( const overmap *north, const overmap *east, const overmap *south,
                           const overmap *west );
+        void place_limited_access_highways( const overmap *north, const overmap *east, const overmap *south,
+                                            const overmap *west );
 
         // City Building
         overmap_special_id pick_random_building_to_place( int town_dist ) const;
