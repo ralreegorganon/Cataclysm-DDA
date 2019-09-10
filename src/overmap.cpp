@@ -1440,7 +1440,7 @@ void overmap::generate( const overmap *north, const overmap *east,
     place_lakes();
     place_forests();
     place_swamps();
-    place_forest_trails();
+    //place_forest_trails();
     place_limited_access_highways( north, east, south, west );
 
     // place_cities();
@@ -2747,7 +2747,13 @@ void overmap::place_limited_access_highways( const overmap *north, const overmap
         }
     }
 
+    
     const string_id<overmap_connection> limited_access_highway( "limited_access_highway" );
+
+//    const point start(177, 90);
+//    const point end(179, 90);
+//    const pf::path path = lay_out_connection( *limited_access_highway, start, end, 0, false );
+//    build_connection( *limited_access_highway, path, 0 );
     for( auto i = limited_access_highways_out.begin(); i < limited_access_highways_out.end() - 1;
          i++ ) {
         const point start = ( *i ).xy();
