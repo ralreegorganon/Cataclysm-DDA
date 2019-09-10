@@ -255,6 +255,8 @@
 		2876C79C22F9F27D009737FB /* timed_event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2876C79A22F9F27D009737FB /* timed_event.cpp */; };
 		287A934A22EBC63A0033ACE7 /* point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 287A934722EBC63A0033ACE7 /* point.cpp */; };
 		287FA9B62175BE2E00E5A203 /* popup.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 287FA9B42175BE2E00E5A203 /* popup.cpp */; };
+		289797EC23270010006E7388 /* relic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 289797E823270010006E7388 /* relic.cpp */; };
+		289797ED23270010006E7388 /* magic_enchantment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 289797EB23270010006E7388 /* magic_enchantment.cpp */; };
 		2898BC30224AA44700418350 /* panels.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2898BC2E224AA44700418350 /* panels.cpp */; };
 		28ACBB842321BA9300514698 /* event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28ACBB722321BA9200514698 /* event.cpp */; };
 		28ACBB852321BA9300514698 /* cata_variant.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 28ACBB732321BA9200514698 /* cata_variant.cpp */; };
@@ -788,6 +790,10 @@
 		287FA9B42175BE2E00E5A203 /* popup.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = popup.cpp; sourceTree = "<group>"; };
 		287FA9B52175BE2E00E5A203 /* popup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = popup.h; sourceTree = "<group>"; };
 		2890AC9022779FDD00D66DA9 /* sdl_utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sdl_utils.h; sourceTree = "<group>"; };
+		289797E823270010006E7388 /* relic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = relic.cpp; sourceTree = "<group>"; };
+		289797E923270010006E7388 /* magic_enchantment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = magic_enchantment.h; sourceTree = "<group>"; };
+		289797EA23270010006E7388 /* relic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = relic.h; sourceTree = "<group>"; };
+		289797EB23270010006E7388 /* magic_enchantment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = magic_enchantment.cpp; sourceTree = "<group>"; };
 		2898BC2E224AA44700418350 /* panels.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = panels.cpp; sourceTree = "<group>"; };
 		2898BC2F224AA44700418350 /* panels.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = panels.h; sourceTree = "<group>"; };
 		28ACBB722321BA9200514698 /* event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = event.cpp; sourceTree = "<group>"; };
@@ -863,6 +869,10 @@
 		282100542155941400697C30 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				289797EB23270010006E7388 /* magic_enchantment.cpp */,
+				289797E923270010006E7388 /* magic_enchantment.h */,
+				289797E823270010006E7388 /* relic.cpp */,
+				289797EA23270010006E7388 /* relic.h */,
 				282101E22155941400697C30 /* action.cpp */,
 				282101452155941400697C30 /* action.h */,
 				282101EC2155941400697C30 /* active_item_cache.cpp */,
@@ -1619,6 +1629,7 @@
 				282102362155941400697C30 /* monmove.cpp in Sources */,
 				2821026A2155941400697C30 /* dependency_tree.cpp in Sources */,
 				282102AD2155941400697C30 /* mapgenformat.cpp in Sources */,
+				289797EC23270010006E7388 /* relic.cpp in Sources */,
 				282102BF2155941400697C30 /* mapsharing.cpp in Sources */,
 				282102992155941400697C30 /* string_id_null_ids.cpp in Sources */,
 				282102712155941400697C30 /* main_menu.cpp in Sources */,
@@ -1703,6 +1714,7 @@
 				282102C62155941400697C30 /* vehicle_part.cpp in Sources */,
 				2821028F2155941400697C30 /* mondeath.cpp in Sources */,
 				2821023F2155941400697C30 /* debug_menu.cpp in Sources */,
+				289797ED23270010006E7388 /* magic_enchantment.cpp in Sources */,
 				282102152155941400697C30 /* line.cpp in Sources */,
 				282102CA2155941400697C30 /* game_inventory.cpp in Sources */,
 				282102902155941400697C30 /* overmap.cpp in Sources */,
