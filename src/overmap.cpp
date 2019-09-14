@@ -1441,10 +1441,10 @@ void overmap::generate( const overmap *north, const overmap *east,
     place_forests();
     place_swamps();
     place_cities();
-    place_forest_trails();
+    /*place_forest_trails();
     place_roads( north, east, south, west );
     place_specials( enabled_specials );
-    place_forest_trailheads();
+    place_forest_trailheads();*/
 
     polish_river();
 
@@ -2779,23 +2779,15 @@ void overmap::place_river( point pa, point pb )
     } while( pb.x != x || pb.y != y );
 }
 
-/*: the root is overmap::place_cities()
-20:50 <kevingranade>: which is at overmap.cpp:1355 or so
-20:51 <kevingranade>: the key is cs = rng(4, 17), setting the "size" of the city
-20:51 <kevingranade>: which is roughly it's radius in overmap tiles
-20:52 <kevingranade>: then later overmap::place_mongroups() is called
-20:52 <kevingranade>: which creates a mongroup with radius city_size * 2.5 and population city_size * 80
-20:53 <kevingranade>: tadaa
-
-spawns happen at... <cue Clue music>
-20:56 <kevingranade>: game:pawn_mon() in game.cpp:7380*/
 void overmap::place_cities()
 {
-    int op_city_size = get_option<int>( "CITY_SIZE" );
+    const int op_city_size = get_option<int>( "CITY_SIZE" );
     if( op_city_size <= 0 ) {
         return;
     }
-    int op_city_spacing = get_option<int>( "CITY_SPACING" );
+    const int op_city_size_min = get_option<int>( "CITY_SIZE_MIN" );
+    const int op_city_size_max = get_option<int>( "CITY_SIZE_MAX" );
+    const int op_city_spacing = get_option<int>( "CITY_SPACING" );
 
     // spacing dictates how much of the map is covered in cities
     //   city  |  cities  |   size N cities per overmap
@@ -2810,51 +2802,74 @@ void overmap::place_cities()
     //     7   |     0    |  15 |   3 |   0 |   0 |   0
     //     8   |     0    |   7 |   1 |   0 |   0 |   0
 
-    const double omts_per_overmap = OMAPX * OMAPY;
-    const double city_map_coverage_ratio = 1.0 / std::pow( 2.0, op_city_spacing );
-    const double omts_per_city = ( op_city_size * 2 + 1 ) * ( op_city_size * 2 + 1 ) * 3 / 4.0;
+    int valid_city_location_omt_count = 0;
+    for( int x = 0; x < OMAPX; x++ ) {
+        for( int y = 0; y < OMAPY; y++ ) {
+            if( ter( { x, y, 0 } ) == settings.default_oter ) {
+                valid_city_location_omt_count++;
+            }
+        }
+    }
 
-    // how many cities on this overmap?
-    const int NUM_CITIES =
-        roll_remainder( omts_per_overmap * city_map_coverage_ratio / omts_per_city );
+    constexpr double omts_per_overmap = OMAPX * OMAPY;
+    const double city_map_coverage_ratio = 1.0 / std::pow( 2.0, op_city_spacing );
+
+    const int city_omts_per_overmap = std::min( valid_city_location_omt_count,
+                                      static_cast<int>( omts_per_overmap * city_map_coverage_ratio ) );
+
+    const auto estimated_omts_per_city = []( const int city_size ) {
+        return ( city_size * 2 + 1 ) * ( city_size * 2 + 1 ) * 3 / 4;
+    };
+
+    const auto calc_city_size = []( const int min, const int mode, const int max ) {
+        std::piecewise_linear_distribution<double> rng_triangle_dist;
+        constexpr std::array<double, 3> w{ 0, 1, 0 };
+        std::array<double, 3> i{ min, mode, max };
+        return rng_triangle_dist( rng_get_engine(),
+                                  std::piecewise_linear_distribution<>::param_type( i.begin(), i.end(), w.begin() ) );
+    };
+
+    // Build our set of cities with sizes but no locations until our estimated coverage
+    // meets or exceeds our required coverage.
+    int total_estimated_city_omts = 0;
+    while( total_estimated_city_omts < city_omts_per_overmap ) {
+        city tmp;
+        tmp.size = calc_city_size( op_city_size_min, op_city_size, op_city_size_max );
+        cities.push_back( tmp );
+        total_estimated_city_omts += estimated_omts_per_city( tmp.size );
+    }
+
+    // Sort the cities so our largest city is first.
+    std::sort( std::begin( cities ), std::end( cities ), []( const city & lhs, const city & rhs ) {
+        return lhs.size > rhs.size;
+    } );
+
 
     const string_id<overmap_connection> local_road_id( "local_road" );
     const overmap_connection &local_road( *local_road_id );
 
-    // place a seed for NUM_CITIES cities, and maybe one more
-    while( cities.size() < static_cast<size_t>( NUM_CITIES ) ) {
-        // randomly make some cities smaller or larger
-        int size = rng( op_city_size - 1, op_city_size + 1 );
-        if( one_in( 3 ) ) {      // 33% tiny
-            size = 1;
-        } else if( one_in( 2 ) ) { // 33% small
-            size = size * 2 / 3;
-        } else if( one_in( 2 ) ) { // 17% large
-            size = size * 3 / 2;
-        } else {                 // 17% huge
-            size = size * 2;
-        }
-        size = std::max( size, 1 );
 
-        // TODO: put cities closer to the edge when they can span overmaps
-        // don't draw cities across the edge of the map, they will get clipped
-        int cx = rng( size - 1, OMAPX - size );
-        int cy = rng( size - 1, OMAPY - size );
-        const tripoint p( cx, cy, 0 );
+    for( auto &placing_city : cities ) {
+        for( int attempts = 0; attempts < city_omts_per_overmap; attempts++ ) {
+            // TODO: put cities closer to the edge when they can span overmaps
+            // don't draw cities across the edge of the map, they will get clipped
+            int cx = rng( placing_city.size - 1, OMAPX - placing_city.size );
+            int cy = rng( placing_city.size - 1, OMAPY - placing_city.size );
+            tripoint c( cx, cy, 0 );
+            if( ter( c ) == settings.default_oter ||
+                is_ot_match( "forest", ter( c ), ot_match_type::prefix ) ) {
+                ter( c ) = oter_id( "road_nesw" ); // every city starts with an intersection
+                placing_city.pos = { cx, cy };
 
-        if( ter( p ) == settings.default_oter ) {
-            ter( p ) = oter_id( "road_nesw" ); // every city starts with an intersection
-            city tmp;
-            tmp.pos = p.xy();
-            tmp.size = size;
-            cities.push_back( tmp );
+                const auto start_dir = om_direction::random();
+                auto cur_dir = start_dir;
 
-            const auto start_dir = om_direction::random();
-            auto cur_dir = start_dir;
+                do {
+                    build_city_street( local_road, placing_city.pos, placing_city.size, cur_dir, placing_city );
+                } while( ( cur_dir = om_direction::turn_right( cur_dir ) ) != start_dir );
 
-            do {
-                build_city_street( local_road, tmp.pos, size, cur_dir, tmp );
-            } while( ( cur_dir = om_direction::turn_right( cur_dir ) ) != start_dir );
+                break;
+            }
         }
     }
 }
