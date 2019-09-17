@@ -94,5 +94,10 @@
     "type": "overmap_location",
     "id": "lake_shore",
     "terrains": [ "lake_shore" ]
+  },
+  {
+    "type": "overmap_location",
+    "id": "limited_access_highway",
+    "terrains": [ "limited_access_highway" ]
   }
 ]

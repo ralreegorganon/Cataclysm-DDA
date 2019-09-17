@@ -2707,53 +2707,67 @@ void overmap::place_limited_access_highways( const overmap *north, const overmap
     const string_id<overmap_connection> limited_access_highway( "limited_access_highway" );
     std::vector<tripoint> &limited_access_highways_out = connections_out[limited_access_highway];
 
-    if( limited_access_highways_out.size() < 2 ) {
+    if( limited_access_highways_out.size() < 4 ) {
         std::vector<tripoint> viable_exits;
         tripoint tmp;
         if( north == nullptr ) {
+            int c = 0;
             do {
-                tmp = tripoint( rng( 10, OMAPX - 11 ), 0, 0 );
-            } while( is_river( ter( tmp ) ) || is_river( ter( tmp + point_east ) ) ||
-                     is_river( ter( tmp + point_west ) ) );
-            viable_exits.push_back( tmp );
+                tmp = tripoint( rng( 60, OMAPX - 61 ), 0, 0 );
+            } while( c < 60 &&  (is_river_or_lake( ter( tmp ) ) || is_river_or_lake( ter( tmp + point_east ) ) || is_river_or_lake( ter( tmp + point_west ) )));
+            if (c < 60) {
+                viable_exits.push_back(tmp);
+            }
         }
         if( east == nullptr ) {
+            int c = 0;
             do {
-                tmp = tripoint( OMAPX - 1, rng( 10, OMAPY - 11 ), 0 );
-            } while( is_river( ter( tmp ) ) || is_river( ter( tmp + point_north ) ) ||
-                     is_river( ter( tmp + point_south ) ) );
-            viable_exits.push_back( tmp );
+                tmp = tripoint( OMAPX - 1, rng( 60, OMAPY - 61 ), 0 );
+            } while(c < 60 &&  (is_river_or_lake( ter( tmp ) ) || is_river_or_lake( ter( tmp + point_north ) ) || is_river_or_lake( ter( tmp + point_south ) )) );
+            if (c < 60) {
+                viable_exits.push_back(tmp);
+            }
         }
         if( south == nullptr ) {
+            int c = 0;
             do {
-                tmp = tripoint( rng( 10, OMAPX - 11 ), OMAPY - 1, 0 );
-            } while( is_river( ter( tmp ) ) || is_river( ter( tmp + point_east ) ) ||
-                     is_river( ter( tmp + point_west ) ) );
-            viable_exits.push_back( tmp );
+                tmp = tripoint( rng( 60, OMAPX - 61 ), OMAPY - 1, 0 );
+            } while(c < 60 &&  (is_river_or_lake( ter( tmp ) ) || is_river_or_lake( ter( tmp + point_east ) ) || is_river_or_lake( ter( tmp + point_west ) )) );
+            if (c < 60) {
+                viable_exits.push_back(tmp);
+            }
         }
         if( west == nullptr ) {
+            int c = 0;
             do {
-                tmp = tripoint( 0, rng( 10, OMAPY - 11 ), 0 );
-            } while( is_river( ter( tmp ) ) || is_river( ter( tmp + point_north ) ) ||
-                     is_river( ter( tmp + point_south ) ) );
-            viable_exits.push_back( tmp );
+                tmp = tripoint( 0, rng( 60, OMAPY - 61 ), 0 );
+            } while(c < 60 && (is_river_or_lake( ter( tmp ) ) || is_river_or_lake( ter( tmp + point_north ) ) || is_river_or_lake( ter( tmp + point_south ) ) ));
+            if (c < 60) {
+                viable_exits.push_back(tmp);
+            }
         }
-        while( limited_access_highways_out.size() < 2 && !viable_exits.empty() ) {
+        while( limited_access_highways_out.size() < 4 && !viable_exits.empty() ) {
             limited_access_highways_out.push_back( random_entry_removed( viable_exits ) );
         }
     }
     
+
+
+
     for( auto i = limited_access_highways_out.begin(); i < limited_access_highways_out.end() - 1;
          i++ ) {
         const point start = ( *i ).xy();
-        const point middle = {90,90};
+        
         const point end = ( *( i + 1 ) ).xy();
 
-        const pf::path path_to_middle = lay_out_connection( *limited_access_highway, start, middle, 0, false );
+        /*const pf::path path_to_middle = lay_out_connection( *limited_access_highway, start, junction.xy(), 0, false );
         build_connection( *limited_access_highway, path_to_middle, 0 );
 
-        const pf::path path_from_middle = lay_out_connection( *limited_access_highway, middle, end, 0, false );
-        build_connection( *limited_access_highway, path_from_middle, 0 );
+        const pf::path path_from_middle = lay_out_connection( *limited_access_highway, junction.xy(), end, 0, false );
+        build_connection( *limited_access_highway, path_from_middle, 0 );*/
+
+        const pf::path path_from_start_to_end = lay_out_connection(*limited_access_highway, start, end, 0, false);
+        build_connection(*limited_access_highway, path_from_start_to_end, 0);
     }
 }
 

@@ -8,7 +8,9 @@
       { "terrain": "road", "locations": [ "forest_trail" ], "basic_cost": 25 },
       { "terrain": "road", "locations": [ "swamp" ], "basic_cost": 40 },
       { "terrain": "road_nesw_manhole", "locations": [  ] },
-      { "terrain": "bridge", "locations": [ "water" ], "basic_cost": 120 }
+      { "terrain": "bridge", "locations": [ "water" ], "basic_cost": 120 },
+      { "terrain": "limited_access_highway", "locations": [ "limited_access_highway" ], "basic_cost": 200 }
+        
     ]
   },
   {
@@ -46,8 +48,9 @@
     "type": "overmap_connection",
     "id": "limited_access_highway",
     "subtypes": [
-      { "terrain": "limited_access_highway", "locations": [ "land" ], "flags": [ "ORTHOGONAL" ] },
-      { "terrain": "limited_access_highway", "locations": [ "water" ], "flags": [ "ORTHOGONAL" ] }
+      { "terrain": "limited_access_highway", "locations": [ "limited_access_highway" ]},
+      { "terrain": "limited_access_highway", "locations": [ "land" ], "basic_cost": 5  },
+      { "terrain": "limited_access_highway", "locations": [ "water" ], "basic_cost": 5  }
     ]
   }
 ]

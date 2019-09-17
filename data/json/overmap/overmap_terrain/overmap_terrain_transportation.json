@@ -739,7 +739,7 @@
     "type": "overmap_terrain",
     "id": "limited_access_highway",
     "name": "highway (limited access)",
-    "color": "light_blue",
+    "color": "light_red",
     "see_cost": 1,
     "mapgen_straight": [ { "method": "builtin", "name": "limited_access_highway" } ],
     "mapgen_curved": [ { "method": "builtin", "name": "limited_access_highway" } ],
