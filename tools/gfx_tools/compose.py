@@ -54,9 +54,9 @@ def find_or_make_dir(pathname):
 class PngRefs(object):
     def __init__(self):
         # dict of pngnames to png numbers; used to control uniqueness
-        self.pngname_to_pngnum = { "null_image": 0 }
+        self.pngname_to_pngnum = { }
         # dict of png absolute numbers to png names
-        self.pngnum_to_pngname = { 0: "null_image" }
+        self.pngnum_to_pngname = { }
         self.pngnum = 0
 
     def convert_pngname_to_pngnum(self, index):
@@ -121,8 +121,6 @@ class TilesheetData(object):
                 self.offset_x = ts_specs.get("sprite_offset_x", 0)
                 self.offset_y = ts_specs.get("sprite_offset_y", 0)
                 break
-        self.row_pngs = ["null_image"]
-        refs.pngnum += 1
         self.first_index = pngnum
         self.max_index = pngnum
 
@@ -144,7 +142,7 @@ class TilesheetData(object):
                         continue
                     to_merge.append(filepath)
                     if self.width < 0 or self.height < 0:
-                        img = pyvips.Image.new_from_file(filepath, access='random')
+                        img = pyvips.Image.new_from_file(filepath, access='sequential')
                         self.width = img.width
                         self.height = img.height
 
@@ -158,11 +156,14 @@ class TilesheetData(object):
         
         images = []
         for p in to_merge:
-            img = pyvips.Image.new_from_file(p, access="random")
-            images.append(img)
+            images.append(pyvips.Image.new_from_file(p, access="sequential"))
 
         tilesheet = pyvips.Image.arrayjoin(images, across=16)
         tilesheet.write_to_file(self.ts_path)
+
+        extras = len(images) % 16
+        if extras > 0:
+            refs.pngnum += 16 - extras
 
 args = argparse.ArgumentParser(description="Merge all the individal tile_entries and pngs in a tileset's directory into a tile_config.json and 1 or more tilesheet pngs.")
 args.add_argument("tileset_dir", action="store",

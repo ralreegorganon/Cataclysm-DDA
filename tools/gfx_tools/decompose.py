@@ -225,10 +225,15 @@ class ExtractionData(object):
         file_off_y = self.png_height * y_index + self.offset_y
         tile_png_pathname = self.subdir_pathname + "/" + pngname + ".png"
 
-        img = pyvips.Image.new_from_file(self.ts_pathname, access='random')
-        out = img.extract_area(file_off_x, file_off_y, self.png_width, self.png_height)
-        out.pngsave(tile_png_pathname)
-        refs.extracted_pngnums[png_index] = True
+        try:
+            img = pyvips.Image.new_from_file(self.ts_pathname)
+            out = img.extract_area(file_off_x, file_off_y, self.png_width, self.png_height)
+            out.pngsave(tile_png_pathname)
+            refs.extracted_pngnums[png_index] = True
+        except:
+            img = pyvips.Image.black(self.png_width, self.png_height)
+            img.pngsave(tile_png_pathname)
+            print("{}, {}, {}, {}, {}, {}".format(tile_png_pathname, png_index, file_off_x, file_off_y, self.png_width, self.png_height))
 
     def write_images(self, refs):
         for pngnum in range(self.first_file_index, self.final_file_index + 1):
