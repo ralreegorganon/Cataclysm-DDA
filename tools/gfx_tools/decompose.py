@@ -9,7 +9,7 @@ import copy
 import json
 import os
 import subprocess
-
+import pyvips
 
 # stupid stinking Python 2 versus Python 3 syntax
 def write_to_json(pathname, data):
@@ -143,7 +143,7 @@ class TileSheetData(object):
         #debug statement to verify pngnum_min and pngnum_max
         #print("{} from {} to {}".format(ts_filename, pngnum_min, pngnum_max))
         if self.pngnum_max > 0:
-            self.pngnum_min = 16 * (self.pngnum_min / 16)
+            self.pngnum_min = 16 * (self.pngnum_min // 16)
             tilesheet_to_data[self.ts_filename] = {
                 "min": self.pngnum_min,
                 "max": self.pngnum_max,
@@ -219,22 +219,16 @@ class ExtractionData(object):
         pngname = refs.pngnum_to_pngname[png_index]
         self.increment_dir()
         file_index = png_index - self.first_file_index
-        y_index = file_index / 16
+        y_index = file_index // 16
         x_index = file_index - y_index * 16
         file_off_x = self.png_width * x_index + self.offset_x
         file_off_y = self.png_height * y_index + self.offset_y
-        geometry_offset = "+{}+{}".format(file_off_x, file_off_y)
         tile_png_pathname = self.subdir_pathname + "/" + pngname + ".png"
-        cmd = ["convert", self.ts_pathname, "-crop", self.geometry_dim + geometry_offset,
-               tile_png_pathname]
-        #debug statement for convert call
-        #print("for {}, trying {}".format(png_index, cmd))
-        failure = subprocess.check_output(cmd)
-        if failure:
-            print("failed to extract name {} #{}: {}".format(pngname, file_index, failure))
-        else:
-            #print("extracted {}".format(png_index))
-            refs.extracted_pngnums[png_index] = True
+
+        img = pyvips.Image.new_from_file(self.ts_pathname, access='random')
+        out = img.extract_area(file_off_x, file_off_y, self.png_width, self.png_height)
+        out.pngsave(tile_png_pathname)
+        refs.extracted_pngnums[png_index] = True
 
     def write_images(self, refs):
         for pngnum in range(self.first_file_index, self.final_file_index + 1):

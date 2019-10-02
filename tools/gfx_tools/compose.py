@@ -10,6 +10,7 @@ import json
 import os
 import string
 import subprocess
+import pyvips
 
 FALLBACK = {
     "file": "fallback.png",
@@ -130,28 +131,8 @@ class TilesheetData(object):
             return False
         return self.width == tileset_width and self.height == tileset_height
 
-    def merge_pngs(self, refs):
-        spacer = 16 - len(self.row_pngs)
-        refs.pngnum += spacer
-
-        cmd = ["montage"]
-        for png_pathname in self.row_pngs:
-            if png_pathname == "null_image":
-                cmd.append("null:")
-            else:
-                cmd.append(png_pathname)
-
-        tmp_path = "{}/tmp_{}.png".format(self.subdir_path, self.row_num)
-        cmd += ["-tile", "16x1","-geometry", "{}x{}+0+0".format(self.width, self.height)]
-        cmd += ["-background", "Transparent", tmp_path]
-        failure = subprocess.check_output(cmd)
-        if failure:
-            print("failed: {}".format(failure))
-
-        return tmp_path
-
     def walk_dirs(self, refs):
-        tmp_merged_pngs = []
+        to_merge = []
         for subdir_fpath, dirnames, filenames in os.walk(self.subdir_path):
             #print("{} has dirs {} and files {}".format(subdir_fpath, dirnames, filenames))
             for filename in filenames:
@@ -161,39 +142,27 @@ class TilesheetData(object):
                     if pngname in refs.pngname_to_pngnum or pngname == "no_entry":
                         print("skipping {}".format(pngname))
                         continue
-                    self.row_pngs.append(filepath)
+                    to_merge.append(filepath)
                     if self.width < 0 or self.height < 0:
-                        cmd = ["identify", "-format", "\"%G\"", filepath]
-                        geometry_dim = subprocess.check_output(cmd)
-                        self.width = int(geometry_dim.split("x")[0][1:])
-                        self.height = int(geometry_dim.split("x")[1][:-1])
+                        img = pyvips.Image.new_from_file(filepath, access='random')
+                        self.width = img.width
+                        self.height = img.height
 
                     refs.pngname_to_pngnum[pngname] = refs.pngnum
                     refs.pngnum_to_pngname[refs.pngnum] = pngname
                     refs.pngnum += 1
-                    if len(self.row_pngs) > 15:
-                        merged = self.merge_pngs(refs)
-                        self.row_num += 1
-                        self.row_pngs = []
-                        tmp_merged_pngs.append(merged)
                 elif filename.endswith(".json"):
                     with open(filepath, "r") as fp:
                         tile_entry = json.load(fp)
                         self.tile_entries.append(tile_entry)
-        merged = self.merge_pngs(refs)
-        tmp_merged_pngs.append(merged)
-        return tmp_merged_pngs
+        
+        images = []
+        for p in to_merge:
+            img = pyvips.Image.new_from_file(p, access="random")
+            images.append(img)
 
-    def finalize_merges(self, merge_pngs):
-        cmd = ["montage"] + merge_pngs
-        cmd += ["-tile", "1", "-geometry", "{}x{}".format(16 * self.width, self.height)]
-        cmd += ["-background", "Transparent", self.ts_path]
-        failure = subprocess.check_output(cmd)
-        if failure:
-            print("failed: {}".format(failure))
-        for merged_png in merge_pngs:
-            os.remove(merged_png)
-
+        tilesheet = pyvips.Image.arrayjoin(images, across=16)
+        tilesheet.write_to_file(self.ts_path)
 
 args = argparse.ArgumentParser(description="Merge all the individal tile_entries and pngs in a tileset's directory into a tile_config.json and 1 or more tilesheet pngs.")
 args.add_argument("tileset_dir", action="store",
@@ -229,13 +198,10 @@ all_subdirs = os.listdir(tileset_pathname)
 all_subdirs.sort()
 
 for subdir in all_subdirs:
-    if string.find(subdir, "pngs_") < 0:
+    if subdir.find("pngs_") < 0:
         continue
     ts_data = TilesheetData(subdir, tileset_pathname, tileset_info, refs)
-    tmp_merged_pngs = ts_data.walk_dirs(refs)
-
-    ts_data.finalize_merges(tmp_merged_pngs)
-
+    ts_data.walk_dirs(refs)
     ts_data.max_index = refs.pngnum
     all_ts_data.append(ts_data)
 
