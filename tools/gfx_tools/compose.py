@@ -175,6 +175,8 @@ class TilesheetData(object):
                 in_list.append(self.null_image)
             else:
                 vips_image = Vips.Image.pngload(png_pathname)
+                if not vips_image.hasalpha():
+                    vips_image = vips_image.addalpha()
                 in_list.append(vips_image)
         for i in range(0, spacer):
             in_list.append(self.null_image)
