@@ -14,6 +14,7 @@
 #include "type_id.h"
 #include "game_constants.h"
 #include "point.h"
+#include "coordinate_conversions.h"
 
 TEST_CASE( "set_and_get_overmap_scents" )
 {
@@ -110,6 +111,8 @@ TEST_CASE( "default_overmap_generation_has_non_mandatory_specials_at_origin" )
 TEST_CASE( "overmap_generation_statistics" )
 {
     std::map<oter_id, int> occurrences;
+    std::map<ter_id, int> toc;
+    std::map<furn_id, int> foc;
     int count = 0;
     for( point p : closest_points_first( 1, point_zero ) ) {
         count++;
@@ -118,17 +121,41 @@ TEST_CASE( "overmap_generation_statistics" )
             overmap_buffer.create_custom_overmap( p, test_specials );
         }
         overmap *om = overmap_buffer.get_existing( p );
-        for( int z = -OVERMAP_DEPTH; z <= OVERMAP_HEIGHT; z++ ) {
+        int z = 0;
+        //for( int z = -OVERMAP_DEPTH; z <= OVERMAP_HEIGHT; z++ ) {
             for( int x = 0; x < OMAPX; ++x ) {
                 for( int y = 0; y < OMAPY; ++y ) {
-                    const oter_id t = om->get_ter( { x, y, z } );
+                    const oter_id t = om->ter( { x, y, z } );
                     occurrences[t] += 1;
+
+                    tinymap tmpmap;
+                    tmpmap.generate( omt_to_sm_copy( tripoint(om->global_base_point(), 0) + tripoint(x, y, z ) ), calendar::turn );
+                    for(int tx = 0; tx < SEEX*2; tx++) {
+                        for(int ty = 0; ty < SEEY *2; ty++) {
+                            const ter_id ti = tmpmap.ter({tx, ty});
+                            toc[ti] += 1;
+                            const furn_id fi = tmpmap.furn({tx, ty});
+                            foc[fi] += 1;
+                        }
+                    }
                 }
             }
-        }
+        //}
     }
 
+    /*
     for(auto &x : occurrences) {
+        std::cout << x.first.id().str() << " , " << x.second << std::endl;
+    }
+    */
+
+    for(auto &x : toc) {
+        std::cout << x.first.id().str() << " , " << x.second << std::endl;
+    }
+
+    std::cout << "END OF TER" << std::endl;
+
+    for(auto &x : foc) {
         std::cout << x.first.id().str() << " , " << x.second << std::endl;
     }
  
