@@ -110,11 +110,11 @@ TEST_CASE( "default_overmap_generation_has_non_mandatory_specials_at_origin" )
 
 TEST_CASE( "overmap_generation_statistics" )
 {
-    std::map<oter_id, int> occurrences;
+    std::map<string_id<oter_type_t>, int> occurrences;
     std::map<ter_id, int> toc;
     std::map<furn_id, int> foc;
     std::map<itype_id, int> ioc;
-    std::map<std::pair<oter_id, itype_id>, int> otit;
+    std::map<std::pair<string_id<oter_type_t>, itype_id>, int> otit;
 
     int count = 0;
     for( point p : closest_points_first( 1, point_zero ) ) {
@@ -129,7 +129,7 @@ TEST_CASE( "overmap_generation_statistics" )
             for( int x = 0; x < OMAPX; ++x ) {
                 for( int y = 0; y < OMAPY; ++y ) {
                     const oter_id t = om->ter( { x, y, z } );
-                    occurrences[t] += 1;
+                    occurrences[t.obj().get_type_id()] += 1;
 
                     tinymap tmpmap;
                     tmpmap.generate( omt_to_sm_copy( tripoint(om->global_base_point(), 0) + tripoint(x, y, z ) ), calendar::turn );
@@ -143,7 +143,7 @@ TEST_CASE( "overmap_generation_statistics" )
                             
                             for( item &it : ms ) {
                                 ioc[it.typeId()] +=1;
-                                otit[{t, it.typeId()}] +=1; 
+                                otit[{t.obj().get_type_id(), it.typeId()}] +=1; 
                             }
                         }
                     }
@@ -177,7 +177,13 @@ TEST_CASE( "overmap_generation_statistics" )
     // }
 
     for(auto &x : otit) {
-        std::cout << x.first.first.obj().get_type_id().str() << " , " << x.first.second << " , " << x.second << std::endl;
+        std::cout << x.first.first.str() << " , " << x.first.second << " , " << x.second << std::endl;
+    }
+
+    std::cout << "END OF ITEM" << std::endl;
+
+    for(auto &x : occurrences) {
+        std::cout << x.first.str() << " , " << x.second << std::endl;
     }
  
     CHECK(count == 10);
