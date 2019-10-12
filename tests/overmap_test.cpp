@@ -114,6 +114,8 @@ TEST_CASE( "overmap_generation_statistics" )
     std::map<ter_id, int> toc;
     std::map<furn_id, int> foc;
     std::map<itype_id, int> ioc;
+    std::map<std::pair<oter_id, itype_id>, int> otit;
+
     int count = 0;
     for( point p : closest_points_first( 1, point_zero ) ) {
         count++;
@@ -141,6 +143,7 @@ TEST_CASE( "overmap_generation_statistics" )
                             
                             for( item &it : ms ) {
                                 ioc[it.typeId()] +=1;
+                                otit[{t, it.typeId()}] +=1; 
                             }
                         }
                     }
@@ -169,8 +172,12 @@ TEST_CASE( "overmap_generation_statistics" )
 
     std::cout << "END OF TER" << std::endl;
 */
-    for(auto &x : ioc) {
-        std::cout << x.first << " , " << x.second << std::endl;
+    // for(auto &x : ioc) {
+    //     std::cout << x.first << " , " << x.second << std::endl;
+    // }
+
+    for(auto &x : otit) {
+        std::cout << x.first.first.obj().get_type_id().str() << " , " << x.first.second << " , " << x.second << std::endl;
     }
  
     CHECK(count == 10);
