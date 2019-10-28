@@ -13,7 +13,7 @@ CATA_LIB=../$(BUILD_PREFIX)cataclysm.a
 # built with BUILD_PREFIX set, you must set it for this invocation as well.
 ODIR ?= obj
 
-LDFLAGS += -L.
+LDFLAGS += -L. -l sqlite3
 
 # Allow use of any header files from cataclysm.
 # Catch sections throw unused variable warnings.
