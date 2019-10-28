@@ -116,23 +116,32 @@ TEST_CASE( "overmap_generation_statistics" )
     std::map<itype_id, int> ioc;
     std::map<std::pair<string_id<oter_type_t>, itype_id>, int> otit;
 
-    int count = 0;
-    for( point p : closest_points_first( 1, point_zero ) ) {
-        count++;
+    // Loop through the grid of overmap points
+    for( point p : closest_points_first( 0, point_zero ) ) {
+
+        // If we haven't already created this one, then create it (sometimes they get created by spill-over)
         if( !overmap_buffer.has( p ) ) {
             overmap_special_batch test_specials = overmap_specials::get_default_batch( p );
             overmap_buffer.create_custom_overmap( p, test_specials );
         }
+
+        // Get the overmap
         overmap *om = overmap_buffer.get_existing( p );
+        
         int z = 0;
         //for( int z = -OVERMAP_DEPTH; z <= OVERMAP_HEIGHT; z++ ) {
             for( int x = 0; x < OMAPX; ++x ) {
                 for( int y = 0; y < OMAPY; ++y ) {
-                    const oter_id t = om->ter( { x, y, z } );
-                    occurrences[t.obj().get_type_id()] += 1;
 
+                    // Get the overmap terrain at this xyz
+                    const oter_id t = om->ter( { x, y, z } );
+
+                    // Run the mapgen for this overmap terrain
                     tinymap tmpmap;
                     tmpmap.generate( omt_to_sm_copy( tripoint(om->global_base_point(), 0) + tripoint(x, y, z ) ), calendar::turn );
+
+                    occurrences[t.obj().get_type_id()] += 1;
+
                     for(int tx = 0; tx < SEEX*2; tx++) {
                         for(int ty = 0; ty < SEEY *2; ty++) {
                             const ter_id ti = tmpmap.ter({tx, ty});
@@ -186,5 +195,6 @@ TEST_CASE( "overmap_generation_statistics" )
         std::cout << x.first.str() << " , " << x.second << std::endl;
     }
  
+    int count = 0;
     CHECK(count == 10);
 }
