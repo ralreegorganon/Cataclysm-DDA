@@ -26,13 +26,17 @@ int callback(void *, int, char **, char **) {
 TEST_CASE( "overmap_generation_statistics" )
 {
     sqlite3* db;
-    sqlite3_open("stats.db", &db);
-    char *zErrMsg = 0;
-    std::string sql = "create table overmap_terrain (overmap_x int, overmap_y int, x int, y int, oter_id text);";
-    sqlite3_exec(db, sql.c_str(), callback, 0, &zErrMsg);
-    sqlite3_close(db);
+    char *sErrMsg;
 
-    return;
+    sqlite3_open("stats.db", &db);
+
+    sqlite3_exec(db, "PRAGMA synchronous=OFF", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db, "PRAGMA count_changes=OFF", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db, "PRAGMA journal_mode=MEMORY", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db, "PRAGMA temp_store=MEMORY", NULL, NULL, &sErrMsg);
+    
+    std::string sql = "create table overmap_terrain (overmap_x int, overmap_y int, x int, y int, oter_id text);";
+    sqlite3_exec(db, sql.c_str(), callback, 0, &sErrMsg);
 
     std::map<string_id<oter_type_t>, int> occurrences;
     std::map<ter_id, int> toc;
@@ -52,6 +56,12 @@ TEST_CASE( "overmap_generation_statistics" )
         // Get the overmap
         overmap *om = overmap_buffer.get_existing( p );
         
+        sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &sErrMsg);
+
+        std::string isql = "insert into overmap_terrain values (?, ?, ?, ?, ?);";
+        sqlite3_stmt * stmt;
+        sqlite3_prepare_v2(db,  isql.c_str(), isql.length(), &stmt, NULL);
+
         int z = 0;
         //for( int z = -OVERMAP_DEPTH; z <= OVERMAP_HEIGHT; z++ ) {
             for( int x = 0; x < OMAPX; ++x ) {
@@ -60,31 +70,46 @@ TEST_CASE( "overmap_generation_statistics" )
                     // Get the overmap terrain at this xyz
                     const oter_id t = om->ter( { x, y, z } );
 
-                    // Run the mapgen for this overmap terrain
-                    tinymap tmpmap;
-                    tmpmap.generate( omt_to_sm_copy( tripoint(om->global_base_point(), 0) + tripoint(x, y, z ) ), calendar::turn );
+                    sqlite3_bind_int(stmt, 1, om->global_base_point().x);
+                    sqlite3_bind_int(stmt, 2, om->global_base_point().y);
+                    sqlite3_bind_int(stmt, 3, x);
+                    sqlite3_bind_int(stmt, 4, y);
+                    sqlite3_bind_text(stmt, 5, t->get_type_id().c_str(), -1, SQLITE_TRANSIENT);
 
-                    occurrences[t.obj().get_type_id()] += 1;
+                    sqlite3_step(stmt);
+                    sqlite3_reset(stmt);
+                    // // Run the mapgen for this overmap terrain
+                    // tinymap tmpmap;
+                    // tmpmap.generate( omt_to_sm_copy( tripoint(om->global_base_point(), 0) + tripoint(x, y, z ) ), calendar::turn );
 
-                    for(int tx = 0; tx < SEEX*2; tx++) {
-                        for(int ty = 0; ty < SEEY *2; ty++) {
-                            const ter_id ti = tmpmap.ter({tx, ty});
-                            toc[ti] += 1;
-                            const furn_id fi = tmpmap.furn({tx, ty});
-                            foc[fi] += 1;
-                            map_stack ms = tmpmap.i_at({tx, ty, z});
+                    // occurrences[t.obj().get_type_id()] += 1;
+
+                    // for(int tx = 0; tx < SEEX*2; tx++) {
+                    //     for(int ty = 0; ty < SEEY *2; ty++) {
+                    //         const ter_id ti = tmpmap.ter({tx, ty});
+                    //         toc[ti] += 1;
+                    //         const furn_id fi = tmpmap.furn({tx, ty});
+                    //         foc[fi] += 1;
+                    //         map_stack ms = tmpmap.i_at({tx, ty, z});
                             
-                            for( item &it : ms ) {
-                                ioc[it.typeId()] +=1;
-                                otit[{t.obj().get_type_id(), it.typeId()}] +=1; 
-                            }
-                        }
-                    }
+                    //         for( item &it : ms ) {
+                    //             ioc[it.typeId()] +=1;
+                    //             otit[{t.obj().get_type_id(), it.typeId()}] +=1; 
+                    //         }
+                    //     }
+                    // }
                 }
             }
         //}
+
+        sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &sErrMsg);
+        sqlite3_finalize(stmt);
     }
 
+
+    sqlite3_close(db);
+
+    return;
     /*
     for(auto &x : occurrences) {
         std::cout << x.first.id().str() << " , " << x.second << std::endl;
