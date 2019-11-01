@@ -22,6 +22,67 @@ int callback(void *, int, char **, char **) {
     return 0;
 }
 
+TEST_CASE( "mapgen_item_stats" )
+{
+    sqlite3* db;
+    char *sErrMsg;
+
+    sqlite3_open("stats.db", &db);
+
+    sqlite3_exec(db, "PRAGMA synchronous=OFF", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db, "PRAGMA count_changes=OFF", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db, "PRAGMA journal_mode=MEMORY", NULL, NULL, &sErrMsg);
+    sqlite3_exec(db, "PRAGMA temp_store=MEMORY", NULL, NULL, &sErrMsg);
+    
+    std::string sql = "create table item_stats (iteration int, oter_id text, itype_id text, count int);";
+    sqlite3_exec(db, sql.c_str(), callback, 0, &sErrMsg);
+
+    std::map<std::pair<std::string, itype_id>, int> otit;
+    
+    std::vector<std::string> locations = { "forest" };
+
+    for(auto &ot : locations) {
+        for(int i = 0; i < 100; i++) {
+            overmap_buffer.ter_set( {0,0,0}, oter_id( ot) );
+            tinymap tmpmap;
+            tmpmap.generate( {0,0,0}, calendar::turn );
+
+            for(int tx = 0; tx < SEEX*2; tx++) {
+                for(int ty = 0; ty < SEEY *2; ty++) {
+                    map_stack ms = tmpmap.i_at({tx, ty, 0});
+                    for( item &it : ms ) {
+                        otit[{ot, it.typeId()}] += 1;
+                    }
+                }
+            }
+
+            sqlite3_exec(db, "BEGIN TRANSACTION", NULL, NULL, &sErrMsg);
+
+            std::string otisql = "insert into item_stats values (?, ?, ?, ?);";
+            sqlite3_stmt * otistmt;
+            sqlite3_prepare_v2(db,  otisql.c_str(), otisql.length(), &otistmt, NULL);
+            
+            for(auto &x : otit) {
+                sqlite3_bind_int(otistmt, 1, i);
+                sqlite3_bind_text(otistmt, 2, x.first.first.c_str(), -1, SQLITE_TRANSIENT );
+                sqlite3_bind_text(otistmt, 3, x.first.second.c_str(), -1, SQLITE_TRANSIENT );
+                sqlite3_bind_int(otistmt, 4, x.second);
+
+                sqlite3_step(otistmt);
+                sqlite3_reset(otistmt);
+            }
+
+            sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &sErrMsg);
+            sqlite3_finalize(otistmt);
+        }
+    }
+
+    sqlite3_close(db);
+
+    int count = 0;
+    CHECK(count == 10);
+}
+
 
 TEST_CASE( "overmap_generation_statistics" )
 {
