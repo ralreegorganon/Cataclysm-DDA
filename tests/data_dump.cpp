@@ -39,11 +39,129 @@ TEST_CASE( "mapgen_item_stats" )
 
     std::map<std::pair<std::string, itype_id>, int> otit;
     
-    std::vector<std::string> locations = { "forest" };
+    std::vector<std::string> locations = { "s_antique_north", "bar_north", "s_bike_shop_north", "s_bike_shop_1_north", "s_butcher_north", "s_butcher_1_north", "s_butcher_2_north", "cs_sex_shop_north",
+    "cs_tire_shop_north", "s_restaurant_3_north", "dispensary_north", "dispensary_1_north", "dispensary_2_north", "dollarstore_north", "dollarstore_1_north",
+    "s_garage_north", "s_garage_1_north", "s_garage_2_north", "garage_gas_1_north", "garage_gas_2_north", "garage_gas_3_north", "s_gardening_north", "s_gun_4_north", 
+     "headshop_north", "home_improvement_north", "hdwr_large_entrance_north", "hdwr_large_SW_north", "hdwr_large_NW_north", "hdwr_large_NE_north", "hdwr_large_backroom_north", 
+    "hdwr_large_1_2_0_north", "hdwr_large_0_2_0_north" ,
+       "hdwr_large_1_1_0_north", "hdwr_large_0_1_0_north" ,
+       "hdwr_large_1_0_0_north", "hdwr_large_0_0_0_north" ,
+       "hdwr_large_1_2_1_north", "hdwr_large_0_2_1_north" ,
+       "hdwr_large_1_1_1_north", "hdwr_large_0_1_1_north" ,
+       "hdwr_large_1_0_1_north", "hdwr_large_0_0_1_north", "s_jewelry_north",
+       "landscapingsupplyco_1a_north", "landscapingsupplyco_1b_north",
+       "s_library_north", "s_library_2_north",
+       "megastore_0_0_0_north",
+"megastore_1_0_0_north",
+"megastore_2_0_0_north",
+"megastore_parking_north",
+"megastore_0_1_0_north",
+"megastore_1_1_0_north",
+"megastore_2_1_0_north",
+"megastore_parking_north",
+"megastore_0_2_0_north",
+"megastore_1_2_0_north",
+"megastore_2_2_0_north",
+"megastore_parking_north",
+"megastore_parking_north",
+"megastore_parking_north",
+"megastore_parking_north",
+"megastore_parking_north",
+"megastore_parking_north",
+"megastore_parking_north",
+"megastore_parking_north",
+"megastore_parking_north",
+"megastore_0_0_1_north",
+"megastore_1_0_1_north",
+"megastore_2_0_1_north",
+"megastore_0_1_1_north",
+"megastore_1_1_1_north",
+"megastore_2_1_1_north",
+"megastore_0_2_1_north",
+"megastore_1_2_1_north",
+"megastore_2_2_1_north",
+"megastore_0_0_roof_north",
+"megastore_1_0_roof_north",
+"megastore_2_0_roof_north",
+"megastore_0_1_roof_north",
+"megastore_1_1_roof_north",
+"megastore_2_1_roof_north",
+"megastore_0_2_roof_north",
+"megastore_1_2_roof_north",
+"megastore_2_2_roof_north",
+"mil_surplus_north",
+"mil_surplus_1_north",
+"mil_surplus_2_north",
+"museum_north",
+"s_music_north",     
+"office_doctor_north",
+"office_doctor_1_north",
+"office_doctor_2_north",
+"pawn_north",
+"pawn_1_north",
+"pawn_pf_north",
+"pawn_pf_under_north",
+"s_petstore_north",
+"s_petstore_1_north",
+"s_petstore_2_north",
+"s_pharm_north",
+"s_pharm_1_north",
+"s_pizza_parlor_north",
+"s_pizza_parlor_1_north",
+"s_restaurant_north",
+"s_restaurant_1_north",
+"s_restaurant_2_north",
+"s_restaurant_foodplace_north",
+"s_restaurant_fast_north",
+"s_restaurant_fast_1_north",
+"s_reststop_1_north",
+"s_reststop_2_north",
+"s_bookstore_north",
+"s_bookstore_1_north",
+"s_bookstore_2_north",
+"s_clothes_north",
+"s_clothes_1_north",
+"s_clothes_2_north",
+"s_clothes_3_north",
+"s_clothes_4_north",
+"s_clothes_5_north",
+"s_clothes_6_north",
+"s_restaurant_coffee_north",
+"s_restaurant_coffee_1_north",
+"s_restaurant_coffee_2_north",
+"s_electronics_north",
+"s_electronics_1_north",
+"furniture_north",
+"s_gas_north",
+"s_gas_1_north",
+"s_gas_rural_north",
+"s_grocery_north",
+"s_grocery_1_north",
+"s_gun_north",
+"s_gun_1_north",
+"s_gun_2_north",
+"s_gun_3_north",
+"s_hardware_north",
+"s_hardware_1_north",
+"s_hardware_2_north",
+"s_hardware_3_north",
+"icecream_shop_north",
+"s_liquor_north",
+"smoke_lounge_north",
+"smoke_lounge_1_north",
+"s_sports_north",
+"s_teashop_north",
+"s_teashop_1_north",
+"s_teashop_roof_1_north",
+"s_thrift_north",
+"veterinarian_north"
+          };
 
     for(auto &ot : locations) {
         for(int i = 0; i < 100; i++) {
-            overmap_buffer.ter_set( {0,0,0}, oter_id( ot) );
+            oter_id otid = oter_id(ot);
+            std::string otidstr = otid->get_type_id().str();
+            overmap_buffer.ter_set( {0,0,0}, otid );
             tinymap tmpmap;
             tmpmap.generate( {0,0,0}, calendar::turn );
 
@@ -51,7 +169,7 @@ TEST_CASE( "mapgen_item_stats" )
                 for(int ty = 0; ty < SEEY *2; ty++) {
                     map_stack ms = tmpmap.i_at({tx, ty, 0});
                     for( item &it : ms ) {
-                        otit[{ot, it.typeId()}] += 1;
+                        otit[{otidstr, it.typeId()}] += 1;
                     }
                 }
             }
@@ -165,7 +283,7 @@ TEST_CASE( "overmap_generation_statistics" )
                     tinymap tmpmap;
                     tmpmap.generate( omt_to_sm_copy( tripoint(om->global_base_point(), 0) + tripoint(x, y, z ) ), calendar::turn );
 
-                    // occurrences[t.obj().get_type_id()] += 1;
+                    // occurrencest.obj().get_type_id() += 1;
 
                     for(int tx = 0; tx < SEEX*2; tx++) {
                         for(int ty = 0; ty < SEEY *2; ty++) {
