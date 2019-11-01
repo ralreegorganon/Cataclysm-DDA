@@ -37,8 +37,6 @@ TEST_CASE( "mapgen_item_stats" )
     std::string sql = "create table item_stats (iteration int, oter_id text, itype_id text, count int);";
     sqlite3_exec(db, sql.c_str(), callback, 0, &sErrMsg);
 
-    std::map<std::pair<std::string, itype_id>, int> otit;
-    
     std::vector<std::string> locations = { "s_antique_north", "bar_north", "s_bike_shop_north", "s_bike_shop_1_north", "s_butcher_north", "s_butcher_1_north", "s_butcher_2_north", "cs_sex_shop_north",
     "cs_tire_shop_north", "s_restaurant_3_north", "dispensary_north", "dispensary_1_north", "dispensary_2_north", "dollarstore_north", "dollarstore_1_north",
     "s_garage_north", "s_garage_1_north", "s_garage_2_north", "garage_gas_1_north", "garage_gas_2_north", "garage_gas_3_north", "s_gardening_north", "s_gun_4_north", 
@@ -159,6 +157,8 @@ TEST_CASE( "mapgen_item_stats" )
 
     for(auto &ot : locations) {
         for(int i = 0; i < 100; i++) {
+            std::map<std::pair<std::string, itype_id>, int> otit;
+
             oter_id otid = oter_id(ot);
             std::string otidstr = otid->get_type_id().str();
             overmap_buffer.ter_set( {0,0,0}, otid );
