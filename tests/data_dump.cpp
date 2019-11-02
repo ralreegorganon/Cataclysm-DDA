@@ -170,6 +170,11 @@ TEST_CASE( "mapgen_item_stats" )
                     map_stack ms = tmpmap.i_at({tx, ty, 0});
                     for( item &it : ms ) {
                         otit[{otidstr, it.typeId()}] += 1;
+
+                        if(it.is_container() && !it.is_container_empty()) {
+                            const item &cit = it.get_contained();  
+                            otit[{otidstr, cit.typeId()}] += 1;  
+                        }
                     }
                 }
             }
