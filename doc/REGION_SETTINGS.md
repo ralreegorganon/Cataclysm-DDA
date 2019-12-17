@@ -552,7 +552,6 @@ those values which should be changed.
 | Identifier |                                         Description                                         |
 | ---------- | ------------------------------------------------------------------------------------------- |
 | `type`     | Type identifier. Must be "region_overlay".                                                  |
-| `id`       | Unique identfier for this region overlay.                                                   |
 | `regions`  | A list of regions to which this overlay should be applied. "all" will apply to all regions. |
 
 All additional fields and sections are as defined for a `region_overlay`.
@@ -561,7 +560,6 @@ All additional fields and sections are as defined for a `region_overlay`.
 ```json
 [{
 	"type": "region_overlay",
-	"id": "example_overlay",
 	"regions": ["all"],
 	"city": {
 		"parks": {

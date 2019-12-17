@@ -1,7 +1,6 @@
 [
   {
     "type": "region_overlay",
-    "id": "animatronics_overlay",
     "//": "unique identifier for this overlay",
     "regions": [ "all" ],
     "//": "A list of regions to which this overlay should be applied",

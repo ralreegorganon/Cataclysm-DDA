@@ -1,7 +1,6 @@
 [
   {
     "type": "region_overlay",
-    "id": "classic_overmap",
     "regions": [ "all" ],
     "overmap_feature_flag_settings": { "whitelist": [ "CLASSIC" ] }
   },
@@ -19,7 +18,6 @@
   },
   {
     "type": "region_overlay",
-    "id": "classic_extras",
     "regions": [ "all" ],
     "map_extras": {
       "forest": { "chance": 20, "extras": { "mx_portal": 0, "mx_portal_in": 0, "mx_anomaly": 0, "mx_spider": 0 } },
