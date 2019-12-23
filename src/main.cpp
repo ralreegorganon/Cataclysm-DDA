@@ -46,6 +46,10 @@
 #   endif
 #endif
 
+#if TARGET_OS_IOS
+#include <CoreFoundation/CoreFoundation.h>
+#endif
+
 #if defined(__ANDROID__)
 #include <unistd.h>
 #include <SDL_system.h>
@@ -130,6 +134,8 @@ int APIENTRY WinMain( HINSTANCE /* hInstance */, HINSTANCE /* hPrevInstance */,
     char **argv = __argv;
 #elif defined(__ANDROID__)
 extern "C" int SDL_main( int argc, char **argv ) {
+#elif TARGET_OS_IOS
+extern "C" int SDL_main( int argc, char **argv ) {
 #else
 int main( int argc, char *argv[] )
 {
@@ -155,6 +161,20 @@ int main( int argc, char *argv[] )
     }
 
     PATH_INFO::init_base_path( external_storage_path );
+#elif TARGET_OS_IOS
+    // Get a reference to the main bundle
+    CFBundleRef mainBundle = CFBundleGetMainBundle();
+    // Get a reference to the file's URL
+    CFURLRef imageURL = CFBundleCopyResourceURL(mainBundle, CFSTR("data"), NULL, NULL);
+    // Convert the URL reference into a string reference
+    CFStringRef imagePath = CFURLCopyFileSystemPath(imageURL, kCFURLPOSIXPathStyle);
+    // Get the system encoding method
+    CFStringEncoding encodingMethod = CFStringGetSystemEncoding();
+    // Convert the string reference into a C string
+    const char *path = CFStringGetCStringPtr(imagePath, encodingMethod);
+    std::string fuck(path);
+    fuck.erase(fuck.length()-4);
+    PATH_INFO::init_base_path( fuck );
 #else
     // Set default file paths
 #if defined(PREFIX)
@@ -165,9 +185,13 @@ int main( int argc, char *argv[] )
     PATH_INFO::init_base_path( "" );
 #endif
 #endif
-
+    
 #if defined(__ANDROID__)
     PATH_INFO::init_user_dir( external_storage_path );
+#elif TARGET_OS_IOS
+    const std::string home(getenv("HOME"));
+    const std::string documents = home + "/Documents/";
+    PATH_INFO::init_user_dir( documents );
 #else
 #   if defined(USE_HOME_DIR) || defined(USE_XDG_DIR)
     PATH_INFO::init_user_dir( "" );

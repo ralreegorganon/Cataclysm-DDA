@@ -2493,6 +2493,13 @@ static void CheckMessages()
         return;
     }
 
+    
+#if TARGET_OS_IOS
+if( !SDL_IsTextInputActive() ) {
+    SDL_StartTextInput();
+}
+#endif
+    
 #if defined(__ANDROID__)
     if( visible_display_frame_dirty ) {
         needupdate = true;
