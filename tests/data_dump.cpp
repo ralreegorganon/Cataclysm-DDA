@@ -238,7 +238,7 @@ TEST_CASE( "overmap_generation_statistics" )
     // std::map<std::pair<string_id<oter_type_t>, itype_id>, int> otit;
 
     // Loop through the grid of overmap points
-    for( point p : closest_points_first( 0, point_zero ) ) {
+    for( point p : closest_points_first( point_zero, 10 ) ) {
 
         // If we haven't already created this one, then create it (sometimes they get created by spill-over)
         if( !overmap_buffer.has( p ) ) {
@@ -275,8 +275,8 @@ TEST_CASE( "overmap_generation_statistics" )
                     // Get the overmap terrain at this xyz
                     const oter_id t = om->ter( { x, y, z } );
 
-                    sqlite3_bind_int(stmt, 1, om->global_base_point().x);
-                    sqlite3_bind_int(stmt, 2, om->global_base_point().y);
+                    sqlite3_bind_int(stmt, 1, p.x);
+                    sqlite3_bind_int(stmt, 2, p.y);
                     sqlite3_bind_int(stmt, 3, x);
                     sqlite3_bind_int(stmt, 4, y);
                     sqlite3_bind_int(stmt, 5, z);
@@ -284,6 +284,9 @@ TEST_CASE( "overmap_generation_statistics" )
 
                     sqlite3_step(stmt);
                     sqlite3_reset(stmt);
+
+                    continue;
+
                     // Run the mapgen for this overmap terrain
                     tinymap tmpmap;
                     tmpmap.generate( omt_to_sm_copy( tripoint(om->global_base_point(), 0) + tripoint(x, y, z ) ), calendar::turn );
