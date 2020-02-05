@@ -688,6 +688,7 @@ void DynamicDataLoader::check_consistency( loading_ui &ui )
             { _( "Body parts" ), &body_part_struct::check_consistency },
             { _( "Anatomies" ), &anatomy::check_consistency },
             { _( "Spells" ), &spell_type::check_consistency },
+            { _( "Terrain/furniture transformations" ), &ter_furn_transform::check_consistency },
             { _( "Transformations" ), &event_transformation::check_consistency },
             { _( "Statistics" ), &event_statistic::check_consistency },
             { _( "Scent types" ), &scent_type::check_scent_consistency },

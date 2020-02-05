@@ -26,7 +26,13 @@
   {
     "type": "ter_furn_transform",
     "id": "mapgen_test",
-    "terrain": [ { "result": "t_dirt", "valid_terrain": [ "t_grass" ] } ]
+    "transforms": [ { "result_nested_mapgen": "mapgen_test_nested", "match_terrain": [ "t_grass" ] } ]
+  },
+  {
+    "type": "mapgen",
+    "method": "json",
+    "nested_mapgen_id": "mapgen_test_nested",
+    "object": { "mapgensize": [ 1, 1 ], "place_terrain": [ { "ter": "t_dirt", "x": 0, "y": 0 } ] }
   },
   {
     "type": "mapgen",

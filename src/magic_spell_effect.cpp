@@ -825,8 +825,7 @@ void spell_effect::transform_blast( const spell &sp, Creature &caster,
     const std::set<tripoint> area = spell_effect_blast( sp, caster.pos(), target, sp.aoe(), true );
     for( const tripoint &location : area ) {
         if( one_in( sp.damage() ) ) {
-            transform->transform( location );
-            transform->add_all_messages( caster, location );
+            transform->transform_with_messages( g->m, location, caster );
         }
     }
 }

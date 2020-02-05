@@ -1,5 +1,6 @@
 #include "magic_ter_furn_transform.h"
 
+#include "coordinate_conversions.h"
 #include "creature.h"
 #include "point.h"
 #include "game.h"
@@ -7,6 +8,7 @@
 #include "magic.h"
 #include "map.h"
 #include "mapdata.h"
+#include "mapgendata.h"
 #include "messages.h"
 #include "type_id.h"
 
@@ -30,6 +32,11 @@ bool string_id<ter_furn_transform>::is_valid() const
 void ter_furn_transform::load_transform( const JsonObject &jo, const std::string &src )
 {
     ter_furn_transform_factory.load( jo, src );
+}
+
+void ter_furn_transform::check_consistency()
+{
+    ter_furn_transform_factory.check();
 }
 
 void ter_furn_transform::reset_all()
@@ -65,199 +72,156 @@ static void load_transform_results( const JsonObject &jsi, const std::string &js
     }
 }
 
-template<class T>
-void ter_furn_data<T>::load( const JsonObject &jo )
+extern std::map<std::string, std::vector<std::unique_ptr<mapgen_function_json_nested>>>
+nested_mapgen;
+
+void ter_furn_transform_def::deserialize( const JsonObject &jo )
 {
-    load_transform_results( jo, "result", list );
-    message = jo.get_string( "message", "" );
-    message_good = jo.get_bool( "message_good", true );
+    load_transform_results( jo, "result_terrain", result_terrains );
+    load_transform_results( jo, "result_furniture", result_furnitures );
+    load_transform_results( jo, "result_nested_mapgen", result_nested_mapgens );
+
+    optional( jo, was_loaded, "message", message, "" );
+    optional( jo, was_loaded, "message_good", message_good, true );
+
+    optional( jo, was_loaded, "match_terrain", match_terrains );
+    optional( jo, was_loaded, "match_furniture", match_furnitures );
+    optional( jo, was_loaded, "match_terrain_flags", match_terrain_flags );
+    optional( jo, was_loaded, "match_furniture_flags", match_furniture_flags );
+}
+
+void ter_furn_transform_def::check( const std::string &name ) const
+{
+    if( result_terrains.empty() && result_furnitures.empty() && result_nested_mapgens.empty() ) {
+        debugmsg( "ter_furn_transform %s has a transformation with no results defined", name );
+    }
+
+    if( match_terrains.empty() && match_furnitures.empty() && match_terrain_flags.empty() &&
+        match_furniture_flags.empty() ) {
+        debugmsg( "ter_furn_transform %s has a transformation with no match criteria defined", name );
+    }
+}
+
+bool ter_furn_transform_def::is_match( const ter_id &ter, const furn_id &furn ) const
+{
+    if( !match_terrains.empty() &&
+        std::find( match_terrains.begin(), match_terrains.end(), ter.id() ) == match_terrains.end() ) {
+        return false;
+    }
+
+    if( !match_furnitures.empty() &&
+        std::find( match_furnitures.begin(), match_furnitures.end(),
+                   furn.id() ) == match_furnitures.end() ) {
+        return false;
+    }
+
+    if( !match_terrain_flags.empty() &&
+        !std::any_of( match_terrain_flags.begin(),
+    match_terrain_flags.end(), [&ter]( const std::string & flag ) {
+    return ter->has_flag( flag );
+    } ) ) {
+        return false;
+    }
+
+    if( !match_furniture_flags.empty() &&
+        !std::any_of( match_furniture_flags.begin(),
+    match_furniture_flags.end(), [&furn]( const std::string & flag ) {
+    return furn->has_flag( flag );
+    } ) ) {
+        return false;
+    }
+
+    return true;
+}
+
+void ter_furn_transform_def::apply( map &m, const tripoint &location ) const
+{
+    const ter_str_id *ter_result = result_terrains.pick();
+    if( ter_result != nullptr ) {
+        m.ter_set( location, ter_result->id() );
+    }
+
+    const furn_str_id *furn_result = result_furnitures.pick();
+    if( furn_result != nullptr ) {
+        m.furn_set( location, furn_result->id() );
+    }
+
+    const std::string *nested_mapgen_result = result_nested_mapgens.pick();
+    if( nested_mapgen_result != nullptr ) {
+        const auto iter = nested_mapgen.find( *nested_mapgen_result );
+        const auto &ptr = random_entry_ref( iter->second );
+
+        const tripoint abs_ms = m.getabs( location );
+        const tripoint abs_omt = ms_to_omt_copy( abs_ms );
+
+        mapgendata md( abs_omt, m, 0.0f, calendar::start_of_cataclysm, nullptr );
+
+        ptr->nest( md, location.xy() );
+    }
+}
+
+void ter_furn_transform_def::add_message( Creature &caster ) const
+{
+    caster.add_msg_if_player( message_good ? m_good : m_bad, message );
 }
 
 void ter_furn_transform::load( const JsonObject &jo, const std::string & )
 {
-    std::string input;
-    mandatory( jo, was_loaded, "id", input );
-    id = ter_furn_transform_id( input );
+    mandatory( jo, was_loaded, "id", id );
+    mandatory( jo, was_loaded, "transforms", transforms );
     optional( jo, was_loaded, "fail_message", fail_message, "" );
+}
 
-    if( jo.has_member( "terrain" ) ) {
-        for( JsonObject ter_obj : jo.get_array( "terrain" ) ) {
-            ter_furn_data<ter_str_id> cur_results = ter_furn_data<ter_str_id>();
-            cur_results.load( ter_obj );
-
-            for( const std::string valid_terrain : ter_obj.get_array( "valid_terrain" ) ) {
-                ter_transform.emplace( ter_str_id( valid_terrain ), cur_results );
-            }
-
-            for( const std::string valid_terrain : ter_obj.get_array( "valid_flags" ) ) {
-                ter_flag_transform.emplace( valid_terrain, cur_results );
-            }
-        }
+void ter_furn_transform::check() const
+{
+    if( transforms.empty() ) {
+        debugmsg( "ter_furn_transform %s has no transformations defined", id.str() );
     }
 
-    if( jo.has_member( "furniture" ) ) {
-        for( JsonObject furn_obj : jo.get_array( "furniture" ) ) {
-            ter_furn_data<furn_str_id> cur_results = ter_furn_data<furn_str_id>();
-            cur_results.load( furn_obj );
-
-            for( const std::string valid_furn : furn_obj.get_array( "valid_furniture" ) ) {
-                furn_transform.emplace( furn_str_id( valid_furn ), cur_results );
-            }
-
-            for( const std::string valid_terrain : furn_obj.get_array( "valid_flags" ) ) {
-                furn_flag_transform.emplace( valid_terrain, cur_results );
-            }
-        }
+    for( const ter_furn_transform_def &t : transforms ) {
+        t.check( id.str() );
     }
 }
 
-template<class T, class K>
-cata::optional<ter_furn_data<T>> ter_furn_transform::find_transform( const
-                              std::map<K, ter_furn_data<T>> &list, const K &key ) const
-{
-    const auto result_iter = list.find( key );
-    if( result_iter == list.cend() ) {
-        return cata::nullopt;
-    }
-    return result_iter->second;
-}
-
-template<class T, class K>
-cata::optional<T> ter_furn_transform::next( const std::map<K, ter_furn_data<T>> &list,
-        const K &key ) const
-{
-    const cata::optional<ter_furn_data<T>> result = find_transform( list, key );
-    if( result ) {
-        return result->pick();
-    }
-    return cata::nullopt;
-}
-
-cata::optional<ter_str_id> ter_furn_transform::next_ter( const ter_str_id &ter ) const
-{
-    return next( ter_transform, ter );
-}
-
-cata::optional<ter_str_id> ter_furn_transform::next_ter( const std::string &flag ) const
-{
-    return next( ter_flag_transform, flag );
-}
-
-cata::optional<furn_str_id> ter_furn_transform::next_furn( const furn_str_id &furn ) const
-{
-    return next( furn_transform, furn );
-}
-
-cata::optional<furn_str_id> ter_furn_transform::next_furn( const std::string &flag ) const
-{
-    return next( furn_flag_transform, flag );
-}
-
-template<class T, class K>
-bool ter_furn_transform::add_message( const std::map<K, ter_furn_data<T>> &list, const K &key,
-                                      const Creature &critter, const tripoint &location ) const
-{
-    const cata::optional<ter_furn_data<T>> result = find_transform( list, key );
-    if( result && !result->has_msg() ) {
-        if( critter.sees( location ) ) {
-            result->add_msg( critter );
-        }
-        return true;
-    }
-    return false;
-}
-
-void ter_furn_transform::add_all_messages( const Creature &critter, const tripoint &location ) const
-{
-    add_all_messages( g->m, critter, location );
-}
-
-void ter_furn_transform::add_all_messages( const map &m, const Creature &critter,
-        const tripoint &location ) const
+bool ter_furn_transform::transform( map &m, const tripoint &location,
+                                    std::function<void( const ter_furn_transform_def & )> success_callback ) const
 {
     const ter_id ter_at_loc = m.ter( location );
-    if( !add_message( ter_transform, ter_at_loc->id, critter, location ) ) {
-        for( const std::pair<const std::string, ter_furn_data<ter_str_id>> &data : ter_flag_transform ) {
-            if( data.second.has_msg() && ter_at_loc->has_flag( data.first ) ) {
-                data.second.add_msg( critter );
-                break;
-            }
-        }
-    }
-
     const furn_id furn_at_loc = m.furn( location );
-    if( !add_message( furn_transform, furn_at_loc->id, critter, location ) ) {
-        for( const std::pair<const std::string, ter_furn_data<furn_str_id>> &data : furn_flag_transform ) {
-            if( data.second.has_msg() && furn_at_loc->has_flag( data.first ) ) {
-                data.second.add_msg( critter );
-                break;
-            }
-        }
-    }
-}
+    bool success = false;
 
-void ter_furn_transform::transform( const tripoint &location ) const
-{
-    transform( g->m, location );
+    for( const ter_furn_transform_def &t : transforms ) {
+        if( !t.is_match( ter_at_loc, furn_at_loc ) ) {
+            continue;
+        }
+        success = true;
+        t.apply( m, location );
+        success_callback( t );
+    }
+
+    return success;
 }
 
 void ter_furn_transform::transform( map &m, const tripoint &location ) const
 {
-    const ter_id ter_at_loc = m.ter( location );
-    cata::optional<ter_str_id> ter_potential = next_ter( ter_at_loc->id );
-    const furn_id furn_at_loc = m.furn( location );
-    cata::optional<furn_str_id> furn_potential = next_furn( furn_at_loc->id );
-
-    if( !ter_potential ) {
-        for( const std::pair<const std::string, ter_furn_data<ter_str_id>> &flag_result :
-             ter_flag_transform )             {
-            if( ter_at_loc->has_flag( flag_result.first ) ) {
-                ter_potential = next_ter( flag_result.first );
-                if( ter_potential ) {
-                    break;
-                }
-            }
-        }
-    }
-
-    if( !furn_potential ) {
-        for( const std::pair<const std::string, ter_furn_data<furn_str_id>> &flag_result :
-             furn_flag_transform ) {
-            if( furn_at_loc->has_flag( flag_result.first ) ) {
-                furn_potential = next_furn( flag_result.first );
-                if( furn_potential ) {
-                    break;
-                }
-            }
-        }
-    }
-
-    if( ter_potential ) {
-        m.ter_set( location, *ter_potential );
-    }
-    if( furn_potential ) {
-        m.furn_set( location, *furn_potential );
-    }
+    transform( m, location, []( const ter_furn_transform_def & ) {} );
 }
 
-template<class T>
-cata::optional<T> ter_furn_data<T>::pick() const
+void ter_furn_transform::transform_with_messages( map &m, const tripoint &location,
+        Creature &caster ) const
 {
-    const T *picked = list.pick();
-    if( picked == nullptr ) {
-        return cata::nullopt;
+    const bool caster_sees_location = caster.sees( location );
+
+    bool success = false;
+    if( caster_sees_location ) {
+        success = transform( m, location, [&caster]( const ter_furn_transform_def & t ) {
+            t.add_message( caster );
+        } );
+    } else {
+        success = transform( m, location, []( const ter_furn_transform_def & ) {} );
     }
-    return *picked;
-}
 
-template<class T>
-bool ter_furn_data<T>::has_msg() const
-{
-    return !message.empty();
-}
-
-template<class T>
-void ter_furn_data<T>::add_msg( const Creature &critter ) const
-{
-    critter.add_msg_if_player( message_good ? m_good : m_bad, message );
+    if( !success ) {
+        caster.add_msg_if_player( m_bad, fail_message );
+    }
 }
