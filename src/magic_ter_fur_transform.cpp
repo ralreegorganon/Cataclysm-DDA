@@ -157,8 +157,9 @@ void ter_furn_transform_def::apply( map &m, const tripoint &location ) const
 
         tinymap target_map;
         target_map.load(abs_sub, true);
+        const tripoint local_ms = target_map.getlocal(abs_ms);
         mapgendata md( abs_omt, target_map, 0.0f, calendar::start_of_cataclysm, nullptr );
-        ptr->nest( md, location.xy() );
+        ptr->nest( md, local_ms.xy() );
         target_map.save();
     }
 }
