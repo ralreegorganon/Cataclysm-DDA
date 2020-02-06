@@ -153,10 +153,13 @@ void ter_furn_transform_def::apply( map &m, const tripoint &location ) const
 
         const tripoint abs_ms = m.getabs( location );
         const tripoint abs_omt = ms_to_omt_copy( abs_ms );
+        const tripoint abs_sub = ms_to_sm_copy(abs_ms);
 
-        mapgendata md( abs_omt, m, 0.0f, calendar::start_of_cataclysm, nullptr );
-
+        tinymap target_map;
+        target_map.load(abs_sub, true);
+        mapgendata md( abs_omt, target_map, 0.0f, calendar::start_of_cataclysm, nullptr );
         ptr->nest( md, location.xy() );
+        target_map.save();
     }
 }
 
