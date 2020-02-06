@@ -15,7 +15,7 @@ TEST_CASE( "ter_furn_transform_grass_to_dirt" )
 {
     clear_map();
     GIVEN( "A t_grass terrain exists" ) {
-        const tripoint test_origin( 0, 0, 0 );
+        const tripoint test_origin( 0, 0, -1 );
         g->u.setpos( test_origin );
         const tripoint grass_point = test_origin + tripoint_east;
         g->m.ter_set( grass_point, ter_id( "t_grass" ) );
