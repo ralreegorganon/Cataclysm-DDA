@@ -229,7 +229,7 @@ TEST_CASE( "overmap_generation_statistics" )
     sql = "create table ot_terrain (overmap_x int, overmap_y int, x int, y int, z int, mx int, my int, ter_id text);";
     sqlite3_exec(db, sql.c_str(), callback, 0, &sErrMsg);
 
-    sql = "create table ot_item (overmap_x int, overmap_y int, x int, y int, z int, mx int, my int, itype_id text);";
+    sql = "create table ot_item (overmap_x int, overmap_y int, x int, y int, z int, mx int, my int, itype_id text, extra text);";
     sqlite3_exec(db, sql.c_str(), callback, 0, &sErrMsg);
 
     // std::map<string_id<oter_type_t>, int> occurrences;
@@ -263,7 +263,7 @@ TEST_CASE( "overmap_generation_statistics" )
         sqlite3_stmt * ottstmt;
         sqlite3_prepare_v2(db,  ottsql.c_str(), ottsql.length(), &ottstmt, NULL);
 
-        std::string otisql = "insert into ot_item values (?, ?, ?, ?, ?, ?, ?, ?);";
+        std::string otisql = "insert into ot_item values (?, ?, ?, ?, ?, ?, ?, ?, ?);";
         sqlite3_stmt * otistmt;
         sqlite3_prepare_v2(db,  otisql.c_str(), otisql.length(), &otistmt, NULL);
 
@@ -332,6 +332,14 @@ TEST_CASE( "overmap_generation_statistics" )
                                     continue;
                                 }
 
+                                std::string fuck = "";
+
+                                for(auto &at : it.ammo_types())
+                                {
+                                    fuck = at.c_str();
+                                    break;
+                                }
+                                
                                 sqlite3_bind_int(otistmt, 1, p.x);
                                 sqlite3_bind_int(otistmt, 2, p.y);
                                 sqlite3_bind_int(otistmt, 3, x);
@@ -340,6 +348,7 @@ TEST_CASE( "overmap_generation_statistics" )
                                 sqlite3_bind_int(otistmt, 6, tx);
                                 sqlite3_bind_int(otistmt, 7, ty);
                                 sqlite3_bind_text(otistmt, 8, it.typeId().c_str(), -1, SQLITE_TRANSIENT);
+                                sqlite3_bind_text(otistmt, 9, fuck.c_str(), -1, SQLITE_TRANSIENT);
 
                                 sqlite3_step(otistmt);
                                 sqlite3_reset(otistmt);
