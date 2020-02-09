@@ -9,6 +9,7 @@
 #include "map.h"
 #include "overmap.h"
 #include "overmapbuffer.h"
+#include "mapbuffer.h"
 #include "calendar.h"
 #include "common_types.h"
 #include "omdata.h"
@@ -222,13 +223,13 @@ TEST_CASE( "overmap_generation_statistics" )
     std::string sql = "create table overmap_terrain (overmap_x int, overmap_y int, x int, y int, z int, oter_id text);";
     sqlite3_exec(db, sql.c_str(), callback, 0, &sErrMsg);
 
-    sql = "create table ot_furniture (overmap_x int, overmap_y int, x int, y int, z int, furn_id text);";
+    sql = "create table ot_furniture (overmap_x int, overmap_y int, x int, y int, z int, mx int, my int, furn_id text);";
+    sqlite3_exec(db, sql.c_str(), callback, 0, &sErrMsg);
+ 
+    sql = "create table ot_terrain (overmap_x int, overmap_y int, x int, y int, z int, mx int, my int, ter_id text);";
     sqlite3_exec(db, sql.c_str(), callback, 0, &sErrMsg);
 
-    sql = "create table ot_terrain (overmap_x int, overmap_y int, x int, y int, z int, ter_id text);";
-    sqlite3_exec(db, sql.c_str(), callback, 0, &sErrMsg);
-
-    sql = "create table ot_item (overmap_x int, overmap_y int, x int, y int, z int, itype_id text);";
+    sql = "create table ot_item (overmap_x int, overmap_y int, x int, y int, z int, mx int, my int, itype_id text);";
     sqlite3_exec(db, sql.c_str(), callback, 0, &sErrMsg);
 
     // std::map<string_id<oter_type_t>, int> occurrences;
@@ -238,8 +239,7 @@ TEST_CASE( "overmap_generation_statistics" )
     // std::map<std::pair<string_id<oter_type_t>, itype_id>, int> otit;
 
     // Loop through the grid of overmap points
-    for( point p : closest_points_first( point_zero, 10 ) ) {
-
+    for( point p : closest_points_first( point_zero, 0 ) ) {
         // If we haven't already created this one, then create it (sometimes they get created by spill-over)
         if( !overmap_buffer.has( p ) ) {
             overmap_special_batch test_specials = overmap_specials::get_default_batch( p );
@@ -255,25 +255,31 @@ TEST_CASE( "overmap_generation_statistics" )
         sqlite3_stmt * stmt;
         sqlite3_prepare_v2(db,  isql.c_str(), isql.length(), &stmt, NULL);
 
-        std::string otfsql = "insert into ot_furniture values (?, ?, ?, ?, ?, ?);";
+        std::string otfsql = "insert into ot_furniture values (?, ?, ?, ?, ?, ?, ?, ?);";
         sqlite3_stmt * otfstmt;
         sqlite3_prepare_v2(db,  otfsql.c_str(), otfsql.length(), &otfstmt, NULL);
 
-        std::string ottsql = "insert into ot_terrain values (?, ?, ?, ?, ?, ?);";
+        std::string ottsql = "insert into ot_terrain values (?, ?, ?, ?, ?, ?, ?, ?);";
         sqlite3_stmt * ottstmt;
         sqlite3_prepare_v2(db,  ottsql.c_str(), ottsql.length(), &ottstmt, NULL);
 
-        std::string otisql = "insert into ot_item values (?, ?, ?, ?, ?, ?);";
+        std::string otisql = "insert into ot_item values (?, ?, ?, ?, ?, ?, ?, ?);";
         sqlite3_stmt * otistmt;
         sqlite3_prepare_v2(db,  otisql.c_str(), otisql.length(), &otistmt, NULL);
 
-        int z = 0;
-        //for( int z = -OVERMAP_DEPTH; z <= OVERMAP_HEIGHT; z++ ) {
+        const oter_id empty_rock("empty_rock");
+        const oter_id open_air("open_air");
+        //int z = 0;
+        for( int z = -OVERMAP_DEPTH; z <= OVERMAP_HEIGHT; z++ ) {
             for( int x = 0; x < OMAPX; ++x ) {
                 for( int y = 0; y < OMAPY; ++y ) {
 
                     // Get the overmap terrain at this xyz
                     const oter_id t = om->ter( { x, y, z } );
+
+                    if(t == empty_rock || t == open_air) {
+                        continue;
+                    }
 
                     sqlite3_bind_int(stmt, 1, p.x);
                     sqlite3_bind_int(stmt, 2, p.y);
@@ -284,8 +290,6 @@ TEST_CASE( "overmap_generation_statistics" )
 
                     sqlite3_step(stmt);
                     sqlite3_reset(stmt);
-
-                    continue;
 
                     // Run the mapgen for this overmap terrain
                     tinymap tmpmap;
@@ -298,45 +302,68 @@ TEST_CASE( "overmap_generation_statistics" )
                             const ter_id ti = tmpmap.ter({tx, ty});
                             const furn_id fi = tmpmap.furn({tx, ty});
 
-                            sqlite3_bind_int(otfstmt, 1, om->global_base_point().x);
-                            sqlite3_bind_int(otfstmt, 2, om->global_base_point().y);
+                            sqlite3_bind_int(otfstmt, 1, p.x);
+                            sqlite3_bind_int(otfstmt, 2, p.y);
                             sqlite3_bind_int(otfstmt, 3, x);
                             sqlite3_bind_int(otfstmt, 4, y);
                             sqlite3_bind_int(otfstmt, 5, z);
-                            sqlite3_bind_text(otfstmt, 6, fi->id.c_str(), -1, SQLITE_TRANSIENT);
+                            sqlite3_bind_int(otfstmt, 6, tx);
+                            sqlite3_bind_int(otfstmt, 7, ty);
+                            sqlite3_bind_text(otfstmt, 8, fi->id.c_str(), -1, SQLITE_TRANSIENT);
 
                             sqlite3_step(otfstmt);
                             sqlite3_reset(otfstmt);
 
-                            sqlite3_bind_int(ottstmt, 1, om->global_base_point().x);
-                            sqlite3_bind_int(ottstmt, 2, om->global_base_point().y);
+                            sqlite3_bind_int(ottstmt, 1, p.x);
+                            sqlite3_bind_int(ottstmt, 2, p.y);
                             sqlite3_bind_int(ottstmt, 3, x);
                             sqlite3_bind_int(ottstmt, 4, y);
                             sqlite3_bind_int(ottstmt, 5, z);
-                            sqlite3_bind_text(ottstmt, 6, ti->id.c_str(), -1, SQLITE_TRANSIENT);
+                            sqlite3_bind_int(ottstmt, 6, tx);
+                            sqlite3_bind_int(ottstmt, 7, ty);
+                            sqlite3_bind_text(ottstmt, 8, ti->id.c_str(), -1, SQLITE_TRANSIENT);
 
                             sqlite3_step(ottstmt);
                             sqlite3_reset(ottstmt);
 
-
                             map_stack ms = tmpmap.i_at({tx, ty, z});
                             for( item &it : ms ) {
+                                if(!it.is_gun()) {
+                                    continue;
+                                }
 
-                                sqlite3_bind_int(otistmt, 1, om->global_base_point().x);
-                                sqlite3_bind_int(otistmt, 2, om->global_base_point().y);
+                                sqlite3_bind_int(otistmt, 1, p.x);
+                                sqlite3_bind_int(otistmt, 2, p.y);
                                 sqlite3_bind_int(otistmt, 3, x);
                                 sqlite3_bind_int(otistmt, 4, y);
                                 sqlite3_bind_int(otistmt, 5, z);
-                                sqlite3_bind_text(otistmt, 6, it.typeId().c_str(), -1, SQLITE_TRANSIENT);
+                                sqlite3_bind_int(otistmt, 6, tx);
+                                sqlite3_bind_int(otistmt, 7, ty);
+                                sqlite3_bind_text(otistmt, 8, it.typeId().c_str(), -1, SQLITE_TRANSIENT);
 
                                 sqlite3_step(otistmt);
                                 sqlite3_reset(otistmt);
+
+                                if(it.is_container() && !it.is_container_empty()) {
+                                    const item &cit = it.get_contained();  
+                                    sqlite3_bind_int(otistmt, 1, p.x);
+                                    sqlite3_bind_int(otistmt, 2, p.y);
+                                    sqlite3_bind_int(otistmt, 3, x);
+                                    sqlite3_bind_int(otistmt, 4, y);
+                                    sqlite3_bind_int(otistmt, 5, z);
+                                    sqlite3_bind_int(otistmt, 6, tx);
+                                    sqlite3_bind_int(otistmt, 7, ty);
+                                    sqlite3_bind_text(otistmt, 8, cit.typeId().c_str(), -1, SQLITE_TRANSIENT);
+
+                                    sqlite3_step(otistmt);
+                                    sqlite3_reset(otistmt);
+                                }
                             }
                         }
                     }
                 }
             }
-        //}
+        }
 
         sqlite3_exec(db, "END TRANSACTION", NULL, NULL, &sErrMsg);
         sqlite3_finalize(stmt);
