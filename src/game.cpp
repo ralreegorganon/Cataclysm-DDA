@@ -685,7 +685,13 @@ bool game::start_game()
         gamemode = std::make_unique<special_game>();
     }
 
-    seed = rng_bits();
+    const std::string world_seed = get_option<std::string>( "WORLD_SEED" );
+    if( world_seed.empty() ) {
+        seed = rng_bits();
+    } else {
+        seed = djb2_hash( reinterpret_cast<const unsigned char *>( world_seed.c_str() ) );
+    }
+
     new_game = true;
     start_calendar();
     weather.nextweather = calendar::turn;

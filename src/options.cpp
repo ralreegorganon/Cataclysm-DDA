@@ -1977,6 +1977,13 @@ void options_manager::add_options_world_default()
         world_default_page_.items_.emplace_back();
     };
 
+    add( "WORLD_SEED", "world_default", translate_marker( "World seed" ),
+         translate_marker( "Random seed used to drive world-specific game elements such as weather and map generation.  If left blank, a random seed will be assigned." ),
+         "", 32
+       );
+
+    add_empty_line();
+
     add( "CORE_VERSION", "world_default", translate_marker( "Core version data" ),
          translate_marker( "Controls what migrations are applied for legacy worlds" ),
          1, core_version, core_version, COPT_ALWAYS_HIDE
