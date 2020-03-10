@@ -1518,7 +1518,7 @@ bool overmapbuffer::place_special( const overmap_special_id &special_id, const t
     const int longest_side = calculate_longest_side();
 
     // Predefine our sectors to search in.
-    om_special_sectors sectors = get_sectors( longest_side );
+    om_special_sectors sectors = get_sectors( longest_side, rng_get_engine() );
 
     // Get all of the overmaps within the defined radius of the center.
     for( const auto &om : get_overmaps_near( omt_to_sm_copy( center ), omt_to_sm_copy( radius ) ) ) {

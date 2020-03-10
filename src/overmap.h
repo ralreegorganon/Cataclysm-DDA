@@ -15,6 +15,7 @@
 #include <vector>
 #include <iterator>
 #include <utility>
+#include <chrono>
 
 #include "basecamp.h"
 #include "game_constants.h"
@@ -355,6 +356,14 @@ class overmap
 
         oter_id get_default_terrain( int z ) const;
 
+        cata_default_random_engine &om_rng_get_engine() const;
+        int om_rng( int lo, int hi ) const;
+        double om_rng_float( double lo, double hi ) const;
+        double om_normal_roll( double mean, double stddev ) const;
+        bool om_one_in( int chance ) const;
+        bool om_x_in_y( double x, double y ) const;
+        int om_roll_remainder( double value ) const;
+
         // Initialize
         void init_layers();
         // open existing overmap, or generate a new one
@@ -505,8 +514,9 @@ bool is_ot_match( const std::string &name, const oter_id &oter,
 /**
 * Gets a collection of sectors and their width for usage in placing overmap specials.
 * @param sector_width used to divide the OMAPX by OMAPY map into sectors.
+* @param rng_engine used to determine how sectors are shuffled.
 */
-om_special_sectors get_sectors( int sector_width );
+om_special_sectors get_sectors( int sector_width, cata_default_random_engine &rng_engine );
 
 /**
 * Returns the string of oter without any directional suffix
