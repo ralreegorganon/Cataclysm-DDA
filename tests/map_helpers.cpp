@@ -122,3 +122,47 @@ void build_test_map( const ter_id &terrain )
     g->m.invalidate_map_cache( 0 );
     g->m.build_map_cache( 0, true );
 }
+
+void build_test_lake_map()
+{
+    const int z_lakebed = -3;
+
+    const furn_id f_null( "f_null" );
+    const trap_id tr_null( "tr_null" );
+    const ter_id t_open_air( "t_open_air" );
+    const ter_id t_water_dp( "t_water_dp" );
+    const ter_id t_water_cube( "t_water_cube" );
+    const ter_id t_lake_bed( "t_lake_bed" );
+
+    const tripoint from( 0, 0, OVERMAP_HEIGHT );
+    const tripoint to( MAPSIZE_X * SEEX, MAPSIZE_Y * SEEY, z_lakebed);
+
+    for( const tripoint &p : g->m.points_in_rectangle( from, to ) ) {
+        g->m.furn_set( p, f_null );
+        g->m.i_clear( p );
+
+        if( p.z > 0 ) {
+            g->m.ter_set( p, t_open_air );
+        } else if( p.z == 0 ) {
+            g->m.ter_set( p, t_water_dp );
+        } else if( p.z < 0 && p.z > z_lakebed) {
+            g->m.ter_set( p, t_water_cube );
+        } else if( p.z == z_lakebed) {
+            g->m.ter_set( p, t_lake_bed );
+        }
+    }
+
+    const int minz = z_lakebed;
+    const int maxz = OVERMAP_HEIGHT;
+    for( int z = minz; z <= maxz; z++ ) {
+        g->m.invalidate_map_cache( z );
+        g->m.build_map_cache( z, true );
+    }
+
+    clear_npcs();
+    clear_creatures();
+
+    for (wrapped_vehicle& veh : g->m.get_vehicles()) {
+        g->m.destroy_vehicle(veh.v);
+    }
+}
