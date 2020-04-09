@@ -35,7 +35,7 @@
     "looks_like": "t_water_sh",
     "color": "blue",
     "move_cost": 8,
-    "flags": [ "TRANSPARENT", "LIQUID", "NO_SCENT", "SWIMMABLE", "DEEP_WATER", "FISHABLE" ],
+    "flags": [ "TRANSPARENT", "LIQUID", "NO_SCENT", "SWIMMABLE", "DEEP_WATER", "GOES_DOWN", "GOES_UP", "FISHABLE" ],
     "connects_to": "WATER",
     "examine_action": "water_source"
   },
