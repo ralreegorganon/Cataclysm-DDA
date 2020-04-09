@@ -26,41 +26,41 @@ TEST_CASE("character_water_movement", "[water][movement]")
     REQUIRE(p.pos().z == 0);
 
     // We attempt to dive down.
-    g->vertical_move(-1, true);
+    g->vertical_move(-1, false);
 
     // The first time we dive down from the surface, we don't actually go down a z-level but do go underwater in the current tile.
     CHECK(p.is_underwater());
     CHECK(p.pos().z == 0);
 
     // We attempt to surface.
-    g->vertical_move(1, true);
+    g->vertical_move(1, false);
 
     CHECK(!p.is_underwater());
     CHECK(p.pos().z == 0);
 
     // We attempt to dive down twice, which should actually move a z-level.
-    g->vertical_move(-1, true);
-    g->vertical_move(-1, true);
+    g->vertical_move(-1, false);
+    g->vertical_move(-1, false);
 
     CHECK(p.is_underwater());
     CHECK(p.pos().z == -1);
 
-    g->vertical_move(-1, true);
+    g->vertical_move(-1, false);
 
     CHECK(p.is_underwater());
     CHECK(p.pos().z == -2);
 
-    g->vertical_move(1, true);
+    g->vertical_move(1, false);
 
     CHECK(p.is_underwater());
     CHECK(p.pos().z == -1);
 
-    g->vertical_move(1, true);
+    g->vertical_move(1, false);
 
     CHECK(p.is_underwater());
     CHECK(p.pos().z == 0);
 
-    g->vertical_move(1, true);
+    g->vertical_move(1, false);
 
     CHECK(!p.is_underwater());
     CHECK(p.pos().z == 0);
