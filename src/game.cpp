@@ -9990,33 +9990,6 @@ void game::vertical_move( int movez, bool force )
         }
     }
 
-    // > and < are used for diving underwater.
-    if( m.has_flag( "SWIMMABLE", u.pos() ) && m.has_flag( TFLAG_DEEP_WATER, u.pos() ) ) {
-        if( movez == -1 ) {
-            if( u.is_underwater() ) {
-                add_msg( m_info, _( "You are already underwater!" ) );
-                return;
-            }
-            if( u.worn_with_flag( "FLOTATION" ) ) {
-                add_msg( m_info, _( "You can't dive while wearing a flotation device." ) );
-                return;
-            }
-            u.set_underwater( true );
-            ///\EFFECT_STR increases breath-holding capacity while diving
-            u.oxygen = 30 + 2 * u.str_cur;
-            add_msg( _( "You dive underwater!" ) );
-        } else {
-            if( u.swim_speed() < 500 || u.shoe_type_count( "swim_fins" ) ) {
-                u.set_underwater( false );
-                add_msg( _( "You surface." ) );
-            } else {
-                add_msg( m_info, _( "You try to surface but can't!" ) );
-            }
-        }
-        u.moves -= 100;
-        return;
-    }
-
     // Force means we're going down, even if there's no staircase, etc.
     bool climbing = false;
     int move_cost = 100;
@@ -10136,6 +10109,103 @@ void game::vertical_move( int movez, bool force )
         // We no longer need to shift the map here! What joy
     } else {
         maybetmp.load( tripoint( get_levx(), get_levy(), z_after ), false );
+    }
+
+    // > and < are used for diving underwater.
+    if (m.has_flag("SWIMMABLE", u.pos())) {
+        const ter_id &target_ter = m.has_zlevels() ? maybetmp.ter(u.pos() + tripoint(0, 0, movez)) : maybetmp.ter(u.pos().xy());
+
+        // If we're in a water tile that has both air above and deep enough water to submerge in...
+        if (m.has_flag(TFLAG_DEEP_WATER, u.pos()))
+        {
+            // ...and we're trying to swim down
+            if (movez == -1) {
+                // ...and we're already submerged
+                if (u.is_underwater()) {
+                    // ...and there's more water beneath us.
+                    if(target_ter->has_flag("WATER_CUBE"))
+                    {
+                        // Then go ahead and move down.
+                    }
+                    else
+                    {
+                        // There's no more water beneath us.
+                        add_msg(m_info, _("You are already underwater and there is no more water beneath you to swim down!"));
+                        return;
+                    }
+                }
+                // ...and we're not already submerged.
+                else
+                {
+                    // Check for a flotation device first before allowing us to submerge.
+                    if (u.worn_with_flag("FLOTATION")) {
+                        add_msg(m_info, _("You can't dive while wearing a flotation device."));
+                        return;
+                    }
+
+                    // Then take a breath and dive under water.
+                    u.set_underwater(true);
+                    ///\EFFECT_STR increases breath-holding capacity while diving
+                    u.oxygen = 30 + 2 * u.str_cur;
+                    add_msg(_("You dive underwater!"));
+                    return;
+                }
+            }
+            // ...and we're trying to surface
+            else if (movez == 1) {
+                // ... and we're already submerged
+                if(u.is_underwater())
+                {
+                    if (u.swim_speed() < 500 || u.shoe_type_count("swim_fins")) {
+                        u.set_underwater(false);
+                        add_msg(_("You surface."));
+                    }
+                    else {
+                        add_msg(m_info, _("You try to surface but can't!"));
+                    }
+
+                    u.moves -= 100;
+                    return;
+                }
+            }
+        }
+        // If we're in a water tile that is entirely water
+        else if (m.has_flag("WATER_CUBE", u.pos()))
+        {
+            // If you're at this point, you should already be underwater, but force that to be the case.
+            if(!u.is_underwater())
+            {
+                u.set_underwater(true);
+            }
+
+            // ...and we're trying to swim down
+            if (movez == -1) {
+                // ...and there's more water beneath us.
+                if (target_ter->has_flag("WATER_CUBE"))
+                {
+                    // Then go ahead and move down.
+                }
+                else
+                {
+                    add_msg(m_info, _("You are already underwater and there is no more water beneath you to swim down!"));
+                    return;
+                }
+            }
+            // ...and we're trying to move up
+            else if (movez == 1)
+            {
+                // ...and there's more water above us us.
+                if (target_ter->has_flag("WATER_CUBE") || target_ter->has_flag(TFLAG_DEEP_WATER))
+                {
+                    // Then go ahead and move up.
+                }
+                else
+                {
+                    add_msg(m_info, _("You are already underwater and there is no water above you to swim up!"));
+                    return;
+                }
+            }
+        }
     }
 
     // Find the corresponding staircase

@@ -44,4 +44,24 @@ TEST_CASE("character_water_movement", "[water][movement]")
 
     CHECK(p.is_underwater());
     CHECK(p.pos().z == -1);
+
+    g->vertical_move(-1, true);
+
+    CHECK(p.is_underwater());
+    CHECK(p.pos().z == -2);
+
+    g->vertical_move(1, true);
+
+    CHECK(p.is_underwater());
+    CHECK(p.pos().z == -1);
+
+    g->vertical_move(1, true);
+
+    CHECK(p.is_underwater());
+    CHECK(p.pos().z == 0);
+
+    g->vertical_move(1, true);
+
+    CHECK(!p.is_underwater());
+    CHECK(p.pos().z == 0);
 }
