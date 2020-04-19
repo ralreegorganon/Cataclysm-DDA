@@ -40,18 +40,6 @@
     "description": "zombies killed"
   },
   {
-    "id": "score_kills",
-    "type": "score",
-    "description": "Monsters killed: %s",
-    "statistic": "num_avatar_kills"
-  },
-  {
-    "id": "achievement_kill_zombie",
-    "type": "achievement",
-    "description": "One down, billions to go\u2026",
-    "requirements": [ { "event_statistic": "num_avatar_zombie_kills", "is": ">=", "target": 1 } ]
-  },
-  {
     "id": "moves_expand_pre_move_mode",
     "type": "event_transformation",
     "event_type": "avatar_moves",
@@ -142,60 +130,6 @@
     "description": "squares swam underwater"
   },
   {
-    "id": "score_moves",
-    "type": "score",
-    "description": "Moved: %s squares",
-    "statistic": "num_moves"
-  },
-  {
-    "id": "score_walked",
-    "type": "score",
-    "description": "Walked: %s squares",
-    "statistic": "num_moves_walked"
-  },
-  {
-    "id": "score_mounted",
-    "type": "score",
-    "description": "Rode mount: %s squares",
-    "statistic": "num_moves_mounted"
-  },
-  {
-    "id": "score_ran",
-    "type": "score",
-    "description": "Ran: %s squares",
-    "statistic": "num_moves_ran"
-  },
-  {
-    "id": "score_crouched",
-    "type": "score",
-    "description": "Crouched: %s squares",
-    "statistic": "num_moves_crouched"
-  },
-  {
-    "id": "score_swam",
-    "type": "score",
-    "description": "Swam: %s squares",
-    "statistic": "num_moves_swam"
-  },
-  {
-    "id": "score_swam_underwater",
-    "type": "score",
-    "description": "Swam underwater: %s squares",
-    "statistic": "num_moves_swam_underwater"
-  },
-  {
-    "id": "achievement_swim_short_distance",
-    "type": "achievement",
-    "description": "Swimming Merit Badge",
-    "requirements": [ { "event_statistic": "num_moves_swam", "is": ">=", "target": 10000 } ]
-  },
-  {
-    "id": "achievement_swim_short_distance_underwater",
-    "type": "achievement",
-    "description": "Finding Nemo",
-    "requirements": [ { "event_statistic": "num_moves_swam_underwater", "is": ">=", "target": 1000 } ]
-  },
-  {
     "id": "avatar_takes_damage",
     "type": "event_transformation",
     "event_type": "character_takes_damage",
@@ -207,12 +141,6 @@
     "stat_type": "total",
     "field": "damage",
     "event_transformation": "avatar_takes_damage"
-  },
-  {
-    "id": "score_damage_taken",
-    "type": "score",
-    "description": "Damage taken: %s damage",
-    "statistic": "avatar_damage_taken"
   },
   {
     "id": "avatar_heals_damage",
@@ -228,12 +156,6 @@
     "event_transformation": "avatar_heals_damage"
   },
   {
-    "id": "score_damage_healed",
-    "type": "score",
-    "description": "Damage healed: %s damage",
-    "statistic": "avatar_damage_healed"
-  },
-  {
     "id": "avatar_headshots",
     "type": "event_transformation",
     "event_type": "character_gets_headshot",
@@ -244,11 +166,5 @@
     "type": "event_statistic",
     "stat_type": "count",
     "event_transformation": "avatar_headshots"
-  },
-  {
-    "id": "score_headshots",
-    "type": "score",
-    "description": { "ctxt": "score description", "str": "Headshots: %s" },
-    "statistic": "avatar_num_headshots"
   }
 ]

@@ -1,0 +1,20 @@
+[
+  {
+    "id": "achievement_kill_zombie",
+    "type": "achievement",
+    "description": "One down, billions to go\u2026",
+    "requirements": [ { "event_statistic": "num_avatar_zombie_kills", "is": ">=", "target": 1 } ]
+  },
+  {
+    "id": "achievement_swim_short_distance",
+    "type": "achievement",
+    "description": "Swimming Merit Badge",
+    "requirements": [ { "event_statistic": "num_moves_swam", "is": ">=", "target": 10000 } ]
+  },
+  {
+    "id": "achievement_swim_short_distance_underwater",
+    "type": "achievement",
+    "description": "Finding Nemo",
+    "requirements": [ { "event_statistic": "num_moves_swam_underwater", "is": ">=", "target": 1000 } ]
+  }
+]
