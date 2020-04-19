@@ -55,57 +55,37 @@
     "id": "moves_expand_pre_move_mode",
     "type": "event_transformation",
     "event_type": "avatar_moves",
-    "new_fields": { 
-      "swimming": { "terrain_to_swimming": "terrain" },
-      "mounted": { "mount_to_mounted": "mount" }
-    }
+    "new_fields": { "swimming": { "terrain_to_swimming": "terrain" }, "mounted": { "mount_to_mounted": "mount" } }
   },
   {
     "id": "moves_walked",
     "type": "event_transformation",
     "event_transformation": "moves_expand_pre_move_mode",
-    "value_constraints": { 
-      "movement_mode": { "equals": "walk" },
-      "mounted": { "equals": false },
-      "swimming": { "equals": false }
-    }
+    "value_constraints": { "movement_mode": { "equals": "walk" }, "mounted": { "equals": false }, "swimming": { "equals": false } }
   },
   {
     "id": "moves_mounted",
     "type": "event_transformation",
     "event_transformation": "moves_expand_pre_move_mode",
-    "value_constraints": { 
-      "mounted": { "equals": true }
-    }
+    "value_constraints": { "mounted": { "equals": true } }
   },
   {
     "id": "moves_ran",
     "type": "event_transformation",
     "event_transformation": "moves_expand_pre_move_mode",
-    "value_constraints": { 
-      "movement_mode": { "equals": "run" },
-      "mounted": { "equals": false },
-      "swimming": { "equals": false }
-    }
+    "value_constraints": { "movement_mode": { "equals": "run" }, "mounted": { "equals": false }, "swimming": { "equals": false } }
   },
   {
     "id": "moves_crouched",
     "type": "event_transformation",
     "event_transformation": "moves_expand_pre_move_mode",
-    "value_constraints": { 
-      "movement_mode": { "equals": "crouch" },
-      "mounted": { "equals": false },
-      "swimming": { "equals": false }
-    }
+    "value_constraints": { "movement_mode": { "equals": "crouch" }, "mounted": { "equals": false }, "swimming": { "equals": false } }
   },
   {
     "id": "moves_swam",
     "type": "event_transformation",
     "event_transformation": "moves_expand_pre_move_mode",
-    "value_constraints": { 
-      "mounted": { "equals": false },
-      "swimming": { "equals": true }
-    }
+    "value_constraints": { "mounted": { "equals": false }, "swimming": { "equals": true } }
   },
   {
     "id": "moves_swam_underwater",
@@ -113,7 +93,6 @@
     "event_transformation": "moves_swam",
     "value_constraints": { "underwater": { "equals": true } }
   },
-
   {
     "id": "num_moves",
     "type": "event_statistic",
@@ -216,7 +195,6 @@
     "description": "Finding Nemo",
     "requirements": [ { "event_statistic": "num_moves_swam_underwater", "is": ">=", "target": 1000 } ]
   },
-
   {
     "id": "avatar_takes_damage",
     "type": "event_transformation",
