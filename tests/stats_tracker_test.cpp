@@ -83,18 +83,12 @@ TEST_CASE( "stats_tracker_with_event_statistics", "[stats]" )
         const std::string run_move_mode = character_movemode_str[character_movemode::CMM_RUN];
         const std::string crouch_move_mode = character_movemode_str[character_movemode::CMM_CROUCH];
 
-        const cata::event walk = cata::event::make<event_type::avatar_moves>( no_monster, t_null,
-                                 walk_move_mode,  false );
-        const cata::event ride = cata::event::make<event_type::avatar_moves>( horse, t_null, walk_move_mode,
-                                 false );
-        const cata::event run = cata::event::make<event_type::avatar_moves>( no_monster, t_null,
-                                run_move_mode, false );
-        const cata::event crouch = cata::event::make<event_type::avatar_moves>( no_monster, t_null,
-                                   crouch_move_mode, false );
-        const cata::event swim = cata::event::make<event_type::avatar_moves>( no_monster, t_water_dp,
-                                 walk_move_mode, false );
-        const cata::event swim_underwater = cata::event::make<event_type::avatar_moves>( no_monster,
-                                            t_water_dp, walk_move_mode, true );
+        const cata::event walk = cata::event::make<event_type::avatar_moves>( no_monster, t_null, walk_move_mode,  false );
+        const cata::event ride = cata::event::make<event_type::avatar_moves>( horse, t_null, walk_move_mode, false );
+        const cata::event run = cata::event::make<event_type::avatar_moves>( no_monster, t_null, run_move_mode, false );
+        const cata::event crouch = cata::event::make<event_type::avatar_moves>( no_monster, t_null, crouch_move_mode, false );
+        const cata::event swim = cata::event::make<event_type::avatar_moves>( no_monster, t_water_dp, walk_move_mode, false );
+        const cata::event swim_underwater = cata::event::make<event_type::avatar_moves>( no_monster, t_water_dp, walk_move_mode, true );
 
         const string_id<score> score_moves( "score_moves" );
         const string_id<score> score_walked( "score_walked" );
@@ -104,30 +98,26 @@ TEST_CASE( "stats_tracker_with_event_statistics", "[stats]" )
         const string_id<score> score_swam( "score_swam" );
         const string_id<score> score_swam_underwater( "score_swam_underwater" );
 
-        CHECK( score_walked->value( s ) == cata_variant( 0 ) );
-        CHECK( score_moves->value( s ) == cata_variant( 0 ) );
-        CHECK( score_swam->value( s ) == cata_variant( 0 ) );
-        CHECK( score_swam_underwater->value( s ) == cata_variant( 0 ) );
+        auto check_scores = [&](int moves, int walked, int mounted, int ran, int crouched, int swam, int swam_underwater) {
+
+
+            return score_moves->value( s ) == cata_variant( moves ) && score_walked->value( s ) == cata_variant( walked ) && score_mounted->value( s ) == cata_variant( mounted ) 
+&& score_ran->value( s ) == cata_variant( ran ) && score_crouched->value( s ) == cata_variant( crouched )  && score_swam->value( s ) == cata_variant( swam ) && score_swam_underwater->value( s ) == cata_variant( swam_underwater );
+        };
+
+        CHECK(check_scores(0,0,0,0,0,0,0));
         b.send( walk );
-        CHECK( score_walked->value( s ) == cata_variant( 1 ) );
-        CHECK( score_moves->value( s ) == cata_variant( 1 ) );
-        CHECK( score_swam->value( s ) == cata_variant( 0 ) );
-        CHECK( score_swam_underwater->value( s ) == cata_variant( 0 ) );
+        check_scores(1,1,0,0,0,0,0);
         b.send( ride );
-        CHECK( score_walked->value( s ) == cata_variant( 1 ) );
-        CHECK( score_moves->value( s ) == cata_variant( 2 ) );
-        CHECK( score_swam->value( s ) == cata_variant( 0 ) );
-        CHECK( score_swam_underwater->value( s ) == cata_variant( 0 ) );
+        check_scores(2,1,1,0,0,0,0);
+        b.send( run );
+        check_scores(3,1,1,1,0,0,0);
+        b.send( crouch );
+        check_scores(4,1,1,1,1,0,0);
         b.send( swim );
-        CHECK( score_walked->value( s ) == cata_variant( 1 ) );
-        CHECK( score_moves->value( s ) == cata_variant( 3 ) );
-        CHECK( score_swam->value( s ) == cata_variant( 1 ) );
-        CHECK( score_swam_underwater->value( s ) == cata_variant( 0 ) );
+        check_scores(5,1,1,1,1,1,0);
         b.send( swim_underwater );
-        CHECK( score_walked->value( s ) == cata_variant( 1 ) );
-        CHECK( score_moves->value( s ) == cata_variant( 4 ) );
-        CHECK( score_swam->value( s ) == cata_variant( 2 ) );
-        CHECK( score_swam_underwater->value( s ) == cata_variant( 1 ) );
+        check_scores(6,1,1,1,1,1,1);
     }
 
     SECTION( "kills" ) {
