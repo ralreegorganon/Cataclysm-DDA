@@ -58,6 +58,24 @@
     "value_constraints": { "mount": { "equals": "" } }
   },
   {
+    "id": "moves_terrain_flags",
+    "type": "event_transformation",
+    "event_type": "avatar_moves",
+    "new_fields": { "terrain_flag": { "terrain_flag": "terrain" } }
+  },
+  {
+    "id": "moves_swam",
+    "type": "event_transformation",
+    "event_transformation": "moves_terrain_flags",
+    "value_constraints": { "terrain_flag": { "equals": "SWIMMABLE" } }
+  },
+  {
+    "id": "moves_swam_underwater",
+    "type": "event_transformation",
+    "event_transformation": "moves_swam",
+    "value_constraints": { "underwater": { "equals": true } }
+  },
+  {
     "id": "num_moves",
     "type": "event_statistic",
     "stat_type": "count",
@@ -70,6 +88,20 @@
     "event_transformation": "moves_not_mounted"
   },
   {
+    "id": "num_moves_swam",
+    "type": "event_statistic",
+    "stat_type": "count",
+    "event_transformation": "moves_swam",
+    "description": "Number of tiles swam"
+  },
+  {
+    "id": "num_moves_swam_underwater",
+    "type": "event_statistic",
+    "stat_type": "count",
+    "event_transformation": "moves_swam_underwater",
+    "description": "Number of tiles swam underwater"
+  },
+  {
     "id": "score_moves",
     "type": "score",
     "description": "Distance moved: %s squares",
@@ -80,6 +112,30 @@
     "type": "score",
     "description": "Distance walked: %s squares",
     "statistic": "num_moves_not_mounted"
+  },
+  {
+    "id": "score_swam",
+    "type": "score",
+    "description": "Distance swam: %s squares",
+    "statistic": "num_moves_swam"
+  },
+  {
+    "id": "score_swam_underwater",
+    "type": "score",
+    "description": "Distance swam underwater: %s squares",
+    "statistic": "num_moves_swam_underwater"
+  },
+  {
+    "id": "achievement_swim_short_distance",
+    "type": "achievement",
+    "description": "Swimming Merit Badge",
+    "requirements": [ { "event_statistic": "num_moves_swam", "is": ">=", "target": 10000 } ]
+  },
+  {
+    "id": "achievement_swim_short_distance_underwater",
+    "type": "achievement",
+    "description": "Finding Nemo",
+    "requirements": [ { "event_statistic": "num_moves_swam_underwater", "is": ">=", "target": 1000 } ]
   },
   {
     "id": "avatar_takes_damage",

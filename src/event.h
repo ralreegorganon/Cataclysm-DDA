@@ -168,8 +168,10 @@ struct event_spec<event_type::angers_amigara_horrors> : event_spec_empty {};
 
 template<>
 struct event_spec<event_type::avatar_moves> {
-    static constexpr std::array<std::pair<const char *, cata_variant_type>, 1> fields = {{
+    static constexpr std::array<std::pair<const char *, cata_variant_type>, 3> fields = {{
             { "mount", cata_variant_type::mtype_id },
+            { "terrain", cata_variant_type::ter_id },
+            { "underwater", cata_variant_type::bool_ }
         }
     };
 };

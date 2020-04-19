@@ -562,6 +562,13 @@ void avatar_action::swim( map &m, avatar &you, const tripoint &p )
     }
     you.setpos( p );
     g->update_map( you );
+
+    mtype_id mount_type;
+    if( you.is_mounted() ) {
+        mount_type = you.mounted_creature->type->id;
+    }
+    g->events().send<event_type::avatar_moves>( mount_type, m.ter( p ).id(), you.is_underwater() );
+
     if( m.veh_at( you.pos() ).part_with_feature( VPFLAG_BOARDABLE, true ) ) {
         m.board_vehicle( you.pos(), &you );
     }

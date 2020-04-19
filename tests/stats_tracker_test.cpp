@@ -77,19 +77,44 @@ TEST_CASE( "stats_tracker_with_event_statistics", "[stats]" )
     SECTION( "movement" ) {
         const mtype_id no_monster;
         const mtype_id horse( "mon_horse" );
-        const cata::event walk = cata::event::make<event_type::avatar_moves>( no_monster );
-        const cata::event ride = cata::event::make<event_type::avatar_moves>( horse );
+        const ter_id t_null( "t_null" );
+        const ter_id t_water_dp( "t_water_dp" );
+        const cata::event walk = cata::event::make<event_type::avatar_moves>( no_monster, t_null, false );
+        const cata::event ride = cata::event::make<event_type::avatar_moves>( horse, t_null, false );
+        const cata::event swim = cata::event::make<event_type::avatar_moves>( no_monster,
+                                 t_water_dp, false );
+        const cata::event swim_underwater = cata::event::make<event_type::avatar_moves>( no_monster,
+                                            t_water_dp, true );
         const string_id<score> score_moves( "score_moves" );
         const string_id<score> score_walked( "score_walked" );
+        const string_id<score> score_swam( "score_swam" );
+        const string_id<score> score_swam_underwater( "score_swam_underwater" );
+
 
         CHECK( score_walked->value( s ) == cata_variant( 0 ) );
         CHECK( score_moves->value( s ) == cata_variant( 0 ) );
+        CHECK( score_swam->value( s ) == cata_variant( 0 ) );
+        CHECK( score_swam_underwater->value( s ) == cata_variant( 0 ) );
         b.send( walk );
         CHECK( score_walked->value( s ) == cata_variant( 1 ) );
         CHECK( score_moves->value( s ) == cata_variant( 1 ) );
+        CHECK( score_swam->value( s ) == cata_variant( 0 ) );
+        CHECK( score_swam_underwater->value( s ) == cata_variant( 0 ) );
         b.send( ride );
         CHECK( score_walked->value( s ) == cata_variant( 1 ) );
         CHECK( score_moves->value( s ) == cata_variant( 2 ) );
+        CHECK( score_swam->value( s ) == cata_variant( 0 ) );
+        CHECK( score_swam_underwater->value( s ) == cata_variant( 0 ) );
+        b.send( swim );
+        CHECK( score_walked->value( s ) == cata_variant( 1 ) );
+        CHECK( score_moves->value( s ) == cata_variant( 3 ) );
+        CHECK( score_swam->value( s ) == cata_variant( 1 ) );
+        CHECK( score_swam_underwater->value( s ) == cata_variant( 0 ) );
+        b.send( swim_underwater );
+        CHECK( score_walked->value( s ) == cata_variant( 1 ) );
+        CHECK( score_moves->value( s ) == cata_variant( 4 ) );
+        CHECK( score_swam->value( s ) == cata_variant( 2 ) );
+        CHECK( score_swam_underwater->value( s ) == cata_variant( 1 ) );
     }
 
     SECTION( "kills" ) {
@@ -154,24 +179,52 @@ TEST_CASE( "stats_tracker_watchers", "[stats]" )
     SECTION( "movement" ) {
         const mtype_id no_monster;
         const mtype_id horse( "mon_horse" );
-        const cata::event walk = cata::event::make<event_type::avatar_moves>( no_monster );
-        const cata::event ride = cata::event::make<event_type::avatar_moves>( horse );
+        const ter_id t_null( "t_null" );
+        const ter_id t_water_dp( "t_water_dp" );
+        const cata::event walk = cata::event::make<event_type::avatar_moves>( no_monster, t_null, false );
+        const cata::event ride = cata::event::make<event_type::avatar_moves>( horse, t_null, false );
+        const cata::event swim = cata::event::make<event_type::avatar_moves>( no_monster,
+                                 t_water_dp, false );
+        const cata::event swim_underwater = cata::event::make<event_type::avatar_moves>( no_monster,
+                                            t_water_dp, true );
         const string_id<event_statistic> stat_moves( "num_moves" );
         const string_id<event_statistic> stat_walked( "num_moves_not_mounted" );
+        const string_id<event_statistic> stat_swam( "num_moves_swam" );
+        const string_id<event_statistic> stat_swam_underwater( "num_moves_swam_underwater" );
 
         watch_stat moves_watcher;
         watch_stat walks_watcher;
+        watch_stat swims_watcher;
+        watch_stat swims_underwater_watcher;
         s.add_watcher( stat_moves, &moves_watcher );
         s.add_watcher( stat_walked, &walks_watcher );
+        s.add_watcher( stat_swam, &swims_watcher );
+        s.add_watcher( stat_swam_underwater, &swims_underwater_watcher );
 
         CHECK( walks_watcher.value == cata_variant() );
         CHECK( moves_watcher.value == cata_variant() );
+        CHECK( swims_watcher.value == cata_variant() );
+        CHECK( swims_underwater_watcher.value == cata_variant() );
         b.send( walk );
         CHECK( walks_watcher.value == cata_variant( 1 ) );
         CHECK( moves_watcher.value == cata_variant( 1 ) );
+        CHECK( swims_watcher.value == cata_variant() );
+        CHECK( swims_underwater_watcher.value == cata_variant() );
         b.send( ride );
         CHECK( walks_watcher.value == cata_variant( 1 ) );
         CHECK( moves_watcher.value == cata_variant( 2 ) );
+        CHECK( swims_watcher.value == cata_variant() );
+        CHECK( swims_underwater_watcher.value == cata_variant() );
+        b.send( swim );
+        CHECK( walks_watcher.value == cata_variant( 1 ) );
+        CHECK( moves_watcher.value == cata_variant( 3 ) );
+        CHECK( swims_watcher.value == cata_variant( 1 ) );
+        CHECK( swims_underwater_watcher.value == cata_variant() );
+        b.send( swim_underwater );
+        CHECK( walks_watcher.value == cata_variant( 1 ) );
+        CHECK( moves_watcher.value == cata_variant( 4 ) );
+        CHECK( swims_watcher.value == cata_variant( 2 ) );
+        CHECK( swims_underwater_watcher.value == cata_variant( 1 ) );
     }
 
     SECTION( "kills" ) {
@@ -249,6 +302,50 @@ TEST_CASE( "achievments_tracker", "[stats]" )
                "<color_c_light_green>One down, billions to go…</color>\n"
                "  <color_c_green>1/1 Number of zombies killed</color>\n" );
     }
+
+    SECTION( "movement" ) {
+
+        const mtype_id no_monster;
+        const ter_id t_water_dp( "t_water_dp" );
+        const cata::event avatar_swim_underwater = cata::event::make<event_type::avatar_moves>( no_monster,
+                t_water_dp, true );
+
+        SECTION( "achievement_swim_short_distance" ) {
+            GIVEN( "a new game" ) {
+                const character_id u_id = g->u.getID();
+                b.send<event_type::game_start>( u_id );
+                CHECK( achievement_completed == nullptr );
+
+                WHEN( "the avatar swims the required distance" ) {
+                    for( int i = 0; i < 10000; i++ ) {
+                        b.send( avatar_swim_underwater );
+                    }
+                    THEN( "the achivement should be achieved" ) {
+                        REQUIRE( achievement_completed != nullptr );
+                        CHECK( achievement_completed->id.str() == "achievement_swim_short_distance" );
+                    }
+                }
+            }
+        }
+
+        SECTION( "achievement_swim_short_distance_underwater" ) {
+            GIVEN( "a new game" ) {
+                const character_id u_id = g->u.getID();
+                b.send<event_type::game_start>( u_id );
+                CHECK( achievement_completed == nullptr );
+
+                WHEN( "the avatar swims the required distance" ) {
+                    for( int i = 0; i < 1000; i++ ) {
+                        b.send( avatar_swim_underwater );
+                    }
+                    THEN( "the achivement should be achieved" ) {
+                        REQUIRE( achievement_completed != nullptr );
+                        CHECK( achievement_completed->id.str() == "achievement_swim_short_distance_underwater" );
+                    }
+                }
+            }
+        }
+    }
 }
 
 TEST_CASE( "stats_tracker_in_game", "[stats]" )
@@ -258,3 +355,5 @@ TEST_CASE( "stats_tracker_in_game", "[stats]" )
     g->events().send( e );
     CHECK( g->stats().get_events( e.type() ).count( e.data() ) == 1 );
 }
+
+
