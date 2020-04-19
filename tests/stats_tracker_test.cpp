@@ -80,12 +80,21 @@ TEST_CASE( "stats_tracker_with_event_statistics", "[stats]" )
         const ter_id t_null( "t_null" );
         const ter_id t_water_dp( "t_water_dp" );
         const std::string walk_move_mode = character_movemode_str[character_movemode::CMM_WALK];
+        const std::string run_move_mode = character_movemode_str[character_movemode::CMM_RUN];
+        const std::string crouch_move_mode = character_movemode_str[character_movemode::CMM_CROUCH];
+
         const cata::event walk = cata::event::make<event_type::avatar_moves>( no_monster, t_null, walk_move_mode,  false );
-        const cata::event ride = cata::event::make<event_type::avatar_moves>( horse, t_null, walk_move_mode, false );
+        const cata::event ride = cata::event::make<event_type::avatar_moves>(horse, t_null, walk_move_mode, false);
+        const cata::event run = cata::event::make<event_type::avatar_moves>(no_monster, t_null, run_move_mode, false);
+        const cata::event crouch = cata::event::make<event_type::avatar_moves>(no_monster, t_null, crouch_move_mode, false );
         const cata::event swim = cata::event::make<event_type::avatar_moves>( no_monster, t_water_dp, walk_move_mode, false );
         const cata::event swim_underwater = cata::event::make<event_type::avatar_moves>( no_monster, t_water_dp, walk_move_mode, true );
+
         const string_id<score> score_moves( "score_moves" );
-        const string_id<score> score_walked( "score_walked" );
+        const string_id<score> score_walked("score_walked");
+        const string_id<score> score_walked("score_mounted");
+        const string_id<score> score_walked("score_ran");
+        const string_id<score> score_walked( "score_crouched" );
         const string_id<score> score_swam( "score_swam" );
         const string_id<score> score_swam_underwater( "score_swam_underwater" );
 
@@ -352,5 +361,3 @@ TEST_CASE( "stats_tracker_in_game", "[stats]" )
     g->events().send( e );
     CHECK( g->stats().get_events( e.type() ).count( e.data() ) == 1 );
 }
-
-
