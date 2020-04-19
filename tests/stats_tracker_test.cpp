@@ -98,9 +98,9 @@ TEST_CASE( "stats_tracker_with_event_statistics", "[stats]" )
 
         const string_id<score> score_moves( "score_moves" );
         const string_id<score> score_walked( "score_walked" );
-        const string_id<score> score_walked( "score_mounted" );
-        const string_id<score> score_walked( "score_ran" );
-        const string_id<score> score_walked( "score_crouched" );
+        const string_id<score> score_mounted( "score_mounted" );
+        const string_id<score> score_ran( "score_ran" );
+        const string_id<score> score_crouched( "score_crouched" );
         const string_id<score> score_swam( "score_swam" );
         const string_id<score> score_swam_underwater( "score_swam_underwater" );
 
