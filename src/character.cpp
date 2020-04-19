@@ -1506,6 +1506,11 @@ bool Character::move_effects( bool attacking )
     return true;
 }
 
+std::string Character::get_movement_mode_str() const
+{
+    return character_movemode_str[move_mode];
+}
+
 bool Character::movement_mode_is( const character_movemode mode ) const
 {
     return move_mode == mode;

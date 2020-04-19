@@ -29,7 +29,24 @@ static std::vector<cata_variant> terrain_flag( const cata_variant &v )
     return result;
 }
 
+static std::vector<cata_variant> mount_to_mounted(const cata_variant& v)
+{
+    const mtype_id mount = v.get<mtype_id>();
+    std::vector<cata_variant> result = { cata_variant(mount == mtype_id::NULL_ID())};
+    return result;
+}
+
+static std::vector<cata_variant> terrain_to_swimming(const cata_variant& v)
+{
+    const ter_id ter = v.get<ter_id>();
+    const bool swimming = ter->has_flag(ter_bitflags::TFLAG_DEEP_WATER) && ter->has_flag(ter_bitflags::TFLAG_SWIMMABLE);
+    std::vector<cata_variant> result = { cata_variant(swimming) };
+    return result;
+}
+
 const std::unordered_map<std::string, EventFieldTransformation> event_field_transformations = {
     { "species_of_monster", species_of_monster },
     { "terrain_flag", terrain_flag },
+    { "mount_to_mounted", mount_to_mounted },
+    { "terrain_to_swimming", terrain_to_swimming },
 };

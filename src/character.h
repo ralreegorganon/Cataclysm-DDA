@@ -568,6 +568,7 @@ class Character : public Creature, public visitable<Character>
         bool move_effects( bool attacking ) override;
         /** Check against the character's current movement mode */
         bool movement_mode_is( character_movemode mode ) const;
+        std::string Character::get_movement_mode_str() const;
 
         virtual void set_movement_mode( character_movemode mode ) = 0;
 

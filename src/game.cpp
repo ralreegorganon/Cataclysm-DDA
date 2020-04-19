@@ -9178,7 +9178,7 @@ bool game::walk_move( const tripoint &dest_loc )
         if( u.is_mounted() ) {
             mount_type = u.mounted_creature->type->id;
         }
-        g->events().send<event_type::avatar_moves>( mount_type, m.ter( dest_loc ).id(), u.is_underwater() );
+        g->events().send<event_type::avatar_moves>( mount_type, m.ter( dest_loc ).id(), u.get_movement_mode_str(), u.is_underwater() );
     }
 
     tripoint oldpos = u.pos();

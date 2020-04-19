@@ -37,12 +37,12 @@
     "type": "event_statistic",
     "stat_type": "count",
     "event_transformation": "avatar_zombie_kills",
-    "description": "Number of zombies killed"
+    "description": "zombies killed"
   },
   {
     "id": "score_kills",
     "type": "score",
-    "description": "Number of monsters killed: %s",
+    "description": "Monsters killed: %s",
     "statistic": "num_avatar_kills"
   },
   {
@@ -52,22 +52,60 @@
     "requirements": [ { "event_statistic": "num_avatar_zombie_kills", "is": ">=", "target": 1 } ]
   },
   {
-    "id": "moves_not_mounted",
+    "id": "moves_expand_pre_move_mode",
     "type": "event_transformation",
     "event_type": "avatar_moves",
-    "value_constraints": { "mount": { "equals": "" } }
+    "new_fields": { 
+      "swimming": { "terrain_to_swimming": "terrain" },
+      "mounted": { "mount_to_mounted": "mount" }
+    }
   },
   {
-    "id": "moves_terrain_flags",
+    "id": "moves_walked",
     "type": "event_transformation",
-    "event_type": "avatar_moves",
-    "new_fields": { "terrain_flag": { "terrain_flag": "terrain" } }
+    "event_transformation": "moves_expand_pre_move_mode",
+    "value_constraints": { 
+      "movement_mode": { "equals": "walk" },
+      "mounted": { "equals": false },
+      "swimming": { "equals": false }
+    }
+  },
+  {
+    "id": "moves_mounted",
+    "type": "event_transformation",
+    "event_transformation": "moves_expand_pre_move_mode",
+    "value_constraints": { 
+      "mounted": { "equals": true }
+    }
+  },
+  {
+    "id": "moves_ran",
+    "type": "event_transformation",
+    "event_transformation": "moves_expand_pre_move_mode",
+    "value_constraints": { 
+      "movement_mode": { "equals": "run" },
+      "mounted": { "equals": false },
+      "swimming": { "equals": false }
+    }
+  },
+  {
+    "id": "moves_crouched",
+    "type": "event_transformation",
+    "event_transformation": "moves_expand_pre_move_mode",
+    "value_constraints": { 
+      "movement_mode": { "equals": "crouch" },
+      "mounted": { "equals": false },
+      "swimming": { "equals": false }
+    }
   },
   {
     "id": "moves_swam",
     "type": "event_transformation",
-    "event_transformation": "moves_terrain_flags",
-    "value_constraints": { "terrain_flag": { "equals": "SWIMMABLE" } }
+    "event_transformation": "moves_expand_pre_move_mode",
+    "value_constraints": { 
+      "mounted": { "equals": false },
+      "swimming": { "equals": true }
+    }
   },
   {
     "id": "moves_swam_underwater",
@@ -75,6 +113,7 @@
     "event_transformation": "moves_swam",
     "value_constraints": { "underwater": { "equals": true } }
   },
+
   {
     "id": "num_moves",
     "type": "event_statistic",
@@ -82,47 +121,87 @@
     "event_type": "avatar_moves"
   },
   {
-    "id": "num_moves_not_mounted",
+    "id": "num_moves_walked",
     "type": "event_statistic",
     "stat_type": "count",
-    "event_transformation": "moves_not_mounted"
+    "event_transformation": "moves_walked",
+    "description": "squares walked"
+  },
+  {
+    "id": "num_moves_mounted",
+    "type": "event_statistic",
+    "stat_type": "count",
+    "event_transformation": "moves_mounted",
+    "description": "squares rode a mount"
+  },
+  {
+    "id": "num_moves_ran",
+    "type": "event_statistic",
+    "stat_type": "count",
+    "event_transformation": "moves_ran",
+    "description": "squares ran"
+  },
+  {
+    "id": "num_moves_crouched",
+    "type": "event_statistic",
+    "stat_type": "count",
+    "event_transformation": "moves_crouched",
+    "description": "squares crouched"
   },
   {
     "id": "num_moves_swam",
     "type": "event_statistic",
     "stat_type": "count",
     "event_transformation": "moves_swam",
-    "description": "Number of tiles swam"
+    "description": "squares swam"
   },
   {
     "id": "num_moves_swam_underwater",
     "type": "event_statistic",
     "stat_type": "count",
     "event_transformation": "moves_swam_underwater",
-    "description": "Number of tiles swam underwater"
+    "description": "squares swam underwater"
   },
   {
     "id": "score_moves",
     "type": "score",
-    "description": "Distance moved: %s squares",
+    "description": "Moved: %s squares",
     "statistic": "num_moves"
   },
   {
     "id": "score_walked",
     "type": "score",
-    "description": "Distance walked: %s squares",
-    "statistic": "num_moves_not_mounted"
+    "description": "Walked: %s squares",
+    "statistic": "num_moves_walked"
+  },
+  {
+    "id": "score_mounted",
+    "type": "score",
+    "description": "Rode mount: %s squares",
+    "statistic": "num_moves_mounted"
+  },
+  {
+    "id": "score_ran",
+    "type": "score",
+    "description": "Ran: %s squares",
+    "statistic": "num_moves_ran"
+  },
+  {
+    "id": "score_crouched",
+    "type": "score",
+    "description": "Crouched: %s squares",
+    "statistic": "num_moves_crouched"
   },
   {
     "id": "score_swam",
     "type": "score",
-    "description": "Distance swam: %s squares",
+    "description": "Swam: %s squares",
     "statistic": "num_moves_swam"
   },
   {
     "id": "score_swam_underwater",
     "type": "score",
-    "description": "Distance swam underwater: %s squares",
+    "description": "Swam underwater: %s squares",
     "statistic": "num_moves_swam_underwater"
   },
   {
@@ -137,6 +216,7 @@
     "description": "Finding Nemo",
     "requirements": [ { "event_statistic": "num_moves_swam_underwater", "is": ">=", "target": 1000 } ]
   },
+
   {
     "id": "avatar_takes_damage",
     "type": "event_transformation",
